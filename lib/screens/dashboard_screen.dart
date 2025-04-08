@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
+
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              // Handle notifications
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Today's Medications Section
+            const Text(
+              "Today's Medications",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildMedicationCard(
+              name: 'Medication A',
+              time: '08:00 AM',
+              dosage: '1 tablet',
+              status: 'Pending',
+            ),
+            const SizedBox(height: 8),
+            _buildMedicationCard(
+              name: 'Medication B',
+              time: '12:00 PM',
+              dosage: '2 tablets',
+              status: 'Taken',
+            ),
+
+            const SizedBox(height: 24),
+            
+            // Medication Dosage Chart
+            const Text(
+              'Medication Dosage Trend',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            HeatMapCalendar(
+              defaultColor: Colors.white,
+              flexible: true,
+              colorMode: ColorMode.color,
+              datasets: {
+                DateTime(2025, 4, 6): 1,
+                DateTime(2025, 4, 7): 2,
+                DateTime(2025, 4, 8): 3,
+                DateTime(2025, 4, 9): 1,
+                DateTime(2025, 4, 13): 2,
+              },
+              colorsets: const {
+                1: Colors.red,
+                2: Colors.orange,
+                3: Colors.green,
+              },
+              onClick: (value) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value.toString())));
+              },
+            ),
+            const SizedBox(height: 16),
+
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+          // Handle navigation
+          switch (index) {
+            case 0:
+              // Already on dashboard
+              break;
+            case 1:
+              // Navigate to medication list
+              break;
+            case 2:
+              // Navigate to schedule
+              break;
+            case 3:
+              // Navigate to profile
+              break;
+          }
+        },
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medication),
+            label: 'Medications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.schedule),
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label),
+      ],
+    );
+  }
+
+  Widget _buildMedicationCard({
+    required String name,
+    required String time,
+    required String dosage,
+    required String status,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: status == 'Taken' ? Colors.green : Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Time: $time'),
+            Text('Dosage: $dosage'),
+          ],
+        ),
+      ),
+    );
+  }
+}
