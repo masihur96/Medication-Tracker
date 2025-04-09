@@ -20,7 +20,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       id: fields[0] as String,
       name: fields[1] as String,
       dosage: fields[2] as String,
-      timesPerDay: (fields[3] as List).cast<int>(),
+      timesPerDay: (fields[3] as List).cast<int>(), stock: 0, isActive: true, notes: '', frequency: '',
     );
   }
 

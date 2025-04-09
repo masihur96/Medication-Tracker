@@ -16,10 +16,26 @@ class Medication {
   @HiveField(3)
   final List<int> timesPerDay;
 
+  @HiveField(4)
+  final int stock;
+
+  @HiveField(5)
+  final bool isActive;
+
+  @HiveField(5)
+  final String notes;
+
+  @HiveField(5)
+  final String frequency;
+
   Medication({
     required this.id,
     required this.name,
     required this.dosage,
     required this.timesPerDay,
+    required this.stock,
+    required this.isActive,
+    required this.notes,
+    required this.frequency,
   });
 }

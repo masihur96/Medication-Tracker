@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
+import 'package:med_track/screens/medication_screen.dart';
+import 'package:med_track/screens/notification_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -9,18 +11,17 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('MedTrack'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>NotificationScreen(),),);
               // Handle notifications
             },
           ),
@@ -89,48 +90,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          // Handle navigation
-          switch (index) {
-            case 0:
-              // Already on dashboard
-              break;
-            case 1:
-              // Navigate to medication list
-              break;
-            case 2:
-              // Navigate to schedule
-              break;
-            case 3:
-              // Navigate to profile
-              break;
-          }
-        },
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medication),
-            label: 'Medications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Schedule',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
