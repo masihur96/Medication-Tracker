@@ -1,41 +1,29 @@
-import 'package:hive/hive.dart';
+import 'package:isar/isar.dart';
 
-part 'medication.g.dart'; // This will be generated later
+part 'medication.g.dart';
 
-@HiveType(typeId: 0) // Each model needs a unique typeId (0, 1, 2...)
+@Collection()
 class Medication {
-  @HiveField(0) // Each field needs a unique number
-  final String id;
+  Id? isarId; // Isar's auto-increment ID
 
-  @HiveField(1)
-  final String name;
+  late String id; // Your custom ID (e.g., DateTime string)
 
-  @HiveField(2)
-  final String dosage;
+  late String name;
 
-  @HiveField(3)
-  final List<int> timesPerDay;
+  late String dosage;
 
-  @HiveField(4)
-  final int stock;
+  late int timesPerDay;
 
-  @HiveField(5)
-  final bool isActive;
+  late int stock;
 
-  @HiveField(5)
-  final String notes;
+  late bool isActive;
 
-  @HiveField(5)
-  final String frequency;
+  String? notes;
 
-  Medication({
-    required this.id,
-    required this.name,
-    required this.dosage,
-    required this.timesPerDay,
-    required this.stock,
-    required this.isActive,
-    required this.notes,
-    required this.frequency,
-  });
+  late String frequency;
+
+  @override
+  String toString() {
+    return 'Medication(name: $name, dosage: $dosage, timesPerDay: $timesPerDay, stock: $stock, isActive: $isActive, frequency: $frequency)';
+  }
 }

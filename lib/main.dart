@@ -1,19 +1,26 @@
 
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:isar/isar.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/screens/auth_screen.dart';
 import 'package:med_track/screens/home_screen.dart';
 import 'package:med_track/services/database_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+
+
+late Isar isar;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive
-  await Hive.initFlutter();
-  Hive.registerAdapter(MedicationAdapter());
-
+  final dir = await getApplicationDocumentsDirectory();
+  isar = await Isar.open(
+    [MedicationSchema],
+    directory: dir.path,
+  );
   // Initialize provider
   final medicationProvider = MedicationProvider();
   await medicationProvider.initialize();

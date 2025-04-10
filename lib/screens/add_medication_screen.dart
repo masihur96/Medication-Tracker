@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:med_track/main.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:provider/provider.dart';
@@ -35,18 +36,23 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-  void _saveMedication() {
+  void _saveMedication() async{
     if (_formKey.currentState!.validate()) {
-      final newMed = Medication(
-        id: DateTime.now().toString(),
-        name: _nameController.text,
-        dosage: _dosageController.text,
-        timesPerDay: _selectedTimes,
-        stock: int.tryParse(_stockController.text) ?? 0,
-        isActive: _isActive,
-        notes: _noteController.text,
-        frequency: _frequency,
-      );
+
+
+      await isar.writeTxn(() async {
+        await isar.medications.put(Medication()
+          ..id = DateTime.now().toString()
+          ..name = 'Paracetamol'
+          ..dosage = '500mg'
+          ..timesPerDay = _selectedTimes.first
+          .. stock =int.tryParse(_stockController.text) ?? 0
+          ..isActive = _isActive
+          ..notes = _noteController.text
+          .. frequency = _frequency);
+      });
+
+
       Provider.of<MedicationProvider>(context, listen: false).addMedication(newMed);
       Navigator.pop(context);
     }
