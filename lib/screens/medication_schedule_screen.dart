@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -139,55 +140,105 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   Future<void> _generateAndOpenPDF() async {
     final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Header(
-                level: 0,
-                child: pw.Text('Medication History'),
-              ),
-              pw.SizedBox(height: 20),
-              pw.Table.fromTextArray(
-                headers: ['Medication', 'Time', 'Dosage', 'Status', 'Taken At'],
-                data: _getMedicationsForSelectedDay().map((medication) {
-                  return [
-                    medication['name'],
-                    medication['time'],
-                    medication['dosage'],
-                    medication['taken'] ? 'Taken' : 'Not Taken',
-                    medication['taken']
-                        ? _formatDateTime(medication['takenAt'])
-                        : '-',
-                  ];
-                }).toList(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                headerDecoration: pw.BoxDecoration(
-                  color: PdfColors.grey300,
-                ),
-                cellHeight: 30,
-                cellAlignments: {
-                  0: pw.Alignment.centerLeft,
-                  1: pw.Alignment.center,
-                  2: pw.Alignment.center,
-                  3: pw.Alignment.center,
-                  4: pw.Alignment.center,
-                },
-              ),
-            ],
-          );
+    final String patientName = 'John Doe';
+    final int patientAge = 35;
+
+    // Example mock grouped data — replace this with your real grouped data
+    Map<DateTime, List<Map<String, dynamic>>> medicationHistory = {
+      DateTime(2024, 3, 15): [
+        {
+          'name': 'Medication A',
+          'time': '08:00',
+          'dosage': '1 tablet',
+          'taken': true,
+          'takenAt': DateTime(2024, 3, 15, 8, 5),
         },
+        {
+          'name': 'Medication B',
+          'time': '12:00',
+          'dosage': '2 tablets',
+          'taken': true,
+          'takenAt': DateTime(2024, 3, 15, 12, 3),
+        },
+        {
+          'name': 'Medication C',
+          'time': '20:00',
+          'dosage': '1 tablet',
+          'taken': false,
+          'takenAt': null,
+        },
+      ],
+      DateTime(2024, 3, 16): [
+        {
+          'name': 'Medication D',
+          'time': '08:00',
+          'dosage': '1 tablet',
+          'taken': true,
+          'takenAt': DateTime(2024, 3, 16, 8, 10),
+        },
+      ],
+    };
+
+    pdf.addPage(
+      pw.MultiPage(
+        build: (context) => [
+          pw.Header(
+            level: 0,
+            child: pw.Text('Medication History'),
+          ),
+          pw.Text('Name: $patientName'),
+          pw.Text('Age: $patientAge'),
+          pw.SizedBox(height: 20),
+
+          // Loop through each date and print a table
+          ...medicationHistory.entries.map((entry) {
+            final date = DateFormat('yyyy-MM-dd').format(entry.key);
+            final meds = entry.value;
+
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Date: $date', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 10),
+                pw.Table.fromTextArray(
+                  headers: ['Medication', 'Time', 'Dosage', 'Status', 'Taken At'],
+                  data: meds.map((med) {
+                    return [
+                      med['name'],
+                      med['time'],
+                      med['dosage'],
+                      med['taken'] ? 'Taken' : 'Not Taken',
+                      med['taken']
+                          ? _formatDateTime(med['takenAt'])
+                          : '-',
+                    ];
+                  }).toList(),
+                  headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+                  cellHeight: 30,
+                  cellAlignments: {
+                    0: pw.Alignment.centerLeft,
+                    1: pw.Alignment.center,
+                    2: pw.Alignment.center,
+                    3: pw.Alignment.center,
+                    4: pw.Alignment.center,
+                  },
+                ),
+                pw.SizedBox(height: 30),
+              ],
+            );
+          }).toList(),
+        ],
       ),
     );
 
-    // Save the PDF
     final output = await getTemporaryDirectory();
     final file = File('${output.path}/medication_history.pdf');
     await file.writeAsBytes(await pdf.save());
 
-    // Open the PDF
     await OpenFile.open(file.path);
   }
+
+
+
 } 
