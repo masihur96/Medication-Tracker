@@ -27,6 +27,8 @@ environment:
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
+
+isar_version: &isar_version 3.1.0
 dependencies:
   flutter:
     sdk: flutter
@@ -38,8 +40,8 @@ dependencies:
 #  hive: ^2.2.3 # Local database
 #  hive_flutter: ^1.1.0
 #  hive_generator: ^2.0.1
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  isar: *isar_version
+  isar_flutter_libs: *isar_version
   flutter_tts: ^4.2.2 # For voice reminders
   image_picker: ^1.1.2 # For pill scanning
   camera: ^0.11.1
@@ -56,7 +58,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  isar_generator: ^3.1.0+1
+  isar_generator: *isar_version
   build_runner: ^2.4.6
 
 

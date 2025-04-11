@@ -4,8 +4,6 @@ import 'package:isar/isar.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/screens/auth_screen.dart';
-import 'package:med_track/screens/home_screen.dart';
-import 'package:med_track/services/database_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 

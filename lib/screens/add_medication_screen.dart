@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/main.dart';
 import 'package:med_track/models/medication.dart';
-import 'package:med_track/providers/medication_provider.dart';
-import 'package:provider/provider.dart';
+
 
 class AddMedicationScreen extends StatefulWidget {
   @override
@@ -38,8 +37,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   void _saveMedication() async{
     if (_formKey.currentState!.validate()) {
-
-
       await isar.writeTxn(() async {
         await isar.medications.put(Medication()
           ..id = DateTime.now().toString()
@@ -53,7 +50,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       });
 
 
-      Provider.of<MedicationProvider>(context, listen: false).addMedication(newMed);
       Navigator.pop(context);
     }
   }

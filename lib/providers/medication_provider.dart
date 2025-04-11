@@ -1,40 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:med_track/main.dart';
 
 import '../models/medication.dart';
 class MedicationProvider with ChangeNotifier {
   List<Medication> _medications = [];
-  Box<Medication>? _medicationBox; // Changed from late to nullable
   List<Medication> get medications => _medications;
 
   Future<void> initialize() async {
-    _medicationBox = await Hive.openBox<Medication>('medications');
-
     _loadMedications();
   }
   // Load medications from Hive
   void _loadMedications() {
-    _medications = _medicationBox!.values.toList();
+    _medications = [];
     notifyListeners();
   }
 
   Future<void> addMedication(Medication med) async {
-    if (_medicationBox == null) {
-      await initialize(); // Initialize if not done
-    }
-    _medications.add(med);
-    await _medicationBox!.put(med.id, med); // Note the ! operator
+    await isar.writeTxn(() async {
+      await isar.medications.put(Medication()
+        ..id = DateTime.now().toString()
+        ..name = 'Paracetamol'
+        ..dosage = '500mg'
+        ..timesPerDay = med.timesPerDay
+        .. stock =med.stock
+        ..isActive = med.isActive
+        ..notes = med.notes
+        .. frequency = med.frequency);
+    });
+// Note the ! operator
     notifyListeners();
   }
 
-  // Update all other methods to check _medicationBox first
-  Future<void> updateMedication(Medication med) async {
-    if (_medicationBox == null) return;
 
-    final index = _medications.indexWhere((m) => m.id == med.id);
-    if (index >= 0) {
-      _medications[index] = med;
-      await _medicationBox!.put(med.id, med);
-      notifyListeners();
-    }
-  }
 }

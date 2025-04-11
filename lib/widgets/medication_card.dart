@@ -16,7 +16,7 @@ class MedicationCard extends StatelessWidget {
           children: [
             Text(medication.name, style: TextStyle(fontSize: 20)),
             Text('Dosage: ${medication.dosage}'),
-            Text('Times: ${medication.timesPerDay.join(', ')}'),
+            Text('Times: ${medication.timesPerDay}'),
             // Add more details
           ],
         ),

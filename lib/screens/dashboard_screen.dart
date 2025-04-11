@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
+import 'package:isar/isar.dart';
+import 'package:med_track/main.dart';
+import 'package:med_track/models/medication.dart';
 import 'package:med_track/screens/medication_screen.dart';
 import 'package:med_track/screens/notification_screen.dart';
 
@@ -12,6 +15,15 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+getAllMedication()async{
+  List<Medication> allMeds = await isar.medications.where().findAll();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
