@@ -38,8 +38,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +50,50 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         child: ListView(
           padding: EdgeInsets.all(20),
           children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Rx Text on Left
+                    Column(
+                      children: [
+                        Text(
+                          'Rx',
+                          style: TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        _buildLineField(label: widget.prescription.date,size: 16),
+                      ],
+                    ),
+                    SizedBox(width: 16),
+                    // Patient Info on Right
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLineField(label: 'DR: ${widget.prescription.doctor}',size: 16),
+                          // SizedBox(height: 12),
+                          _buildLineField(label: 'Ch: ${widget.prescription.chamber}',size: 12),
+
+                          Divider(
+                          ),
+                          _buildLineField(label: 'Name: ${widget.prescription.date}',size: 16),
+                          _buildLineField(label: 'To: ${widget.prescription.medication}',size: 16),
+
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(thickness: 1, color: Colors.black87),
+              ],
+            ),
+            SizedBox(height: 16),
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -225,4 +267,46 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       ),
     );
   }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
+
+Widget _buildLineField({required String label,required double size}) {
+  return Text(
+    label,
+    style: TextStyle(fontSize: size, fontWeight: FontWeight.w500),
+  );
+}
+
+
