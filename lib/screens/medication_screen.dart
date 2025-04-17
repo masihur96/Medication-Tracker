@@ -30,17 +30,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: const Text('Medications'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AddMedicationScreen()),
-              );
-            },
-          ),
-        ],
+
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

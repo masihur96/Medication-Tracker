@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:med_track/main.dart';
-import 'package:med_track/models/medication.dart';
 
 
 class AddMedicationScreen extends StatefulWidget {

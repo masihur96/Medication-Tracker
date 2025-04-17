@@ -8,6 +8,7 @@ import 'add_medication_screen.dart';
 import 'dashboard_screen.dart';
 import 'medication_schedule_screen.dart';
 import 'medication_screen.dart';
+import 'rx_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     DashboardScreen(),
     MedicationScreen(),
+    RxScreen(),
     MedicationScheduleScreen(),
     ProfileScreen(),
   ];
@@ -77,6 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),
             label: 'Medications',
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.note_add_rounded),
+            label: 'Rx',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
