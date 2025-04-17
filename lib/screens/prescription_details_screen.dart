@@ -48,7 +48,49 @@ class PrescriptionDetailsScreen extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 12),
-            ...prescription.medications.map((med) => _buildMedicationCard(context, med)),
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Name')),
+                    DataColumn(label: Text('Dosage')),
+                    DataColumn(label: Text('Frequency')),
+                    DataColumn(label: Text('Times/Day')),
+                    DataColumn(label: Text('Stock')),
+                    DataColumn(label: Text('Notes')),
+                    DataColumn(label: Text('Reminder Times')),
+                  ],
+                  rows: prescription.medications.map((med) {
+                    return DataRow(cells: [
+                      DataCell(Text(med.name)),
+                      DataCell(Text(med.dosage)),
+                      DataCell(Text(med.frequency)),
+                      DataCell(Text(med.timesPerDay.toString())),
+                      DataCell(Text(med.stock.toString())),
+                      DataCell(Text(med.notes ?? '')),
+                      DataCell(
+                        Wrap(
+                          children: med.reminderTimes.map((time) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Chip(
+                                label: Text(time.toString()),
+                                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ]);
+                  }).toList(),
+                ),
+              ),
+            ),
           ],
         ),
       ),
