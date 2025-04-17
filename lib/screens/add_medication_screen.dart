@@ -35,24 +35,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-  void _saveMedication() async{
-    if (_formKey.currentState!.validate()) {
-      await isar.writeTxn(() async {
-        await isar.medications.put(Medication()
-          ..id = DateTime.now().toString()
-          ..name = 'Paracetamol'
-          ..dosage = '500mg'
-          ..timesPerDay = _selectedTimes.first
-          .. stock =int.tryParse(_stockController.text) ?? 0
-          ..isActive = _isActive
-          ..notes = _noteController.text
-          .. frequency = _frequency);
-      });
 
-
-      Navigator.pop(context);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +205,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _saveMedication,
+              onPressed: (){},
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(

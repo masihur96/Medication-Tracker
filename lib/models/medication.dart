@@ -1,10 +1,5 @@
-import 'package:isar/isar.dart';
 
-part 'medication.g.dart';
-
-@Collection()
 class Medication {
-  Id? isarId; // Isar's auto-increment ID
 
   late String id; // Your custom ID (e.g., DateTime string)
 
