@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:med_track/models/medication.dart';
+import 'package:med_track/models/prescription.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_medication_screen.dart';
 
@@ -13,10 +18,33 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   late TabController _tabController;
   Map<String, bool> _alarmStates = {};  // To track alarm states for each medication
 
+
+  List<Prescription> _prescriptions = [];
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+
+    loadPrescriptions();
+  }
+
+  Future<void> loadPrescriptions() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final String? listString = prefs.getString('prescriptions');
+    print(listString);
+    if (listString != null) {
+      final List decoded = jsonDecode(listString);
+      final List<Prescription> loaded =
+      decoded.map((e) => Prescription.fromJson(e)).toList();
+      setState(() {
+        _prescriptions = loaded;
+        _isLoading = false;
+      });
+    } else {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -34,8 +62,8 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'All Medications'),
-            Tab(text: 'Available Stock'),
+            Tab(text: 'Drugs'),
+            Tab(text: 'Stock'),
             Tab(text: 'Active'),
             Tab(text: 'Inactive'),
           ],
@@ -54,35 +82,64 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   }
 
   Widget _buildMedicationList() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    if (_prescriptions.isEmpty) {
+      return const Center(child: Text('No medications added yet'));
+    }
+
+    // Flatten all medications from all prescriptions
+    List<Medication> allMedications = [];
+    for (var prescription in _prescriptions) {
+      allMedications.addAll(prescription.medications);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: 5,
+      itemCount: allMedications.length,
       itemBuilder: (context, index) {
+        final medication = allMedications[index];
         return _buildMedicationItem(
-          name: 'Medication ${String.fromCharCode(65 + index)}',
-          dosage: '${index + 1} tablet(s)',
-          frequency: 'Daily',
-          timeOfDay: '${8 + (index * 4)}:00',
-          notes: 'Take with food',
+          name: medication.name,
+          dosage: medication.dosage,
+          frequency: medication.frequency,
+          timeOfDay: medication.reminderTimes.isEmpty 
+              ? 'Not set'
+              : medication.reminderTimes
+                  .map((time) => _timeOfDayToString(time))
+                  .join(', '),
+          notes: medication.notes ?? 'No notes',
         );
       },
     );
   }
 
   Widget _buildAvailableStock() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    List<Medication> allMedications = [];
+    for (var prescription in _prescriptions) {
+      allMedications.addAll(prescription.medications);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: 3,
+      itemCount: allMedications.length,
       itemBuilder: (context, index) {
+        final medication = allMedications[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 16.0),
           child: ListTile(
-            title: Text('Medication ${String.fromCharCode(65 + index)}'),
+            title: Text(medication.name),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current Stock: ${(index + 1) * 10} tablets'),
-                Text('Expiry Date: ${DateTime.now().add(Duration(days: 30 * (index + 1))).toString().substring(0, 10)}'),
+                Text('Current Stock: ${medication.stock} units'),
+                // Note: Add expiry date if you add it to the Medication model
               ],
             ),
           ),
@@ -92,35 +149,70 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   }
 
   Widget _buildActiveMedications() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    List<Medication> activeMedications = [];
+    for (var prescription in _prescriptions) {
+      activeMedications.addAll(
+        prescription.medications.where((med) => med.isActive)
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: 2,
+      itemCount: activeMedications.length,
       itemBuilder: (context, index) {
+        final medication = activeMedications[index];
         return _buildMedicationItem(
-          name: 'Active Med ${String.fromCharCode(65 + index)}',
-          dosage: '${index + 1} tablet(s)',
-          frequency: 'Daily',
-          timeOfDay: '${8 + (index * 4)}:00',
-          notes: 'Active medication',
+          name: medication.name,
+          dosage: medication.dosage,
+          frequency: medication.frequency,
+          timeOfDay: medication.reminderTimes.isEmpty
+              ? 'Not set'
+              : medication.reminderTimes
+                  .map((time) => _timeOfDayToString(time))
+                  .join(', '),
+          notes: medication.notes ?? 'No notes',
         );
       },
     );
   }
 
   Widget _buildInactiveMedications() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    List<Medication> inactiveMedications = [];
+    for (var prescription in _prescriptions) {
+      inactiveMedications.addAll(
+        prescription.medications.where((med) => !med.isActive)
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: 2,
+      itemCount: inactiveMedications.length,
       itemBuilder: (context, index) {
+        final medication = inactiveMedications[index];
         return _buildMedicationItem(
-          name: 'Inactive Med ${String.fromCharCode(65 + index)}',
-          dosage: '${index + 1} tablet(s)',
+          name: medication.name,
+          dosage: medication.dosage,
           frequency: 'Not taking',
           timeOfDay: 'N/A',
-          notes: 'Discontinued',
+          notes: medication.notes ?? 'Discontinued',
         );
       },
     );
+  }
+
+  String _timeOfDayToString(TimeOfDay time) {
+    final hour = time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${hour == 0 ? 12 : hour}:$minute $period';
   }
 
   Widget _buildMedicationItem({
@@ -169,10 +261,29 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                     ),
                     const SizedBox(height: 4),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(Icons.access_time, size: 16),
                         const SizedBox(width: 8),
-                        Text('Time: $timeOfDay'),
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: timeOfDay == 'Not set' || timeOfDay == 'N/A'
+                                ? [Text('Time: $timeOfDay')]
+                                : [
+                              for (int i = 0; i < timeOfDay.split(', ').length; i++)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 2),
+                                  child: Text(
+                                    i == timeOfDay.split(', ').length - 1
+                                        ? timeOfDay.split(', ')[i]
+                                        : '${timeOfDay.split(', ')[i]} - ',
+                                  ),
+                                )
+                            ],
+                          ),
+                        ),
+
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -185,28 +296,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                     ),
                   ],
                 ),
-                trailing: PopupMenuButton(
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: Text('Edit'),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Text('Delete'),
-                    ),
-                  ],
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'edit':
-                        // TODO: Navigate to edit medication screen
-                        break;
-                      case 'delete':
-                        // TODO: Show delete confirmation dialog
-                        break;
-                    }
-                  },
-                ),
+
               ),
             ],
           ),
