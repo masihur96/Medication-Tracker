@@ -328,7 +328,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                    // TODO: Add your alarm cancellation logic here
+                    // TODO: Add your alarm cancellation logic
                   }
                 },
                 icon: Icon(
