@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AddMedicationScreen extends StatefulWidget {
-
   final Prescription prescription;
+  final Medication? medication;
 
-  const AddMedicationScreen({super.key,required this.prescription});
+  const AddMedicationScreen({super.key,required this.prescription,this.medication});
   @override
   _AddMedicationScreenState createState() => _AddMedicationScreenState();
 }
@@ -28,6 +28,32 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   // List of frequency options
   final List<String> _frequencyOptions = ['Daily', 'Weekly', 'Monthly', 'As needed'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize form fields if medication exists
+    if (widget.medication != null) {
+      _nameController.text = widget.medication!.name;
+      _dosageController.text = widget.medication!.dosage;
+      _stockController.text = widget.medication!.stock.toString();
+      _noteController.text = widget.medication!.notes!;
+      _frequency = widget.medication!.frequency;
+      _timesPer = widget.medication!.timesPerDay;
+      _isActive = widget.medication!.isActive;
+      _selectedTimes.clear();
+      _selectedTimes.addAll(widget.medication!.reminderTimes);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _dosageController.dispose();
+    _stockController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
 
   Future<void> _selectTime(BuildContext context, int index) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -70,7 +96,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Medication', style: TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(
+          widget.medication != null ? 'Edit Medication' : 'Add Medication',
+          style: TextStyle(fontWeight: FontWeight.w600)
+        ),
         elevation: 0,
       ),
       body: Form(
@@ -288,18 +317,30 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: (){
-                addMedicationToPrescription(widget.prescription.uid,Medication(
-                  id: DateTime.now().microsecondsSinceEpoch.toString(),
-                  name: _nameController.text,
-                  dosage: _dosageController.text,
-                  timesPerDay: _timesPer,
-                  stock: int.parse(_stockController.text),
-                  isActive: _isActive,
-                  notes: _noteController.text,
-                  frequency: _frequency,
-                  reminderTimes: _selectedTimes,
-                ));
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  final medication = Medication(
+                    id: widget.medication?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+                    name: _nameController.text,
+                    dosage: _dosageController.text,
+                    timesPerDay: _timesPer,
+                    stock: int.parse(_stockController.text),
+                    isActive: _isActive,
+                    notes: _noteController.text,
+                    frequency: _frequency,
+                    reminderTimes: _selectedTimes,
+                  );
+
+                  if (widget.medication != null) {
+                    // Update existing medication
+                    updateMedicationInPrescription(widget.prescription.uid, medication);
+                  } else {
+                    // Add new medication
+                    addMedicationToPrescription(widget.prescription.uid, medication);
+                  }
+
+                  Navigator.pop(context); // Go back after saving
+                }
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15),
@@ -308,7 +349,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 ),
               ),
               child: Text(
-                'Save Medication',
+                widget.medication != null ? 'Update Medication' : 'Save Medication',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
@@ -336,6 +377,33 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         // Save updated list back
         final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
         await prefs.setString('prescriptions', updatedString);
+      }
+    }
+  }
+
+  Future<void> updateMedicationInPrescription(String uid, Medication med) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? listString = prefs.getString('prescriptions');
+
+    if (listString != null) {
+      List decoded = jsonDecode(listString);
+      List<Prescription> prescriptions = decoded
+          .map((e) => Prescription.fromJson(e))
+          .toList();
+
+      final prescriptionIndex = prescriptions.indexWhere((rx) => rx.uid == uid);
+      if (prescriptionIndex != -1) {
+        final medicationIndex = prescriptions[prescriptionIndex].medications
+            .indexWhere((m) => m.id == med.id);
+        
+        if (medicationIndex != -1) {
+          // Replace the existing medication
+          prescriptions[prescriptionIndex].medications[medicationIndex] = med;
+
+          // Save updated list back
+          final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
+          await prefs.setString('prescriptions', updatedString);
+        }
       }
     }
   }

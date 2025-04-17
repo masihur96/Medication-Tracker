@@ -6,13 +6,29 @@ import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PrescriptionDetailsScreen extends StatelessWidget {
+import 'add_medication_screen.dart';
+
+class PrescriptionDetailsScreen extends StatefulWidget {
   final Prescription prescription;
 
   const PrescriptionDetailsScreen({
     super.key,
     required this.prescription,
   });
+
+  @override
+  State<PrescriptionDetailsScreen> createState() => _PrescriptionDetailsScreenState();
+}
+
+class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
+  late Prescription prescription;
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    prescription = widget.prescription;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,11 +105,24 @@ class PrescriptionDetailsScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
-            Text(
-              'Medications',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Medications',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    setState(() {
+                      _isEditing = !_isEditing;
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Card(
@@ -104,19 +133,36 @@ class PrescriptionDetailsScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Name')),
-                    DataColumn(label: Text('Dosage')),
-                    DataColumn(label: Text('Frequency')),
-                    DataColumn(label: Text('Times/Day')),
-                    DataColumn(label: Text('Stock')),
-                    DataColumn(label: Text('Notes')),
-                    DataColumn(label: Text('Reminder Times')),
+                  columns: [
+                    if (_isEditing)
+                      const DataColumn(label: Text('')),
+                    const DataColumn(label: Text('Name')),
+                    const DataColumn(label: Text('Dosage')),
+                    const DataColumn(label: Text('Frequency')),
+                    const DataColumn(label: Text('Times/Day')),
+                    const DataColumn(label: Text('Stock')),
+                    const DataColumn(label: Text('Notes')),
+                    const DataColumn(label: Text('Reminder Times')),
                   ],
                   rows: prescription.medications.map((med) {
-
-
                     return DataRow(cells: [
+                      if (_isEditing)
+                        DataCell(
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AddMedicationScreen(
+                                    prescription: prescription,
+                                    medication: med,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       DataCell(Text(med.name)),
                       DataCell(Text(med.dosage)),
                       DataCell(Text(med.frequency)),
