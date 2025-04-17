@@ -33,11 +33,12 @@ class PrescriptionDetailsScreen extends StatelessWidget {
               context,
               title: 'Prescription Information',
               content: [
-                _buildInfoRow('Date', prescription.date),
+
                 _buildInfoRow('Doctor', prescription.doctor),
                 _buildInfoRow('Chamber', prescription.chamber),
                 _buildInfoRow('Patient', prescription.patient),
                 _buildInfoRow('Prescribed For', prescription.medicationTo),
+                _buildInfoRow('Date', prescription.date),
               ],
             ),
             const SizedBox(height: 20),
@@ -103,22 +104,34 @@ class PrescriptionDetailsScreen extends StatelessWidget {
     required List<Widget> content,
   }) {
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: Colors.grey.shade200),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+            Row(
+              children: [
+                Icon(
+                  Icons.medical_information,
+                  color: Theme.of(context).primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const Divider(height: 24),
             ...content,
           ],
         ),
@@ -127,18 +140,27 @@ class PrescriptionDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey.shade200,
+            width: 1,
+          ),
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 140,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+                fontSize: 15,
               ),
             ),
           ),
@@ -147,6 +169,7 @@ class PrescriptionDetailsScreen extends StatelessWidget {
               value,
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
+                fontSize: 15,
               ),
             ),
           ),
