@@ -93,71 +93,85 @@ class _RxScreenState extends State<RxScreen> {
                             (context, index) {
                               final rx = _prescriptions[index];
                               return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
+                                padding: const EdgeInsets.only(bottom: 5.0),
                                 child: Card(
                                   elevation: 2,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    leading: CircleAvatar(
-                                      backgroundColor:
-                                          Theme.of(context).primaryColor,
-                                      child: const Icon(
-                                        Icons.medication,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    title: Text(
-                                      rx.medication,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Dr. ${rx.doctor}',
-                                          style: const TextStyle(
-                                            color: Colors.black87,
+                                        Column(
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundColor: Theme.of(context).primaryColor,
+                                              radius: 30,
+                                              child: const Icon(
+                                                Icons.medication,
+                                                color: Colors.white,
+                                                size: 35,
+
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              rx.date,
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                rx.medication,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                rx.doctor,
+                                                style: const TextStyle(color: Colors.black87),
+                                              ),
+                                              Text(
+                                                'Ch: ${rx.chamber}',
+                                                style: const TextStyle(color: Colors.black87),
+                                              ),
+                                              Text(
+                                                'Pt: ${rx.patient}',
+                                                style: const TextStyle(color: Colors.black87),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        Text(
-                                          'Chamber: ${rx.chamber}',
-                                          style: const TextStyle(
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                        Text(
-                                          rx.date,
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 12,
-                                          ),
+                                        IconButton(
+                                          icon: const Icon(Icons.arrow_forward_ios),
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => AddMedicationScreen(prescription: rx),
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ],
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.arrow_forward_ios),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (_) => AddMedicationScreen(prescription: rx,)),
-                                        );
-                                        // TODO: Navigate to prescription details
-                                      },
                                     ),
                                   ),
                                 ),
                               );
+
                             },
                             childCount: _prescriptions.length,
                           ),

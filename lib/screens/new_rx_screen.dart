@@ -17,6 +17,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
   final _doctorController = TextEditingController();
   final _dateController = TextEditingController();
   final _chamberController = TextEditingController();
+  final _patientController = TextEditingController();
 
   @override
   void dispose() {
@@ -24,6 +25,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
     _doctorController.dispose();
     _dateController.dispose();
     _chamberController.dispose();
+    _patientController.dispose();
     super.dispose();
   }
 
@@ -39,20 +41,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _medicationController,
-                decoration: const InputDecoration(
-                  labelText: 'Medication Title',
-                  icon: Icon(Icons.medication),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter medication title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+
               TextFormField(
                 controller: _doctorController,
                 decoration: const InputDecoration(
@@ -62,6 +51,49 @@ class _NewRxScreenState extends State<NewRxScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter doctor name';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _chamberController,
+                decoration: const InputDecoration(
+                  labelText: 'Chamber Name',
+                  icon: Icon(Icons.business),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter chamber name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _patientController,
+                decoration: const InputDecoration(
+                  labelText: 'Patient Name',
+                  icon: Icon(Icons.person_outline),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter patient name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _medicationController,
+                decoration: const InputDecoration(
+                  labelText: 'Medication To',
+                  icon: Icon(Icons.medication),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter medication title';
                   }
                   return null;
                 },
@@ -97,20 +129,6 @@ class _NewRxScreenState extends State<NewRxScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _chamberController,
-                decoration: const InputDecoration(
-                  labelText: 'Chamber Name',
-                  icon: Icon(Icons.business),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter chamber name';
-                  }
-                  return null;
-                },
-              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
@@ -118,9 +136,11 @@ class _NewRxScreenState extends State<NewRxScreen> {
 
                     savePrescription(Prescription(
                         medication: _medicationController.text,
+                        uid: DateTime.now().microsecondsSinceEpoch.toString(),
                         doctor: _doctorController.text,
                         date: _dateController.text,
-                        chamber: _chamberController.text));
+                        chamber: _chamberController.text,
+                        patient: _patientController.text));
 
                     
                     Navigator.pop(context);

@@ -62,7 +62,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         Text(
                           'Rx',
                           style: TextStyle(
-                            fontSize: 60,
+                            fontSize: 50,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -82,8 +82,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                           Divider(
                           ),
-                          _buildLineField(label: 'Name: ${widget.prescription.date}',size: 16),
-                          _buildLineField(label: 'To: ${widget.prescription.medication}',size: 16),
+                          _buildLineField(label: 'Name: ${widget.prescription.patient}',size: 16),
+                          _buildLineField(label: 'To: ${widget.prescription.medication}',size: 12),
 
                         ],
                       ),
