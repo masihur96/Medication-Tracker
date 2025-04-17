@@ -21,6 +21,19 @@ class _NewRxScreenState extends State<NewRxScreen> {
   final _patientController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with existing prescription data if available
+    if (widget.prescription != null) {
+      _medicationController.text = widget.prescription!.medicationTo;
+      _doctorController.text = widget.prescription!.doctor;
+      _dateController.text = widget.prescription!.date;
+      _chamberController.text = widget.prescription!.chamber;
+      _patientController.text = widget.prescription!.patient;
+    }
+  }
+
+  @override
   void dispose() {
     _medicationController.dispose();
     _doctorController.dispose();
@@ -134,23 +147,22 @@ class _NewRxScreenState extends State<NewRxScreen> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-
-                    savePrescription(Prescription(
-                        medicationTo: _medicationController.text,
-                        uid: DateTime.now().microsecondsSinceEpoch.toString(),
-                        doctor: _doctorController.text,
-                        date: _dateController.text,
-                        chamber: _chamberController.text,
-                        patient: _patientController.text,
-                        medications: []
-                    ),
+                    final prescription = Prescription(
+                      medicationTo: _medicationController.text,
+                      uid: widget.prescription?.uid ?? 
+                           DateTime.now().microsecondsSinceEpoch.toString(),
+                      doctor: _doctorController.text,
+                      date: _dateController.text,
+                      chamber: _chamberController.text,
+                      patient: _patientController.text,
+                      medications: widget.prescription?.medications ?? [],
                     );
 
-                    
+                    savePrescription(prescription);
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Save Prescription'),
+                child: Text(widget.prescription == null ? 'Save Prescription' : 'Update Prescription'),
               ),
             ],
           ),
@@ -159,7 +171,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
     );
   }
 
-  Future<void> savePrescription(Prescription newPrescription) async {
+  Future<void> savePrescription(Prescription prescription) async {
     final prefs = await SharedPreferences.getInstance();
 
     // Get existing list
@@ -171,12 +183,17 @@ class _NewRxScreenState extends State<NewRxScreen> {
       prescriptions = decodedList.map((e) => Prescription.fromJson(e)).toList();
     }
 
-    // Add new prescription
-    prescriptions.add(newPrescription);
+    // If editing, remove the old prescription
+    if (widget.prescription != null) {
+      prescriptions.removeWhere((p) => p.uid == widget.prescription!.uid);
+    }
+
+    // Add the prescription (new or updated)
+    prescriptions.add(prescription);
 
     // Save updated list
     final String encodedList =
-    jsonEncode(prescriptions.map((e) => e.toJson()).toList());
+        jsonEncode(prescriptions.map((e) => e.toJson()).toList());
     await prefs.setString('prescriptions', encodedList);
   }
 } 
