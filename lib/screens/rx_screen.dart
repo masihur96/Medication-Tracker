@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
+import 'package:med_track/screens/prescription_details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_medication_screen.dart';
@@ -28,7 +29,7 @@ class _RxScreenState extends State<RxScreen> {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
-
+print(listString);
     if (listString != null) {
       final List decoded = jsonDecode(listString);
       final List<Prescription> loaded =
@@ -99,74 +100,84 @@ class _RxScreenState extends State<RxScreen> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Column(
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: Theme.of(context).primaryColor,
-                                              radius: 30,
-                                              child: const Icon(
-                                                Icons.medication,
-                                                color: Colors.white,
-                                                size: 35,
-
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              rx.date,
-                                              style: TextStyle(
-                                                color: Colors.grey[600],
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
+                                  child: GestureDetector(
+                                    onTap: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PrescriptionDetailsScreen(prescription: rx),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Column(
                                             children: [
-                                              Text(
-                                                rx.medication,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
+                                              CircleAvatar(
+                                                backgroundColor: Theme.of(context).primaryColor,
+                                                radius: 30,
+                                                child: const Icon(
+                                                  Icons.medication,
+                                                  color: Colors.white,
+                                                  size: 35,
+
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                rx.doctor,
-                                                style: const TextStyle(color: Colors.black87),
-                                              ),
-                                              Text(
-                                                'Ch: ${rx.chamber}',
-                                                style: const TextStyle(color: Colors.black87),
-                                              ),
-                                              Text(
-                                                'Pt: ${rx.patient}',
-                                                style: const TextStyle(color: Colors.black87),
+                                                rx.date,
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.arrow_forward_ios),
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => AddMedicationScreen(prescription: rx),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ],
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  rx.medicationTo,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  rx.doctor,
+                                                  style: const TextStyle(color: Colors.black87),
+                                                ),
+                                                Text(
+                                                  'Ch: ${rx.chamber}',
+                                                  style: const TextStyle(color: Colors.black87),
+                                                ),
+                                                Text(
+                                                  'Pt: ${rx.patient}',
+                                                  style: const TextStyle(color: Colors.black87),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.arrow_forward_ios),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => AddMedicationScreen(prescription: rx),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

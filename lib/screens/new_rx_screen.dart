@@ -135,12 +135,15 @@ class _NewRxScreenState extends State<NewRxScreen> {
                   if (_formKey.currentState!.validate()) {
 
                     savePrescription(Prescription(
-                        medication: _medicationController.text,
+                        medicationTo: _medicationController.text,
                         uid: DateTime.now().microsecondsSinceEpoch.toString(),
                         doctor: _doctorController.text,
                         date: _dateController.text,
                         chamber: _chamberController.text,
-                        patient: _patientController.text));
+                        patient: _patientController.text,
+                        medications: []
+                    ),
+                    );
 
                     
                     Navigator.pop(context);

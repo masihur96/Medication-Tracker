@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AddMedicationScreen extends StatefulWidget {
@@ -18,24 +22,47 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _stockController = TextEditingController();
   final _noteController = TextEditingController();
   String _frequency = 'Daily'; // Default frequency
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  bool _isActive = true;
-  List<int> _selectedTimes = [];
+  int _timesPer = 1; // Default frequency
+  final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()]; // Update to list of TimeOfDay
 
   // List of frequency options
   final List<String> _frequencyOptions = ['Daily', 'Weekly', 'Monthly', 'As needed'];
 
-  Future<void> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context, int index) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: _selectedTime,
+      initialTime: _selectedTimes[index],
     );
     if (picked != null) {
       setState(() {
-        _selectedTime = picked;
-        _selectedTimes = [picked.hour * 60 + picked.minute];
+        _selectedTimes[index] = picked;
       });
     }
+  }
+
+  // Add this method to build time selection fields
+  List<Widget> _buildTimeFields() {
+    return List.generate(_timesPer, (index) {
+      // Ensure we have enough times in our list
+      while (_selectedTimes.length < _timesPer) {
+        _selectedTimes.add(TimeOfDay.now());
+      }
+      
+      return Padding(
+        padding: EdgeInsets.only(bottom: index < _timesPer - 1 ? 16 : 0),
+        child: InkWell(
+          onTap: () => _selectTime(context, index),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: 'Reminder Time ${index + 1}',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.access_time),
+            ),
+            child: Text(_selectedTimes[index].format(context)),
+          ),
+        ),
+      );
+    });
   }
 
   @override
@@ -83,7 +110,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                           Divider(
                           ),
                           _buildLineField(label: 'Name: ${widget.prescription.patient}',size: 16),
-                          _buildLineField(label: 'To: ${widget.prescription.medication}',size: 12),
+                          _buildLineField(label: 'To: ${widget.prescription.medicationTo}',size: 12),
 
                         ],
                       ),
@@ -189,17 +216,27 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       },
                     ),
                     SizedBox(height: 16),
-                    InkWell(
-                      onTap: () => _selectTime(context),
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: 'Reminder Time',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.access_time),
-                        ),
-                        child: Text(_selectedTime.format(context)),
+                    DropdownButtonFormField<int>(
+                      value: _timesPer,
+                      decoration: InputDecoration(
+                        labelText: 'Times per $_frequency',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_today),
                       ),
+                      items: [1,2,3].map((int times) {
+                        return DropdownMenuItem(
+                          value: times,
+                          child: Text(times.toString()),
+                        );
+                      }).toList(),
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          _timesPer = newValue!;
+                        });
+                      },
                     ),
+                    SizedBox(height: 16),
+                    ..._buildTimeFields(),
                   ],
                 ),
               ),
@@ -234,23 +271,36 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       maxLines: 3,
                     ),
                     SizedBox(height: 16),
-                    SwitchListTile(
-                      title: Text('Medication Status'),
-                      subtitle: Text(_isActive ? 'Active' : 'Inactive'),
-                      value: _isActive,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isActive = value;
-                        });
-                      },
-                    ),
+                    // SwitchListTile(
+                    //   title: Text('Medication Status'),
+                    //   subtitle: Text(_isActive ? 'Active' : 'Inactive'),
+                    //   value: _isActive,
+                    //   onChanged: (bool value) {
+                    //     setState(() {
+                    //       _isActive = value;
+                    //     });
+                    //   },
+                    // ),
                   ],
                 ),
               ),
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: (){},
+              onPressed: (){
+
+                addMedicationToPrescription(widget.prescription.uid,Medication(
+                  id: DateTime.now().microsecondsSinceEpoch.toString(),
+                  name: _nameController.text,
+                  dosage: _dosageController.text,
+                  timesPerDay: _timesPer,
+                  stock: int.parse(_stockController.text),
+                  isActive: true,
+                  notes: _noteController.text,
+                  frequency: _frequency,
+                  reminderTimes: _selectedTimes,
+                ));
+              },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
@@ -267,6 +317,30 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       ),
     );
   }
+
+
+  Future<void> addMedicationToPrescription(String uid, Medication med) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? listString = prefs.getString('prescriptions');
+
+    if (listString != null) {
+      List decoded = jsonDecode(listString);
+      List<Prescription> prescriptions = decoded
+          .map((e) => Prescription.fromJson(e))
+          .toList();
+
+      final index = prescriptions.indexWhere((rx) => rx.uid == uid);
+      if (index != -1) {
+        prescriptions[index].medications.add(med);
+
+        // Save updated list back
+        final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
+        await prefs.setString('prescriptions', updatedString);
+      }
+    }
+  }
+
+
 
   Widget _buildDetailRow({
     required IconData icon,
