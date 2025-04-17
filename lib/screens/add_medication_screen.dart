@@ -289,14 +289,13 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: (){
-
                 addMedicationToPrescription(widget.prescription.uid,Medication(
                   id: DateTime.now().microsecondsSinceEpoch.toString(),
                   name: _nameController.text,
                   dosage: _dosageController.text,
                   timesPerDay: _timesPer,
                   stock: int.parse(_stockController.text),
-                  isActive: true,
+                  isActive: _isActive,
                   notes: _noteController.text,
                   frequency: _frequency,
                   reminderTimes: _selectedTimes,

@@ -5,7 +5,8 @@ import 'package:med_track/models/prescription.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewRxScreen extends StatefulWidget {
-  const NewRxScreen({super.key});
+  final Prescription? prescription;
+  const NewRxScreen({super.key, this.prescription});
 
   @override
   State<NewRxScreen> createState() => _NewRxScreenState();
