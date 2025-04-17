@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),
-            label: 'Medications',
+            label: 'Drug',
           ),
 
           BottomNavigationBarItem(

@@ -14,11 +14,11 @@ class PrescriptionDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: Colors.white,
         title: const Text(
           'Prescription Details',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
         backgroundColor: Theme.of(context).primaryColor,
@@ -29,18 +29,51 @@ class PrescriptionDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoCard(
-              context,
-              title: 'Prescription Information',
-              content: [
 
-                _buildInfoRow('Doctor', prescription.doctor),
-                _buildInfoRow('Chamber', prescription.chamber),
-                _buildInfoRow('Patient', prescription.patient),
-                _buildInfoRow('Prescribed For', prescription.medicationTo),
-                _buildInfoRow('Date', prescription.date),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Rx Text on Left
+                    Column(
+                      children: [
+                        Text(
+                          'Rx',
+                          style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        _buildLineField(label: prescription.date,size: 16),
+                      ],
+                    ),
+                    SizedBox(width: 16),
+                    // Patient Info on Right
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLineField(label: 'DR: ${prescription.doctor}',size: 16),
+                          // SizedBox(height: 12),
+                          _buildLineField(label: 'Ch: ${prescription.chamber}',size: 12),
+
+                          Divider(
+                          ),
+                          _buildLineField(label: 'Patient: ${prescription.patient}',size: 16),
+                          _buildLineField(label: 'For: ${prescription.medicationTo}',size: 12),
+
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(thickness: 1, color: Colors.black87),
               ],
             ),
+
             const SizedBox(height: 20),
             Text(
               'Medications',
@@ -67,6 +100,8 @@ class PrescriptionDetailsScreen extends StatelessWidget {
                     DataColumn(label: Text('Reminder Times')),
                   ],
                   rows: prescription.medications.map((med) {
+
+
                     return DataRow(cells: [
                       DataCell(Text(med.name)),
                       DataCell(Text(med.dosage)),
@@ -77,10 +112,11 @@ class PrescriptionDetailsScreen extends StatelessWidget {
                       DataCell(
                         Wrap(
                           children: med.reminderTimes.map((time) {
+
                             return Padding(
                               padding: const EdgeInsets.only(right: 4),
                               child: Chip(
-                                label: Text(time.toString()),
+                                label: Text(formatTimeOfDay(context,time)),
                                 backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
                               ),
                             );
@@ -96,6 +132,18 @@ class PrescriptionDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildLineField({required String label,required double size}) {
+    return Text(
+      label,
+      style: TextStyle(fontSize: size, fontWeight: FontWeight.w500),
+    );
+  }
+
+  String formatTimeOfDay(BuildContext context, TimeOfDay time) {
+    final localizations = MaterialLocalizations.of(context);
+    return localizations.formatTimeOfDay(time, alwaysUse24HourFormat: false);
   }
 
   Widget _buildInfoCard(

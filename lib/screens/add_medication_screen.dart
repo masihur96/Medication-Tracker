@@ -22,6 +22,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _stockController = TextEditingController();
   final _noteController = TextEditingController();
   String _frequency = 'Daily'; // Default frequency
+  bool _isActive = false;
   int _timesPer = 1; // Default frequency
   final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()]; // Update to list of TimeOfDay
 
@@ -271,16 +272,16 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       maxLines: 3,
                     ),
                     SizedBox(height: 16),
-                    // SwitchListTile(
-                    //   title: Text('Medication Status'),
-                    //   subtitle: Text(_isActive ? 'Active' : 'Inactive'),
-                    //   value: _isActive,
-                    //   onChanged: (bool value) {
-                    //     setState(() {
-                    //       _isActive = value;
-                    //     });
-                    //   },
-                    // ),
+                    SwitchListTile(
+                      title: Text('Medication Status'),
+                      subtitle: Text(_isActive ? 'Active' : 'Inactive'),
+                      value: _isActive,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isActive = value;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -340,40 +341,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-
-
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 }
 
 Widget _buildLineField({required String label,required double size}) {
