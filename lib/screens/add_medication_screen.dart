@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:med_track/models/prescription.dart';
 
 
 class AddMedicationScreen extends StatefulWidget {
+
+  final Prescription prescription;
+
+  const AddMedicationScreen({super.key,required this.prescription});
   @override
   _AddMedicationScreenState createState() => _AddMedicationScreenState();
 }

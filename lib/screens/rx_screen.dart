@@ -150,7 +150,7 @@ class _RxScreenState extends State<RxScreen> {
                                       onPressed: () {
                                         Navigator.push(
                                           context,
-                                          MaterialPageRoute(builder: (_) => AddMedicationScreen()),
+                                          MaterialPageRoute(builder: (_) => AddMedicationScreen(prescription: rx,)),
                                         );
                                         // TODO: Navigate to prescription details
                                       },
