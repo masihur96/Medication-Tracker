@@ -156,12 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemCount: _medicationHistory.length,
               itemBuilder: (context, index) {
                 final history = _medicationHistory[index];
-
                 return  _buildMedicationCard(
-                  // name: history.medicationName,
-                  // time: history.time,
-                  // dosage: history.dosage,
-                  // status:  history.isTaken ? 'Taken' : 'Pending',
                   medicationHistory: history,
                 );
 
@@ -211,10 +206,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
   Widget _buildMedicationCard({
-    // required String name,
-    // required String time,
-    // required String dosage,
-    // required String status,
+
     required MedicationHistory medicationHistory,
   }) {
 
@@ -289,33 +281,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> updateMedicationStatus({
     required String medicationId,
     required bool isTaken,
+
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final String? historyString = prefs.getString('medication_history');
-    print(historyString);
-    print(isTaken);
-    if (historyString != null) {
-      final List decoded = jsonDecode(historyString);
-      List<MedicationHistory> historyList = decoded
-          .map((e) => MedicationHistory.fromJson(e))
-          .toList();
 
-      print(isTaken);
+
+
       // 🔍 Find and update the matching record
-      for (var item in historyList) {
+      for (var item in _medicationHistory) {
         if (item.medicationId == medicationId) {
           item.isTaken = isTaken;
           break;
         }
       }
 
-      // 💾 Save the updated list
-      final updatedString = jsonEncode(historyList.map((e) => e.toJson()).toList());
-      await prefs.setString('medication_history', updatedString);
+    print(isTaken);
 
+      final updatedString = jsonEncode(_medicationHistory.map((e) => e.toJson()).toList());
+
+    // 💾 Save the updated list
+      await prefs.setString('medicationHistory', updatedString);
+    print("Update String: $updatedString");
       // Optional: Update UI
-      _medicationHistory = historyList;
-    }
+
+
+    _medicationHistory =   await loadHistoryList();
+    _medicationHistory = _medicationHistory;
+    print("Update String from Local : ${_medicationHistory.first.isTaken}");
+    print("Update String from Local : ${_medicationHistory.last.isTaken}");
+
   }
 
 }
