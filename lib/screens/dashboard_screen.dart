@@ -7,6 +7,8 @@ import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/medication_history.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -16,6 +18,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Medication> _todaysMedications = [];
+  List<MedicationHistory> _medicationHistory = [];
 
   bool _isLoading = true;
 
@@ -31,9 +34,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
-
-
-
     if (listString != null) {
       final List decoded = jsonDecode(listString);
       final List<Prescription> loaded =
@@ -54,10 +54,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
         // List<Prescription> _prescriptions  = loaded;
         _isLoading = false;
       });
+
+      medicationHistory(todayMedications: _todaysMedications);
+// Then you can store or display these history entries
+
+
     } else {
       setState(() => _isLoading = false);
     }
   }
+
+
+  Future<void> saveHistoryList(List<MedicationHistory> historyList) async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = historyList.map((h) => h.toJson()).toList();
+    await prefs.setString('medicationHistory', jsonEncode(encoded));
+
+    _medicationHistory =   await loadHistoryList();
+
+    print("_medicationHistory ${_medicationHistory.length}");
+  }
+
+  Future<List<MedicationHistory>> loadHistoryList() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('medicationHistory');
+    if (jsonString != null) {
+      final List decoded = jsonDecode(jsonString);
+      return decoded.map((e) => MedicationHistory.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  List<MedicationHistory> medicationHistory({required List<Medication> todayMedications}) {
+    final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    List<MedicationHistory> historyList = [];
+
+    for (Medication m in todayMedications) {
+      for (TimeOfDay timeOfDay in m.reminderTimes) {
+        final String time = _formatTimeOfDay(timeOfDay);
+        historyList.add(
+          MedicationHistory(
+            medicationId: m.id,
+            medicationName: m.name,
+            dosage: m.dosage,
+            date: today,
+            time: time,
+            isTaken: false,
+          ),
+        );
+      }
+    }
+
+    saveHistoryList(historyList);
+
+    return historyList;
+  }
+
+
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
@@ -100,23 +154,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Column(
-              children: _todaysMedications.expand((medication) {
-                return medication.reminderTimes.map((timeOfDay) {
-                  return Column(
-                    children: [
-                      _buildMedicationCard(
-                        name: medication.name,
-                        time: _formatTimeOfDay(timeOfDay),
-                        dosage: medication.dosage,
-                        status: 'Pending', // You can customize this based on logic
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  );
-                }).toList();
-              }).toList(),
+
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _medicationHistory.length,
+              itemBuilder: (context, index) {
+                final history = _medicationHistory[index];
+                return  _buildMedicationCard(
+                  name: history.medicationName,
+                  time: history.time,
+                  dosage: history.dosage,
+                  status:  history.isTaken ? 'Taken' : 'Pending',
+                );
+
+              },
             ),
+
+
             const SizedBox(height: 24),
             
             // Medication Dosage Chart
