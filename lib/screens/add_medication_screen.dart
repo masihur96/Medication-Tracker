@@ -26,8 +26,16 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   int _timesPer = 1; // Default frequency
   final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()]; // Update to list of TimeOfDay
 
-  // List of frequency options
-  final List<String> _frequencyOptions = ['Daily', 'Weekly', 'Monthly', 'As needed'];
+
+  List<String> _selectedWeekdays = [];
+  final List<String> _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  List<int> _selectedMonthDays = [];
+
+
+  // final DateTime _reminderDates=[];
+
+  List<String> _reminderDates = [];
 
   @override
   void initState() {
@@ -226,25 +234,41 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       },
                     ),
                     SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _frequency,
-                      decoration: InputDecoration(
-                        labelText: 'Frequency',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.calendar_today),
-                      ),
-                      items: _frequencyOptions.map((String frequency) {
-                        return DropdownMenuItem(
-                          value: frequency,
-                          child: Text(frequency),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _frequency = newValue!;
-                        });
-                      },
+                    Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _frequency,
+                          decoration: InputDecoration(
+                            labelText: 'Frequency',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_today),
+                          ),
+                          items: ['Daily', 'Weekly', 'Monthly', 'As needed']
+                              .map((String frequency) => DropdownMenuItem(
+                            value: frequency,
+                            child: Text(frequency),
+                          ))
+                              .toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _frequency = newValue!;
+                              _reminderDates = []; // clear any previously selected/generated dates
+                            });
+                          },
+                        ),
+
+                        if (_frequency == 'Weekly') _buildWeeklySelector(),
+                        if (_frequency == 'Monthly') _buildMonthlySelector(),
+
+                        ElevatedButton(
+                          onPressed: () {
+                            generateDatesBasedOnFrequency();
+                          },
+                          child: const Text('Generate Reminder Dates'),
+                        ),
+                      ],
                     ),
+
                     SizedBox(height: 16),
                     DropdownButtonFormField<int>(
                       value: _timesPer,
@@ -408,13 +432,106 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
+  Widget _buildLineField({required String label,required double size}) {
+    return Text(
+      label,
+      style: TextStyle(fontSize: size, fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildWeeklySelector() {
+    return Wrap(
+      spacing: 8,
+      children: _weekdays.map((day) {
+        return FilterChip(
+          label: Text(day),
+          selected: _selectedWeekdays.contains(day),
+          onSelected: (selected) {
+            setState(() {
+              selected
+                  ? _selectedWeekdays.add(day)
+                  : _selectedWeekdays.remove(day);
+            });
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildMonthlySelector() {
+    return Wrap(
+      spacing: 8,
+      children: List.generate(31, (index) {
+        int day = index + 1;
+        return FilterChip(
+          label: Text('$day'),
+          selected: _selectedMonthDays.contains(day),
+          onSelected: (selected) {
+            setState(() {
+              selected
+                  ? _selectedMonthDays.add(day)
+                  : _selectedMonthDays.remove(day);
+            });
+          },
+        );
+      }),
+    );
+  }
+
+  void generateDatesBasedOnFrequency() {
+    DateTime now = DateTime.now();
+    DateTime endDate = DateTime(now.year, now.month + 3, now.day);
+    List<String> generatedDates = [];
+
+    if (_frequency == 'Daily') {
+      for (var date = now;
+      date.isBefore(endDate);
+      date = date.add(Duration(days: 1))) {
+        generatedDates.add(_formatDate(date));
+      }
+    } else if (_frequency == 'Weekly') {
+      Map<String, int> weekdayMap = {
+        'Mon': 1,
+        'Tue': 2,
+        'Wed': 3,
+        'Thu': 4,
+        'Fri': 5,
+        'Sat': 6,
+        'Sun': 7,
+      };
+
+      for (var date = now;
+      date.isBefore(endDate);
+      date = date.add(Duration(days: 1))) {
+        if (_selectedWeekdays
+            .map((d) => weekdayMap[d])
+            .contains(date.weekday)) {
+          generatedDates.add(_formatDate(date));
+        }
+      }
+    } else if (_frequency == 'Monthly') {
+      for (var date = now;
+      date.isBefore(endDate);
+      date = date.add(Duration(days: 1))) {
+        if (_selectedMonthDays.contains(date.day)) {
+          generatedDates.add(_formatDate(date));
+        }
+      }
+    }
+
+    setState(() {
+      _reminderDates = generatedDates;
+    });
+
+    print("GGGGGG: $generatedDates");
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
 }
 
-Widget _buildLineField({required String label,required double size}) {
-  return Text(
-    label,
-    style: TextStyle(fontSize: size, fontWeight: FontWeight.w500),
-  );
-}
+
 
 

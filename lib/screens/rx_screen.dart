@@ -117,14 +117,18 @@ print(listString);
                                         children: [
                                           Column(
                                             children: [
+
+
                                               CircleAvatar(
                                                 backgroundColor: Theme.of(context).primaryColor,
                                                 radius: 30,
-                                                child: const Icon(
-                                                  Icons.medication,
-                                                  color: Colors.white,
-                                                  size: 35,
-
+                                                child: Text(
+                                                  'Rx',
+                                                  style: TextStyle(
+                                                    fontSize: 25,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
                                                 ),
                                               ),
                                               const SizedBox(height: 4),
@@ -166,7 +170,7 @@ print(listString);
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.arrow_forward_ios),
+                                            icon: const Icon(Icons.medication_outlined,size: 40,),
                                             onPressed: () {
                                               Navigator.push(
                                                 context,
