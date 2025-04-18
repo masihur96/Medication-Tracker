@@ -105,12 +105,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       }
     }
-
     saveHistoryList(historyList);
-
     return historyList;
   }
-
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
