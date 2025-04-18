@@ -27,9 +27,10 @@ class Prescription {
       chamber: json['chamber']??"",
       patient: json['patient']??"",
       medicationTo: json['medicationTo']??"",
-      medications: (json['medications'] as List)
-          .map((e) => Medication.fromJson(e))
-          .toList(),
+      medications: (json['medications'] as List<dynamic>?)
+          ?.map((e) => Medication.fromJson(e))
+          .toList() ??
+          [],
     );
   }
 

@@ -7,6 +7,7 @@ class Medication {
   late int timesPerDay;
   late int stock;
   late bool isActive;
+  late List<bool> isTaken;
   String? notes;
   late String frequency;
   late List<TimeOfDay> reminderTimes;
@@ -19,6 +20,7 @@ class Medication {
     required this.timesPerDay,
     required this.stock,
     required this.isActive,
+    required this.isTaken,
     this.notes,
     required this.frequency,
     required this.reminderTimes,
@@ -33,6 +35,7 @@ class Medication {
       timesPerDay: json['timesPerDay'],
       stock: json['stock'],
       isActive: json['isActive'],
+      isTaken: List<bool>.from(json['isTaken']),
       notes: json['notes'],
       frequency: json['frequency'],
       reminderTimes: (json['reminderTimes'] as List<dynamic>?)
@@ -54,6 +57,7 @@ class Medication {
       'timesPerDay': timesPerDay,
       'stock': stock,
       'isActive': isActive,
+      'isTaken': isTaken,
       'notes': notes,
       'frequency': frequency,
       'reminderTimes': reminderTimes.map(_timeOfDayToString).toList(),
@@ -78,8 +82,15 @@ class Medication {
   @override
   String toString() {
     return 'Medication('
+        'id: $id, '
         'name: $name, '
         'dosage: $dosage, '
+        'timesPerDay: $timesPerDay, '
+        'stock: $stock, '
+        'isActive: $isActive, '
+        'isTaken: $isTaken, '
+        'notes: $notes, '
+        'frequency: $frequency, '
         'reminderTimes: ${reminderTimes.map(_timeOfDayToString).join(', ')}, '
         'remainderDates: ${remainderDates.join(', ')})';
   }

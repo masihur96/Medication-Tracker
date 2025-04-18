@@ -24,8 +24,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   String _frequency = 'Daily'; // Default frequency
   bool _isActive = false;
   int _timesPer = 1; // Default frequency
-  final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()]; // Update to list of TimeOfDay
-
+  final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()];
+  final List<bool> _isTaken = [false];
 
   List<String> _selectedWeekdays = [];
   final List<String> _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -51,6 +51,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _isActive = widget.medication!.isActive;
       _selectedTimes.clear();
       _selectedTimes.addAll(widget.medication!.reminderTimes);
+      _isTaken.clear();
+      _isTaken.addAll(widget.medication!.isTaken);
     }
   }
 
@@ -78,23 +80,39 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   // Add this method to build time selection fields
   List<Widget> _buildTimeFields() {
     return List.generate(_timesPer, (index) {
-      // Ensure we have enough times in our list
+      // Ensure we have enough times and status in our lists
       while (_selectedTimes.length < _timesPer) {
         _selectedTimes.add(TimeOfDay.now());
+        _isTaken.add(false);
       }
       
       return Padding(
         padding: EdgeInsets.only(bottom: index < _timesPer - 1 ? 16 : 0),
-        child: InkWell(
-          onTap: () => _selectTime(context, index),
-          child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: 'Reminder Time ${index + 1}',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.access_time),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: () => _selectTime(context, index),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Reminder Time ${index + 1}',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.access_time),
+                  ),
+                  child: Text(_selectedTimes[index].format(context)),
+                ),
+              ),
             ),
-            child: Text(_selectedTimes[index].format(context)),
-          ),
+            SizedBox(width: 16),
+            Checkbox(
+              value: _isTaken[index],
+              onChanged: (bool? value) {
+                setState(() {
+                  _isTaken[index] = value ?? false;
+                });
+              },
+            ),
+          ],
         ),
       );
     });
@@ -349,6 +367,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     frequency: _frequency,
                     reminderTimes: _selectedTimes,
                     remainderDates: _reminderDates,
+                    isTaken: _isTaken,
                   );
 
                   if (widget.medication != null) {

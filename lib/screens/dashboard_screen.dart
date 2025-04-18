@@ -27,9 +27,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
 
     loadPrescriptions();
+     // loadHistoryList();
     // TODO: implement initState
     super.initState();
   }
+  List<Medication> todaysMedications = [];
   Future<void> loadPrescriptions() async {
     setState(() => _isLoading = true);
 
@@ -42,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Get today's date in string format (e.g., 17/04/2025)
       final String today = _formatDate(DateTime.now());
       // Collect today's medications
-      List<Medication> todaysMedications = [];
+
       for (final prescription in loaded) {
         for (final med in prescription.medications) {
           if (med.remainderDates.contains(today)) {
@@ -153,9 +155,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: _medicationHistory.length,
+              itemCount: todaysMedications.length,
               itemBuilder: (context, index) {
-                final history = _medicationHistory[index];
+                final history = todaysMedications[index];
                 return  _buildMedicationCard(
                   medicationHistory: history,
                 );
@@ -207,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildMedicationCard({
 
-    required MedicationHistory medicationHistory,
+    required Medication medicationHistory,
   }) {
 
 
@@ -220,96 +222,104 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  medicationHistory.medicationName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () async{
-                    setState(() {
-
-                      if (!medicationHistory.isTaken) {
-                        medicationHistory.isTaken = true;
-                      } else {
-                        medicationHistory.isTaken = false; // Optional: toggle back
-                      }
-                    });
-
-
-                    setState(() {}); // Refresh the UI if needed
-
-                    await updateMedicationStatus(
-                        medicationId: medicationHistory.medicationId,
-
-                        isTaken: medicationHistory.isTaken
-                    );
-
-
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: medicationHistory.isTaken ? Colors.green : Colors.orange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      medicationHistory.isTaken ? 'Taken' : 'Pending',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              medicationHistory.name,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
-            Text('Time: ${medicationHistory.time}'),
             Text('Dosage: ${medicationHistory.dosage}'),
+            // Display status for each reminder time
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: medicationHistory.reminderTimes.length,
+              itemBuilder: (context, index) {
+                final time = _formatTimeOfDay(medicationHistory.reminderTimes[index]);
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Time: $time'),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          medicationHistory.isTaken[index] = !medicationHistory.isTaken[index];
+                        });
+                        
+                        await updateMedicationStatus(
+                          medicationId: medicationHistory.id,
+                          timeIndex: index,
+                          isTaken: medicationHistory.isTaken[index]
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: medicationHistory.isTaken[index] ? Colors.green : Colors.orange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          medicationHistory.isTaken[index] ? 'Taken' : 'Pending',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
-
-  Future<void> updateMedicationStatus({
-    required String medicationId,
-    required bool isTaken,
-
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-
+Future<void> updateMedicationStatus({
+  required String medicationId,
+  required int timeIndex,
+  required bool isTaken,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
 
 
-      // 🔍 Find and update the matching record
-      for (var item in _medicationHistory) {
-        if (item.medicationId == medicationId) {
-          item.isTaken = isTaken;
-          break;
-        }
+  // // Update the status in memory
+  // for (var item in _todaysMedications) {
+  //   if (item.id == medicationId) {
+  //
+  //     print(item.timesPerDay);
+  //     print(timeIndex);
+  //     print(item.isTaken.toString());
+  //     // Make sure we're updating the correct time slot
+  //       item.isTaken = isTaken;
+  //     break;
+  //   }
+  // }
+
+  for (var item in _todaysMedications) {
+    if (item.id == medicationId) {
+      // Make sure we're updating the correct time slot
+      if (timeIndex < item.isTaken.length) {
+        item.isTaken[timeIndex] = isTaken;
       }
-
-    print(isTaken);
-
-      final updatedString = jsonEncode(_medicationHistory.map((e) => e.toJson()).toList());
-
-    // 💾 Save the updated list
-      await prefs.setString('medicationHistory', updatedString);
-    print("Update String: $updatedString");
-      // Optional: Update UI
-
-
-    _medicationHistory =   await loadHistoryList();
-    _medicationHistory = _medicationHistory;
-    print("Update String from Local : ${_medicationHistory.first.isTaken}");
-    print("Update String from Local : ${_medicationHistory.last.isTaken}");
-
+      break;
+    }
   }
+
+  // Save to storage
+  final updatedString = jsonEncode(_todaysMedications.map((e) => e.toJson()).toList());
+
+  print("updatedString: $updatedString");
+  await prefs.setString('prescriptions', updatedString);
+
+  // Update UI
+  setState(() {
+    _medicationHistory = List.from(_medicationHistory);
+  });
+}
+
 
 }
