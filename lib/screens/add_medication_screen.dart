@@ -254,18 +254,13 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                               _frequency = newValue!;
                               _reminderDates = []; // clear any previously selected/generated dates
                             });
+                            generateDatesBasedOnFrequency();
                           },
                         ),
 
                         if (_frequency == 'Weekly') _buildWeeklySelector(),
                         if (_frequency == 'Monthly') _buildMonthlySelector(),
 
-                        ElevatedButton(
-                          onPressed: () {
-                            generateDatesBasedOnFrequency();
-                          },
-                          child: const Text('Generate Reminder Dates'),
-                        ),
                       ],
                     ),
 
@@ -353,6 +348,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     notes: _noteController.text,
                     frequency: _frequency,
                     reminderTimes: _selectedTimes,
+                    remainderDates: _reminderDates,
                   );
 
                   if (widget.medication != null) {
@@ -452,6 +448,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   ? _selectedWeekdays.add(day)
                   : _selectedWeekdays.remove(day);
             });
+            generateDatesBasedOnFrequency();
           },
         );
       }).toList(),
@@ -472,6 +469,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   ? _selectedMonthDays.add(day)
                   : _selectedMonthDays.remove(day);
             });
+            generateDatesBasedOnFrequency();
           },
         );
       }),

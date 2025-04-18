@@ -9,7 +9,8 @@ class Medication {
   late bool isActive;
   String? notes;
   late String frequency;
-  late List<TimeOfDay> reminderTimes; // Changed to TimeOfDay ✅
+  late List<TimeOfDay> reminderTimes;
+  late List<String> remainderDates;
 
   Medication({
     required this.id,
@@ -21,6 +22,7 @@ class Medication {
     this.notes,
     required this.frequency,
     required this.reminderTimes,
+    required this.remainderDates,
   });
 
   factory Medication.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,10 @@ class Medication {
           ?.map((timeString) => _stringToTimeOfDay(timeString))
           .toList() ??
           [],
+      remainderDates: (json['remainderDates'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList() ??
+          [],
     );
   }
 
@@ -50,7 +56,8 @@ class Medication {
       'isActive': isActive,
       'notes': notes,
       'frequency': frequency,
-      'reminderTimes': reminderTimes.map((time) => _timeOfDayToString(time)).toList(),
+      'reminderTimes': reminderTimes.map(_timeOfDayToString).toList(),
+      'remainderDates': remainderDates,
     };
   }
 
@@ -70,6 +77,10 @@ class Medication {
 
   @override
   String toString() {
-    return 'Medication(name: $name, dosage: $dosage, reminderTimes: ${reminderTimes.map(_timeOfDayToString).join(', ')})';
+    return 'Medication('
+        'name: $name, '
+        'dosage: $dosage, '
+        'reminderTimes: ${reminderTimes.map(_timeOfDayToString).join(', ')}, '
+        'remainderDates: ${remainderDates.join(', ')})';
   }
 }

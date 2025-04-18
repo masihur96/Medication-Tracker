@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
+import 'package:intl/intl.dart';
+import 'package:med_track/models/medication.dart';
+import 'package:med_track/models/prescription.dart';
 
 import 'package:med_track/screens/notification_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -11,12 +17,60 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  List<Medication> _todaysMedications = [];
 
+  bool _isLoading = true;
 
   @override
   void initState() {
+
+    loadPrescriptions();
     // TODO: implement initState
     super.initState();
+  }
+  Future<void> loadPrescriptions() async {
+    setState(() => _isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? listString = prefs.getString('prescriptions');
+
+
+
+    if (listString != null) {
+      final List decoded = jsonDecode(listString);
+      final List<Prescription> loaded =
+      decoded.map((e) => Prescription.fromJson(e)).toList();
+      // Get today's date in string format (e.g., 17/04/2025)
+      final String today = _formatDate(DateTime.now());
+      // Collect today's medications
+      List<Medication> todaysMedications = [];
+      for (final prescription in loaded) {
+        for (final med in prescription.medications) {
+          if (med.remainderDates.contains(today)) {
+            todaysMedications.add(med);
+          }
+        }
+      }
+      setState(() {
+        _todaysMedications = todaysMedications; // You need this list in your state
+        // List<Prescription> _prescriptions  = loaded;
+        _isLoading = false;
+      });
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
+
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final format = DateFormat.jm(); // e.g., 08:00 AM
+    return format.format(dt);
   }
 
   @override
@@ -48,20 +102,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildMedicationCard(
-              name: 'Medication A',
-              time: '08:00 AM',
-              dosage: '1 tablet',
-              status: 'Pending',
+            Column(
+              children: _todaysMedications.expand((medication) {
+                return medication.reminderTimes.map((timeOfDay) {
+                  return Column(
+                    children: [
+                      _buildMedicationCard(
+                        name: medication.name,
+                        time: _formatTimeOfDay(timeOfDay),
+                        dosage: medication.dosage,
+                        status: 'Pending', // You can customize this based on logic
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  );
+                }).toList();
+              }).toList(),
             ),
-            const SizedBox(height: 8),
-            _buildMedicationCard(
-              name: 'Medication B',
-              time: '12:00 PM',
-              dosage: '2 tablets',
-              status: 'Taken',
-            ),
-
             const SizedBox(height: 24),
             
             // Medication Dosage Chart
