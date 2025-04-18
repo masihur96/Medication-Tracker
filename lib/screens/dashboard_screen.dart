@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
+
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,10 +70,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final prefs = await SharedPreferences.getInstance();
     final encoded = historyList.map((h) => h.toJson()).toList();
     await prefs.setString('medicationHistory', jsonEncode(encoded));
-
     _medicationHistory =   await loadHistoryList();
-
-    print("_medicationHistory ${_medicationHistory.length}");
   }
 
   Future<List<MedicationHistory>> loadHistoryList() async {
@@ -158,11 +156,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemCount: _medicationHistory.length,
               itemBuilder: (context, index) {
                 final history = _medicationHistory[index];
+
                 return  _buildMedicationCard(
-                  name: history.medicationName,
-                  time: history.time,
-                  dosage: history.dosage,
-                  status:  history.isTaken ? 'Taken' : 'Pending',
+                  // name: history.medicationName,
+                  // time: history.time,
+                  // dosage: history.dosage,
+                  // status:  history.isTaken ? 'Taken' : 'Pending',
+                  medicationHistory: history,
                 );
 
               },
@@ -211,11 +211,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
   Widget _buildMedicationCard({
-    required String name,
-    required String time,
-    required String dosage,
-    required String status,
+    // required String name,
+    // required String time,
+    // required String dosage,
+    // required String status,
+    required MedicationHistory medicationHistory,
   }) {
+
+
+
+
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -226,37 +232,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  name,
+                  medicationHistory.medicationName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: status == 'Taken' ? Colors.green : Colors.orange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    status,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
+                GestureDetector(
+                  onTap: () async{
+                    setState(() {
+
+                      if (!medicationHistory.isTaken) {
+                        medicationHistory.isTaken = true;
+                      } else {
+                        medicationHistory.isTaken = false; // Optional: toggle back
+                      }
+                    });
+
+
+                    setState(() {}); // Refresh the UI if needed
+
+                    await updateMedicationStatus(
+                        medicationId: medicationHistory.medicationId,
+
+                        isTaken: medicationHistory.isTaken
+                    );
+
+
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: medicationHistory.isTaken ? Colors.green : Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      medicationHistory.isTaken ? 'Taken' : 'Pending',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Time: $time'),
-            Text('Dosage: $dosage'),
+            Text('Time: ${medicationHistory.time}'),
+            Text('Dosage: ${medicationHistory.dosage}'),
           ],
         ),
       ),
     );
   }
+
+  Future<void> updateMedicationStatus({
+    required String medicationId,
+    required bool isTaken,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? historyString = prefs.getString('medication_history');
+    print(historyString);
+    print(isTaken);
+    if (historyString != null) {
+      final List decoded = jsonDecode(historyString);
+      List<MedicationHistory> historyList = decoded
+          .map((e) => MedicationHistory.fromJson(e))
+          .toList();
+
+      print(isTaken);
+      // 🔍 Find and update the matching record
+      for (var item in historyList) {
+        if (item.medicationId == medicationId) {
+          item.isTaken = isTaken;
+          break;
+        }
+      }
+
+      // 💾 Save the updated list
+      final updatedString = jsonEncode(historyList.map((e) => e.toJson()).toList());
+      await prefs.setString('medication_history', updatedString);
+
+      // Optional: Update UI
+      _medicationHistory = historyList;
+    }
+  }
+
 }
