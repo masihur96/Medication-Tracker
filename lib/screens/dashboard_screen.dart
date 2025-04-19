@@ -187,50 +187,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
 
-            // Add Prescription Selector before Heat Map
-            const Text(
-              'Select Prescription',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<Prescription>(
-              isExpanded: true,
-              value: _selectedPrescription,
-              hint: const Text('Select a prescription'),
-              items: _prescriptions.map((prescription) {
-                return DropdownMenuItem<Prescription>(
-                  value: prescription,
-                  child: Text('Prescription ${prescription.doctor}'),
-                );
-              }).toList(),
-              onChanged: (Prescription? newValue) {
-                setState(() {
-                  _selectedPrescription = newValue;
-                });
-                loadHeatMapData(); // Reload heat map when prescription changes
-              },
-            ),
+
             const SizedBox(height: 16),
 
             // Medication Dosage Chart
-            const Text(
-              'Medication Dosage Trend',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                const Text(
+                  'Dosage Monitor',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                SizedBox(width: 10,),
+                Expanded(
+
+
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Prescription>(
+                      isExpanded: true,
+                      value: _selectedPrescription,
+                      hint: const Text('prescription'),
+                      items: _prescriptions.map((prescription) {
+                        return DropdownMenuItem<Prescription>(
+                          value: prescription,
+                          child: Text('${prescription.doctor}'),
+                        );
+                      }).toList(),
+                      onChanged: (Prescription? newValue) {
+                        setState(() {
+                          _selectedPrescription = newValue;
+                        });
+                        loadHeatMapData(); // Reload heat map when prescription changes
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             HeatMapCalendar(
               defaultColor: Colors.grey[200],
               flexible: true,
               colorMode: ColorMode.color,
               datasets: _heatMapDataset,
               colorsets: const {
-                0: Colors.black, // Grey for scheduled dates
+
                 1: Colors.red,  // Red for missed
                 2: Colors.yellow, // Yellow for partially taken
                 3: Colors.green, // Green for all taken
