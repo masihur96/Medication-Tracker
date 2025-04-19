@@ -238,6 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onClick: (value) {
                 _showMedicationDetails(value, context);
               },
+              textColor: Color(0xFF1A1A1A)
             ),
             const SizedBox(height: 16),
 
