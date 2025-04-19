@@ -5,10 +5,13 @@ import 'package:med_track/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
+import '../models/medication.dart';
+import '../models/prescription.dart';
 import 'history_screen.dart';
 import 'privacy_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'dart:convert';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -138,7 +141,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _notificationsEnabled = value;
                 });
                 await _saveSettings();
-                await scheduleDailyAlarms(); // This will handle enabling/disabling notifications
+                // Get medications from your data source
+                final medications = await getMedications(); // You'll need to implement this
+                await scheduleDailyAlarms(medications);
               },
             ),
           ),
@@ -268,7 +273,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> scheduleDailyAlarms([List<TimeOfDay>? times]) async {
+  Future<void> scheduleDailyAlarms([List<Medication>? medications]) async {
     if (!_notificationsEnabled) {
       // Cancel all notifications if notifications are disabled
       await flutterLocalNotificationsPlugin.cancelAll();
@@ -295,43 +300,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     }
 
-    // If no times provided, use default time (e.g., 8 AM)
-    final reminderTimes = times ?? [const TimeOfDay(hour: 8, minute: 0)];
-
     // Cancel existing notifications before scheduling new ones
     await flutterLocalNotificationsPlugin.cancelAll();
 
-    for (int i = 0; i < reminderTimes.length; i++) {
-      final time = reminderTimes[i];
+    if (medications == null || medications.isEmpty) {
+      return;
+    }
 
-      final now = DateTime.now();
-      final scheduledTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    int notificationId = 0;
+    for (var medication in medications) {
+      for (int i = 0; i < medication.reminderTimes.length; i++) {
+        final time = medication.reminderTimes[i];
+        
+        final now = DateTime.now();
+        final scheduledTime = DateTime(
+          now.year, 
+          now.month, 
+          now.day, 
+          time.hour, 
+          time.minute
+        );
 
-      // If the time is already passed today, schedule for tomorrow
-      final adjustedTime = scheduledTime.isBefore(now)
-          ? scheduledTime.add(const Duration(days: 1))
-          : scheduledTime;
+        // If the time is already passed today, schedule for tomorrow
+        final adjustedTime = scheduledTime.isBefore(now)
+            ? scheduledTime.add(const Duration(days: 1))
+            : scheduledTime;
 
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        i, // Unique ID per notification
-        'Medication Reminder',
-        'It\'s time to take your medicine!',
-        tz.TZDateTime.from(adjustedTime, tz.local),
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'medication_channel_id',
-            'Medication Reminders',
-            channelDescription: 'Daily medication reminders',
-            importance: Importance.max,
-            priority: Priority.high,
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          notificationId++, // Unique ID per notification
+          'Time for ${medication.name}',
+          'Please take ${medication.dosage} of ${medication.name}\n${medication.notes ?? ''}',
+          tz.TZDateTime.from(adjustedTime, tz.local),
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'medication_channel_id',
+              'Medication Reminders',
+              channelDescription: 'Daily medication reminders',
+              importance: Importance.max,
+              priority: Priority.high,
+            ),
           ),
-        ),
-        // androidAllowWhileIdle: true,
-        // uiLocalNotificationDateInterpretation:
-        //     UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      );
+          matchDateTimeComponents: DateTimeComponents.time,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
+      }
     }
   }
 
@@ -373,6 +385,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  Future<List<Medication>> getMedications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? listString = prefs.getString('prescriptions');
+    List<Medication> allMedications = [];
+    
+    if (listString != null) {
+      final List decoded = jsonDecode(listString);
+      final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
+      
+      // Collect all active medications from all prescriptions
+      for (var prescription in prescriptions) {
+        allMedications.addAll(prescription.medications.where((med) => med.isActive));
+      }
+    }
+    
+    return allMedications;
   }
 
 } 
