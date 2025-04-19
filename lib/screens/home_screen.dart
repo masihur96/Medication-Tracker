@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
+import 'package:med_track/screens/settings_screen.dart';
 import 'package:med_track/widgets/medication_card.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     MedicationScreen(),
     RxScreen(),
     MedicationScheduleScreen(),
-    ProfileScreen(),
+    SettingsScreen(),
   ];
 
   Future<void> _initializeData() async {
@@ -73,25 +74,25 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
+            icon: Icon(Icons.dashboard_outlined),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.medication),
+            icon: Icon(Icons.medication_outlined),
             label: 'Drug',
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.note_add_rounded),
+            icon: Icon(Icons.note_add_outlined),
             label: 'Rx',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
+            icon: Icon(Icons.schedule_outlined),
             label: 'Schedule',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
           ),
         ],
       ),

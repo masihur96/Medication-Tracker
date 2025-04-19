@@ -145,18 +145,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MedTrack'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_)=>NotificationScreen(),),);
-              // Handle notifications
-            },
-          ),
-        ],
+       appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Theme.of(context).primaryColor,
+      title: const Text(
+        'MedTrack',
+        style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
       ),
+         actions: [
+           IconButton(
+             icon: const Icon(Icons.notifications_outlined,color: Colors.white),
+             onPressed: () {
+               Navigator.push(context, MaterialPageRoute(builder: (_)=>NotificationScreen(),),);
+               // Handle notifications
+             },
+           ),
+         ],
+    ),
+
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(

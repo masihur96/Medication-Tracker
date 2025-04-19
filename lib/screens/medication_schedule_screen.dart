@@ -59,14 +59,20 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medication Schedule'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'Medication Schedule',
+          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.print),
+            icon: const Icon(Icons.print,color: Colors.white,),
             onPressed: () => _generateAndOpenPDF(),
           ),
         ],
       ),
+
       body: Column(
         children: [
           Padding(

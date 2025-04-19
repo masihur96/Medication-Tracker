@@ -56,11 +56,20 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
-        title: const Text('Medications'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'Medications',
+          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+        ),
 
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'Drugs'),
             Tab(text: 'Stock'),
@@ -69,6 +78,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
           ],
         ),
       ),
+
       body: TabBarView(
         controller: _tabController,
         children: [
