@@ -288,9 +288,6 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 
   Future<void> _generateAndOpenPDF() async {
     final pdf = pw.Document();
@@ -393,4 +390,9 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
 
     await OpenFile.open(file.path);
   }
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+
 } 

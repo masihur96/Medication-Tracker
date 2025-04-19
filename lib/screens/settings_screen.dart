@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+
+import 'history_screen.dart';
+import 'privacy_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -39,9 +43,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         title: const Text(
           'Settings',
-          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -100,6 +105,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: const Text('View your medication tracking history'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HistoryScreen(
+                    ),
+                  ),
+                );
                 // Navigate to history screen
                 // TODO: Implement navigation to History screen
               },
@@ -173,7 +185,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: const Text('Manage your privacy settings'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                // Navigate to privacy settings
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PrivacyScreen()),
+                );
               },
             ),
           ),
@@ -189,8 +204,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: const Text('Tell a Friend'),
               subtitle: const Text('Share this app with friends'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Implement share functionality
+              onTap: () async {
+                const String appLink = "https://medtrack.app"; // Replace with your actual app link
+                const String message = "Check out MedTrack - Your personal medication tracking assistant! Download it here: ";
+                await Share.share('$message$appLink');
               },
             ),
           ),

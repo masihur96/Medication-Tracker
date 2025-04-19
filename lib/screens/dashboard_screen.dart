@@ -105,29 +105,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  List<MedicationHistory> medicationHistory({required List<Medication> todayMedications}) {
-    final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    List<MedicationHistory> historyList = [];
-
-    for (Medication m in todayMedications) {
-      for (TimeOfDay timeOfDay in m.reminderTimes) {
-        final String time = _formatTimeOfDay(timeOfDay);
-        historyList.add(
-          MedicationHistory(
-            medicationId: m.id,
-            medicationName: m.name,
-            dosage: m.dosage,
-            date: today,
-            time: time,
-            isTaken: false,
-          ),
-        );
-      }
-    }
-   // saveHistoryList(historyList);
-    return historyList;
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
