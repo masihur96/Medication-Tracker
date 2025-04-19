@@ -226,7 +226,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text('Note: ${medication.notes}',
               style: const TextStyle(
                 fontSize: 14,
-
               ),),
             const SizedBox(height: 3),
             // Display status for each reminder time
