@@ -8,6 +8,7 @@ import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/medication_history.dart';
+import '../models/enhanced_medication_history.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,15 +22,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<DateTime, int> _heatMapDataset = {};
   List<Prescription> _prescriptions = [];
   Prescription? _selectedPrescription;
-  
+  List<EnhancedMedicationHistory> _medicationHistory = [];
   bool _isLoading = true;
-
+  
   @override
   void initState() {
     super.initState();
     loadPrescriptions();
-    loadHeatMapData();
-    // TODO: implement initState
+    loadMedicationHistory();
+
   }
 
   Future<void> loadPrescriptions() async {
@@ -75,6 +76,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else {
       setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> loadMedicationHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? historyString = prefs.getString('history');
+    if (historyString != null) {
+      final List decoded = jsonDecode(historyString);
+
+      print("decoded:  $decoded");
+      setState(() {
+        _medicationHistory = decoded
+            .map((e) => EnhancedMedicationHistory.fromJson(e))
+            .toList();
+      });
+
+      print("_medicationHistory$_medicationHistory");
+      loadHeatMapData();
+
+    }
+  }
+
+  Future<void> saveMedicationHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = _medicationHistory.map((h) => h.toJson()).toList();
+    await prefs.setString('history', jsonEncode(encoded));
   }
 
   Future<void> loadHeatMapData() async {
@@ -332,6 +358,35 @@ Future<void> updateMedicationStatus({
       if (item.id == medicationId) {
         if (timeIndex < item.isTaken.length) {
           item.isTaken[timeIndex] = isTaken;
+          
+          // Update or create history entry
+          final String today = _formatDate(DateTime.now());
+          final prescription = prescriptions.firstWhere(
+            (p) => p.medications.any((m) => m.id == medicationId)
+          );
+          
+          // Create or update history entry
+          EnhancedMedicationHistory historyEntry = EnhancedMedicationHistory(
+            prescriptionId: prescription.uid,
+            prescriptionName: "Prescription ${prescription.doctor}",
+            date: today,
+            medicationName: item.name,
+            dosage: item.dosage,
+            notes: item.notes,
+            medicationTimes: item.reminderTimes.map((t) => _formatTimeOfDay(t)).toList(),
+            isTaken: item.isTaken,
+          );
+          
+          // Update history list
+          _medicationHistory.removeWhere((h) => 
+            h.prescriptionId == prescription.uid && 
+            h.date == today && 
+            h.medicationName == item.name
+          );
+          _medicationHistory.add(historyEntry);
+          
+          // Save updated history
+          await saveMedicationHistory();
         }
         break;
       }
@@ -359,34 +414,29 @@ Future<void> updateMedicationStatus({
 
 Future<Map<DateTime, int>> _generateHeatMapDataset() async {
   Map<DateTime, int> dataset = {};
-  
-  if (_selectedPrescription == null) return dataset;
 
-  // Process medications only from selected prescription
-  for (var medication in _selectedPrescription!.medications) {
-    for (var dateStr in medication.remainderDates) {
-      final parts = dateStr.split('/');
+
+  print("ffffff$_medicationHistory");
+  // Use history data to generate heat map
+  for (var history in _medicationHistory) {
+    if (_selectedPrescription != null && 
+        history.prescriptionId == _selectedPrescription!.uid) {
+      final parts = history.date.split('/');
       final date = DateTime(
         int.parse(parts[2]), // year
         int.parse(parts[1]), // month
         int.parse(parts[0]), // day
       );
       
-      // Set all dates to grey (value 0) initially
-      dataset[date] = 0;
+      int totalMeds = history.medicationTimes.length;
+      int takenMeds = history.isTaken.where((taken) => taken).length;
       
-      // Only update colors if checking taken status
-      if (medication.isTaken.isNotEmpty) {
-        int totalMeds = medication.reminderTimes.length;
-        int takenMeds = medication.isTaken.where((taken) => taken).length;
-        
-        if (takenMeds == 0) {
-          dataset[date] = 1; // All missed (red)
-        } else if (takenMeds < totalMeds) {
-          dataset[date] = 2; // Partially taken (yellow)
-        } else {
-          dataset[date] = 3; // All taken (green)
-        }
+      if (takenMeds == 0) {
+        dataset[date] = 1; // All missed (red)
+      } else if (takenMeds < totalMeds) {
+        dataset[date] = 2; // Partially taken (yellow)
+      } else {
+        dataset[date] = 3; // All taken (green)
       }
     }
   }
