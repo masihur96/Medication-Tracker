@@ -1,18 +1,27 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/providers/medication_provider.dart';
-import 'package:med_track/screens/auth_screen.dart';
 import 'package:med_track/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  tz.initializeTimeZones();
+  await initializeNotifications();
 
   // Initialize provider
   final medicationProvider = MedicationProvider();
   await medicationProvider.initialize();
+
 
   runApp(
     MultiProvider(
@@ -22,6 +31,18 @@ void main() async {
       child: MyApp(),
     ),
   );
+}
+
+
+
+Future<void> initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
 
 class MyApp extends StatelessWidget {

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:med_track/main.dart';
 import 'package:med_track/screens/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
-
+import 'package:timezone/timezone.dart' as tz;
 import 'history_screen.dart';
 import 'privacy_screen.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -129,11 +133,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: Theme.of(context).primaryColor,
               ),
               value: _notificationsEnabled,
-              onChanged: (bool value) {
+              onChanged: (bool value) async {
                 setState(() {
                   _notificationsEnabled = value;
-                  _saveSettings();
                 });
+                await _saveSettings();
+                await scheduleDailyAlarms(); // This will handle enabling/disabling notifications
               },
             ),
           ),
@@ -149,11 +154,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: Theme.of(context).primaryColor,
               ),
               value: _isDarkMode,
-              onChanged: (bool value) {
+              onChanged: (bool value) async {
                 setState(() {
                   _isDarkMode = value;
-                  _saveSettings();
                 });
+                await _saveSettings();
               },
             ),
           ),
@@ -224,19 +229,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: const Text('Learn more about MedTrack'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'MedTrack',
-                  applicationVersion: '1.0.0',
-                  applicationIcon: const FlutterLogo(),
-                  children: [
-                    const Text(
-                      'MedTrack is your personal medication tracking assistant, '
-                      'helping you stay on top of your medication schedule and '
-                      'maintain better health.',
-                    ),
-                  ],
-                );
+
+                showCustomAboutDialog(context);
+                // showAboutDialog(
+                //   context: context,
+                //   applicationName: 'MedTrack',
+                //   applicationVersion: '1.0.0',
+                //   applicationIcon: const FlutterLogo(),
+                //   useRootNavigator: false,
+                //
+                //   children: [
+                //     const Text(
+                //       'MedTrack is your personal medication tracking assistant, '
+                //       'helping you stay on top of your medication schedule and '
+                //       'maintain better health.',
+                //     ),
+                //   ],
+                // );
               },
             ),
           ),
@@ -258,4 +267,112 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Future<void> scheduleDailyAlarms([List<TimeOfDay>? times]) async {
+    if (!_notificationsEnabled) {
+      // Cancel all notifications if notifications are disabled
+      await flutterLocalNotificationsPlugin.cancelAll();
+      return;
+    }
+
+    // Request notification permissions for iOS
+    final settings = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
+    // For Android 13 and above, request notification permission
+    if (Platform.isAndroid) {
+      final androidImplementation = flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      
+      final granted = await androidImplementation?.requestNotificationsPermission();
+      if (granted != true) {
+        return; // Exit if permission not granted
+      }
+    }
+
+    // If no times provided, use default time (e.g., 8 AM)
+    final reminderTimes = times ?? [const TimeOfDay(hour: 8, minute: 0)];
+
+    // Cancel existing notifications before scheduling new ones
+    await flutterLocalNotificationsPlugin.cancelAll();
+
+    for (int i = 0; i < reminderTimes.length; i++) {
+      final time = reminderTimes[i];
+
+      final now = DateTime.now();
+      final scheduledTime = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
+      // If the time is already passed today, schedule for tomorrow
+      final adjustedTime = scheduledTime.isBefore(now)
+          ? scheduledTime.add(const Duration(days: 1))
+          : scheduledTime;
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        i, // Unique ID per notification
+        'Medication Reminder',
+        'It\'s time to take your medicine!',
+        tz.TZDateTime.from(adjustedTime, tz.local),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'medication_channel_id',
+            'Medication Reminders',
+            channelDescription: 'Daily medication reminders',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+        ),
+        // androidAllowWhileIdle: true,
+        // uiLocalNotificationDateInterpretation:
+        //     UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    }
+  }
+
+  void showCustomAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const FlutterLogo(),
+              const SizedBox(width: 12),
+              const Text('MedTrack'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Version: 1.0.0',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'MedTrack is your personal medication tracking assistant, '
+                    'helping you stay on top of your medication schedule and '
+                    'maintain better health.',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('CLOSE'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 } 
