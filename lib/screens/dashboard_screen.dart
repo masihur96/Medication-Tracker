@@ -18,17 +18,17 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Medication> _todaysMedications = [];
+  Map<DateTime, int> _heatMapDataset = {};
   // List<MedicationHistory> _medicationHistory = [];
 
   bool _isLoading = true;
 
   @override
   void initState() {
-
-    loadPrescriptions();
-     // loadHistoryList();
-    // TODO: implement initState
     super.initState();
+    loadPrescriptions();
+    loadHeatMapData();
+    // TODO: implement initState
   }
 
   Future<void> loadPrescriptions() async {
@@ -67,6 +67,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> loadHeatMapData() async {
+    final dataset = await _generateHeatMapDataset();
+    setState(() {
+      _heatMapDataset = dataset;
+    });
+  }
 
   // Future<void> saveHistoryList(List<MedicationHistory> historyList) async {
   //   final prefs = await SharedPreferences.getInstance();
@@ -178,23 +184,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
             HeatMapCalendar(
-              defaultColor: Colors.white,
+              defaultColor: Colors.grey[200],
               flexible: true,
               colorMode: ColorMode.color,
-              datasets: {
-                DateTime(2025, 4, 6): 1,
-                DateTime(2025, 4, 7): 2,
-                DateTime(2025, 4, 8): 3,
-                DateTime(2025, 4, 9): 1,
-                DateTime(2025, 4, 13): 2,
-              },
+              datasets: _heatMapDataset,
               colorsets: const {
                 1: Colors.red,
-                2: Colors.orange,
+                2: Colors.yellow,
                 3: Colors.green,
               },
               onClick: (value) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value.toString())));
+                _showMedicationDetails(value, context);
               },
             ),
             const SizedBox(height: 16),
@@ -316,6 +316,98 @@ Future<void> updateMedicationStatus({
     // Save the updated full prescriptions list
     final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
     await prefs.setString('prescriptions', updatedString);
+    // Add this line to update the heat map
+    await loadHeatMapData();
   }
+}
+
+Future<Map<DateTime, int>> _generateHeatMapDataset()  async{
+  Map<DateTime, int> dataset = {};
+  final prefs = await SharedPreferences.getInstance();
+  final String? listString = prefs.getString('prescriptions');
+  
+  if (listString != null) {
+    final List decoded = jsonDecode(listString);
+    final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
+    
+    // Process each day's medications
+    for (var prescription in prescriptions) {
+      for (var medication in prescription.medications) {
+        for (var dateStr in medication.remainderDates) {
+          // Convert date string (DD/MM/YYYY) to DateTime
+          final parts = dateStr.split('/');
+          final date = DateTime(
+            int.parse(parts[2]), // year
+            int.parse(parts[1]), // month
+            int.parse(parts[0]), // day
+          );
+          
+          // Initialize if not exists
+          if (!dataset.containsKey(date)) {
+            dataset[date] = 0; // 0 means scheduled but no status yet
+          }
+          
+          // Count total medications and taken medications for the day
+          int totalMeds = medication.reminderTimes.length;
+          int takenMeds = medication.isTaken.where((taken) => taken).length;
+          
+          if (takenMeds == 0) {
+            dataset[date] = 1; // All missed (red)
+          } else if (takenMeds < totalMeds) {
+            dataset[date] = 2; // Partially taken (yellow)
+          } else {
+            dataset[date] = 3; // All taken (green)
+          }
+        }
+      }
+    }
+  }
+  return dataset;
+}
+
+void _showMedicationDetails(DateTime date, BuildContext context) {
+  // Format date to match your storage format
+  String formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  
+  List<Medication> medicationsForDate = [];
+  for (var med in _todaysMedications) {
+    if (med.remainderDates.contains(formattedDate)) {
+      medicationsForDate.add(med);
+    }
+  }
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Medications for ${DateFormat('MMM d, yyyy').format(date)}'),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: medicationsForDate.map((med) => ListTile(
+            title: Text(med.name),
+            subtitle: Text('Dosage: ${med.dosage}\nNote: ${med.notes}'),
+            trailing: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: med.isTaken.asMap().entries.map((entry) => 
+                Text(
+                  '${_formatTimeOfDay(med.reminderTimes[entry.key])}: ${entry.value ? "Taken" : "Missed"}',
+                  style: TextStyle(
+                    color: entry.value ? Colors.green : Colors.red,
+                  ),
+                )
+              ).toList(),
+            ),
+          )).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Close'),
+        ),
+      ],
+    ),
+  );
 }
 }
