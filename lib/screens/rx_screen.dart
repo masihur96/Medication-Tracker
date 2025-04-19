@@ -28,19 +28,32 @@ class _RxScreenState extends State<RxScreen> {
   Future<void> loadPrescriptions() async {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
-    final String? listString = prefs.getString('prescriptions');
-print(listString);
-    if (listString != null) {
-      final List decoded = jsonDecode(listString);
-      final List<Prescription> loaded =
+
+    try{
+      final String? listString = prefs.getString('prescriptions');
+      print("fdfdfdffd$listString");
+      if (listString != null) {
+
+        try{
+          final List decoded = jsonDecode(listString);
+          final List<Prescription> loaded =
           decoded.map((e) => Prescription.fromJson(e)).toList();
-      setState(() {
-        _prescriptions = loaded;
-        _isLoading = false;
-      });
-    } else {
-      setState(() => _isLoading = false);
+          setState(() {
+            _prescriptions = loaded;
+            _isLoading = false;
+          });
+        }catch(e){
+          print("EEEEEEEEEEE$e");
+        }
+
+      } else {
+        setState(() => _isLoading = false);
+      }
+
+    }catch(e){
+      print("EEEEEEEEEEE$e");
     }
+
   }
 
   @override

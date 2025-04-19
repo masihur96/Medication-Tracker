@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Medication> _todaysMedications = [];
-  List<MedicationHistory> _medicationHistory = [];
+  // List<MedicationHistory> _medicationHistory = [];
 
   bool _isLoading = true;
 
@@ -31,10 +32,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // TODO: implement initState
     super.initState();
   }
-  List<Medication> todaysMedications = [];
+
   Future<void> loadPrescriptions() async {
     setState(() => _isLoading = true);
-
+    List<Medication> todaysMedications = [];
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
     if (listString != null) {
@@ -44,11 +45,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // Get today's date in string format (e.g., 17/04/2025)
       final String today = _formatDate(DateTime.now());
       // Collect today's medications
-
       for (final prescription in loaded) {
-        for (final med in prescription.medications) {
-          if (med.remainderDates.contains(today)) {
-            todaysMedications.add(med);
+        if(prescription.medications.isNotEmpty){
+          for (final med in prescription.medications) {
+            if (med.remainderDates.contains(today)) {
+              todaysMedications.add(med);
+            }
           }
         }
       }
@@ -58,7 +60,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
 
-      medicationHistory(todayMedications: _todaysMedications);
+    //  medicationHistory(todayMedications: _todaysMedications);
 // Then you can store or display these history entries
 
 
@@ -68,22 +70,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
 
-  Future<void> saveHistoryList(List<MedicationHistory> historyList) async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = historyList.map((h) => h.toJson()).toList();
-    await prefs.setString('medicationHistory', jsonEncode(encoded));
-    _medicationHistory =   await loadHistoryList();
-  }
-
-  Future<List<MedicationHistory>> loadHistoryList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('medicationHistory');
-    if (jsonString != null) {
-      final List decoded = jsonDecode(jsonString);
-      return decoded.map((e) => MedicationHistory.fromJson(e)).toList();
-    }
-    return [];
-  }
+  // Future<void> saveHistoryList(List<MedicationHistory> historyList) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final encoded = historyList.map((h) => h.toJson()).toList();
+  //   await prefs.setString('medicationHistory', jsonEncode(encoded));
+  //   _medicationHistory =   await loadHistoryList();
+  // }
+  //
+  // Future<List<MedicationHistory>> loadHistoryList() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final jsonString = prefs.getString('medicationHistory');
+  //   if (jsonString != null) {
+  //     final List decoded = jsonDecode(jsonString);
+  //     return decoded.map((e) => MedicationHistory.fromJson(e)).toList();
+  //   }
+  //   return [];
+  // }
 
   List<MedicationHistory> medicationHistory({required List<Medication> todayMedications}) {
     final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -105,7 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       }
     }
-    saveHistoryList(historyList);
+   // saveHistoryList(historyList);
     return historyList;
   }
 
@@ -155,11 +157,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: todaysMedications.length,
+              itemCount: _todaysMedications.length,
               itemBuilder: (context, index) {
-                final history = todaysMedications[index];
+                final medication = _todaysMedications[index];
                 return  _buildMedicationCard(
-                  medicationHistory: history,
+                  medication: medication,
                 );
 
               },
@@ -209,13 +211,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildMedicationCard({
 
-    required Medication medicationHistory,
+    required Medication medication,
   }) {
-
-
-
-
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -223,21 +220,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              medicationHistory.name,
+              medication.name,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            Text('Dosage: ${medicationHistory.dosage}'),
+            Text('Dosage: ${medication.dosage}'),
             // Display status for each reminder time
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: medicationHistory.reminderTimes.length,
+              itemCount: medication.reminderTimes.length,
               itemBuilder: (context, index) {
-                final time = _formatTimeOfDay(medicationHistory.reminderTimes[index]);
+                final time = _formatTimeOfDay(medication.reminderTimes[index]);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -245,23 +242,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     GestureDetector(
                       onTap: () async {
                         setState(() {
-                          medicationHistory.isTaken[index] = !medicationHistory.isTaken[index];
+                          medication.isTaken[index] = !medication.isTaken[index];
                         });
+
                         
                         await updateMedicationStatus(
-                          medicationId: medicationHistory.id,
+                          medicationId: medication.id,
                           timeIndex: index,
-                          isTaken: medicationHistory.isTaken[index]
+                          isTaken: medication.isTaken[index]
                         );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: medicationHistory.isTaken[index] ? Colors.green : Colors.orange,
+                          color: medication.isTaken[index] ? Colors.green : Colors.orange,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          medicationHistory.isTaken[index] ? 'Taken' : 'Pending',
+                          medication.isTaken[index] ? 'Taken' : 'Pending',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -284,42 +282,37 @@ Future<void> updateMedicationStatus({
   required bool isTaken,
 }) async {
   final prefs = await SharedPreferences.getInstance();
-
-
-  // // Update the status in memory
-  // for (var item in _todaysMedications) {
-  //   if (item.id == medicationId) {
-  //
-  //     print(item.timesPerDay);
-  //     print(timeIndex);
-  //     print(item.isTaken.toString());
-  //     // Make sure we're updating the correct time slot
-  //       item.isTaken = isTaken;
-  //     break;
-  //   }
-  // }
-
-  for (var item in _todaysMedications) {
-    if (item.id == medicationId) {
-      // Make sure we're updating the correct time slot
-      if (timeIndex < item.isTaken.length) {
-        item.isTaken[timeIndex] = isTaken;
+  final String? prescriptionsString = prefs.getString('prescriptions');
+  
+  if (prescriptionsString != null) {
+    final List decoded = jsonDecode(prescriptionsString);
+    final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
+    
+    // Update the status in today's medications list for UI
+    for (var item in _todaysMedications) {
+      if (item.id == medicationId) {
+        if (timeIndex < item.isTaken.length) {
+          item.isTaken[timeIndex] = isTaken;
+        }
+        break;
       }
-      break;
     }
+    
+    // Update the status in the full prescriptions list
+    for (var prescription in prescriptions) {
+      for (var medication in prescription.medications) {
+        if (medication.id == medicationId) {
+          if (timeIndex < medication.isTaken.length) {
+            medication.isTaken[timeIndex] = isTaken;
+          }
+          break;
+        }
+      }
+    }
+    
+    // Save the updated full prescriptions list
+    final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
+    await prefs.setString('prescriptions', updatedString);
   }
-
-  // Save to storage
-  final updatedString = jsonEncode(_todaysMedications.map((e) => e.toJson()).toList());
-
-  print("updatedString: $updatedString");
-  await prefs.setString('prescriptions', updatedString);
-
-  // Update UI
-  setState(() {
-    _medicationHistory = List.from(_medicationHistory);
-  });
 }
-
-
 }
