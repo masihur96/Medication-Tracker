@@ -205,8 +205,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-
   Widget _buildMedicationCard({
 
     required Medication medication,
