@@ -1,12 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/screens/home_screen.dart';
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
 
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -36,13 +34,23 @@ void main() async {
 
 
 Future<void> initializeNotifications() async {
+  final prefs = await SharedPreferences.getInstance();
+  final soundEnabled = prefs.getBool('notification_sound_enabled') ?? true;
+  final vibrationEnabled = prefs.getBool('notification_vibration_enabled') ?? true;
+
   const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
   const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
   );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
+      // Handle notification tapped logic here
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {

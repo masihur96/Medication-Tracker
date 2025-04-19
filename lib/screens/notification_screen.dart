@@ -4,6 +4,8 @@ import 'package:med_track/providers/medication_provider.dart';
 import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatelessWidget {
+  const NotificationScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

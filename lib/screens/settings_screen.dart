@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../models/medication.dart';
 import '../models/prescription.dart';
 import 'history_screen.dart';
+import 'notification_settings_screen.dart';
 import 'privacy_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
@@ -128,25 +129,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Notification Settings
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SwitchListTile(
-              title: const Text('Notifications'),
-              subtitle: const Text('Enable or disable notifications'),
-              secondary: Icon(
+            child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => NotificationSettingsScreen()),
+                );
+              },
+              leading: Icon(
                 Icons.notifications,
                 color: Theme.of(context).primaryColor,
               ),
-              value: _notificationsEnabled,
-              onChanged: (bool value) async {
-                setState(() {
-                  _notificationsEnabled = value;
-                });
-                await _saveSettings();
-                // Get medications from your data source
-                final medications = await getMedications(); // You'll need to implement this
-                await scheduleDailyAlarms(medications);
-              },
+              title: const Text('Notifications'),
+              subtitle: const Text('Enable or disable notifications'),
+              trailing: Switch(
+                value: _notificationsEnabled,
+                onChanged: (bool value) async {
+                  setState(() {
+                    _notificationsEnabled = value;
+                  });
+                  await _saveSettings();
+
+                  final medications = await getMedications(); // Implement this
+                  if (_notificationsEnabled) {
+                    await scheduleDailyAlarms(medications);
+                  } else {
+                    await cancelAllNotifications();
+                  }
+                },
+              ),
             ),
           ),
+
+
 
           // Theme Settings
           Card(
@@ -271,6 +286,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+  Future<void> cancelAllNotifications() async {
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 
   Future<void> scheduleDailyAlarms([List<Medication>? medications]) async {
