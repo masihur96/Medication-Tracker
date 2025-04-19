@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
-
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../models/medication_history.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -220,14 +218,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              medication.name,
+             "${medication.name} (${medication.dosage}) ",
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
-            Text('Dosage: ${medication.dosage}'),
+
+            Text('Note: ${medication.notes}',
+              style: const TextStyle(
+                fontSize: 14,
+
+              ),),
+            const SizedBox(height: 3),
             // Display status for each reminder time
             ListView.builder(
               shrinkWrap: true,
@@ -235,39 +238,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemCount: medication.reminderTimes.length,
               itemBuilder: (context, index) {
                 final time = _formatTimeOfDay(medication.reminderTimes[index]);
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Time: $time'),
-                    GestureDetector(
-                      onTap: () async {
-                        setState(() {
-                          medication.isTaken[index] = !medication.isTaken[index];
-                        });
+                return Padding(
+                  padding: const EdgeInsets.only(top: 3.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Time: $time'),
+                      GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            medication.isTaken[index] = !medication.isTaken[index];
+                          });
 
-                        
-                        await updateMedicationStatus(
-                          medicationId: medication.id,
-                          timeIndex: index,
-                          isTaken: medication.isTaken[index]
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: medication.isTaken[index] ? Colors.green : Colors.orange,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          medication.isTaken[index] ? 'Taken' : 'Pending',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+
+                          await updateMedicationStatus(
+                            medicationId: medication.id,
+                            timeIndex: index,
+                            isTaken: medication.isTaken[index]
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: medication.isTaken[index] ? Colors.green : Colors.orange,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            medication.isTaken[index] ? 'Taken' : 'Pending',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
