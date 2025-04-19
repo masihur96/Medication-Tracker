@@ -28,13 +28,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    loadPrescriptions();
-    loadMedicationHistory();
+    // Initialize data
+    initializeData();
+  }
 
+  Future<void> initializeData() async {
+    setState(() => _isLoading = true);
+    // Load both data sources
+    await loadPrescriptions();
+    await loadMedicationHistory();
+    // Now that both are loaded, generate heat map
+    await loadHeatMapData();
+    setState(() => _isLoading = false);
   }
 
   Future<void> loadPrescriptions() async {
-    setState(() => _isLoading = true);
     List<Medication> todaysMedications = [];
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
@@ -64,17 +72,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       }
       setState(() {
-        _todaysMedications = todaysMedications; // You need this list in your state
-        // List<Prescription> _prescriptions  = loaded;
-        _isLoading = false;
+        _todaysMedications = todaysMedications;
       });
-
-    //  medicationHistory(todayMedications: _todaysMedications);
-// Then you can store or display these history entries
-
-
-    } else {
-      setState(() => _isLoading = false);
     }
   }
 
@@ -83,17 +82,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final String? historyString = prefs.getString('history');
     if (historyString != null) {
       final List decoded = jsonDecode(historyString);
-
-      print("decoded:  $decoded");
       setState(() {
         _medicationHistory = decoded
             .map((e) => EnhancedMedicationHistory.fromJson(e))
             .toList();
       });
-
-      print("_medicationHistory$_medicationHistory");
-      loadHeatMapData();
-
     }
   }
 
@@ -104,28 +97,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> loadHeatMapData() async {
-    final dataset = await _generateHeatMapDataset();
-    setState(() {
-      _heatMapDataset = dataset;
-    });
+    if (_selectedPrescription != null) {
+      final dataset = await _generateHeatMapDataset();
+      setState(() {
+        _heatMapDataset = dataset;
+      });
+    }
   }
-
-  // Future<void> saveHistoryList(List<MedicationHistory> historyList) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final encoded = historyList.map((h) => h.toJson()).toList();
-  //   await prefs.setString('medicationHistory', jsonEncode(encoded));
-  //   _medicationHistory =   await loadHistoryList();
-  // }
-  //
-  // Future<List<MedicationHistory>> loadHistoryList() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final jsonString = prefs.getString('medicationHistory');
-  //   if (jsonString != null) {
-  //     final List decoded = jsonDecode(jsonString);
-  //     return decoded.map((e) => MedicationHistory.fromJson(e)).toList();
-  //   }
-  //   return [];
-  // }
 
   List<MedicationHistory> medicationHistory({required List<Medication> todayMedications}) {
     final String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -179,7 +157,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
