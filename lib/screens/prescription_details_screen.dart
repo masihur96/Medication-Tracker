@@ -66,7 +66,7 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                               style: TextStyle(
                                 fontSize: 50,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+
                               ),
                             ),
                             _buildLineField(label: prescription.date,size: 16),

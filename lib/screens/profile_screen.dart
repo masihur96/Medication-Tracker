@@ -133,19 +133,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 24),
 
             // Settings Section
-            _buildSectionTitle('Settings'),
-            _buildSettingsTile(
-              'Notification Preferences',
-              Icons.notifications_outlined,
-            ),
-            _buildSettingsTile(
-              'Privacy Settings',
-              Icons.security_outlined,
-            ),
-            _buildSettingsTile(
-              'Healthcare Provider Details',
-              Icons.local_hospital_outlined,
-            ),
+           // _buildSectionTitle('Settings'),
+            // _buildSettingsTile(
+            //   'Notification Preferences',
+            //   Icons.notifications_outlined,
+            // ),
+            // _buildSettingsTile(
+            //   'Privacy Settings',
+            //   Icons.security_outlined,
+            // ),
+            // _buildSettingsTile(
+            //   'Healthcare Provider Details',
+            //   Icons.local_hospital_outlined,
+            // ),
           ],
         ),
       ),
@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             borderSide: BorderSide(color: Colors.grey),
           ),
           filled: !_isEditMode,
-          fillColor: Colors.grey[200],
+          // fillColor: Colors.grey[200],
         ),
       ),
     );

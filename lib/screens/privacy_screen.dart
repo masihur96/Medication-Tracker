@@ -66,7 +66,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -86,7 +86,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
               ),
             ),
           ),
@@ -99,7 +98,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               subtitle: const Text('Allow anonymous usage data collection to improve the app'),
               secondary: Icon(
                 Icons.analytics_outlined,
-                color: Theme.of(context).primaryColor,
+
               ),
               value: _dataCollection,
               onChanged: (bool value) {
@@ -119,7 +118,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               subtitle: const Text('Show medication names in notifications and widgets'),
               secondary: Icon(
                 Icons.visibility,
-                color: Theme.of(context).primaryColor,
               ),
               value: _showMedNames,
               onChanged: (bool value) {
@@ -139,7 +137,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               subtitle: const Text('Require authentication to open the app'),
               secondary: Icon(
                 Icons.fingerprint,
-                color: Theme.of(context).primaryColor,
               ),
               value: _biometricLock,
               onChanged: (bool value) {
@@ -159,7 +156,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
               ),
             ),
           ),
@@ -170,7 +166,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.download,
-                color: Theme.of(context).primaryColor,
               ),
               title: const Text('Export Your Data'),
               subtitle: const Text('Download a copy of your data'),

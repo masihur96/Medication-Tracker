@@ -147,7 +147,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                           style: TextStyle(
                             fontSize: 50,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+
                           ),
                         ),
                         _buildLineField(label: widget.prescription.date,size: 16),

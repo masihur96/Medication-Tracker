@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
@@ -29,9 +30,7 @@ class _RxScreenState extends State<RxScreen> {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
 
-    try{
       final String? listString = prefs.getString('prescriptions');
-      print("fdfdfdffd$listString");
       if (listString != null) {
 
         try{
@@ -43,16 +42,14 @@ class _RxScreenState extends State<RxScreen> {
             _isLoading = false;
           });
         }catch(e){
-          print("EEEEEEEEEEE$e");
+          log("loadPrescriptions$e");
         }
 
       } else {
         setState(() => _isLoading = false);
       }
 
-    }catch(e){
-      print("EEEEEEEEEEE$e");
-    }
+
 
   }
 
@@ -88,14 +85,15 @@ class _RxScreenState extends State<RxScreen> {
                                 Icon(
                                   Icons.medication_outlined,
                                   size: 64,
-                                  color: Colors.grey[400],
+
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   'No prescriptions found',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Colors.grey[600],
+                                    fontWeight:FontWeight.w400 ,
+
                                   ),
                                 ),
                               ],
@@ -148,7 +146,7 @@ class _RxScreenState extends State<RxScreen> {
                                               Text(
                                                 rx.date,
                                                 style: TextStyle(
-                                                  color: Colors.grey[600],
+                                                  fontWeight: FontWeight.w600,
                                                   fontSize: 14,
                                                 ),
                                               ),
@@ -169,15 +167,15 @@ class _RxScreenState extends State<RxScreen> {
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   rx.doctor,
-                                                  style: const TextStyle(color: Colors.black87),
+
                                                 ),
                                                 Text(
                                                   'Ch: ${rx.chamber}',
-                                                  style: const TextStyle(color: Colors.black87),
+
                                                 ),
                                                 Text(
                                                   'Pt: ${rx.patient}',
-                                                  style: const TextStyle(color: Colors.black87),
+
                                                 ),
                                               ],
                                             ),

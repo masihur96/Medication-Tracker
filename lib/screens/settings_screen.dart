@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/main.dart';
+import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -96,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+
               ),
             ),
           ),
@@ -107,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.history,
-                color: Theme.of(context).primaryColor,
+
               ),
               title: const Text('Medication History'),
               subtitle: const Text('View your medication tracking history'),
@@ -138,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
               leading: Icon(
                 Icons.notifications,
-                color: Theme.of(context).primaryColor,
+
               ),
               title: const Text('Notifications'),
               subtitle: const Text('Enable or disable notifications'),
@@ -171,13 +173,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: const Text('Switch between light and dark theme'),
               secondary: Icon(
                 Icons.dark_mode,
-                color: Theme.of(context).primaryColor,
+
               ),
               value: _isDarkMode,
               onChanged: (bool value) async {
                 setState(() {
                   _isDarkMode = value;
                 });
+                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
                 await _saveSettings();
               },
             ),
@@ -193,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+
               ),
             ),
           ),
@@ -204,7 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.privacy_tip,
-                color: Theme.of(context).primaryColor,
+
               ),
               title: const Text('Privacy'),
               subtitle: const Text('Manage your privacy settings'),
@@ -224,7 +227,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.share,
-                color: Theme.of(context).primaryColor,
+
               ),
               title: const Text('Tell a Friend'),
               subtitle: const Text('Share this app with friends'),
@@ -243,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.info,
-                color: Theme.of(context).primaryColor,
+
               ),
               title: const Text('About'),
               subtitle: const Text('Learn more about MedTrack'),

@@ -10,9 +10,15 @@ class NotificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications', style: TextStyle(fontWeight: FontWeight.w600)),
         elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+        title: const Text(
+          'Notifications',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
+
       body: Consumer<MedicationProvider>(
         builder: (context, medicationProvider, child) {
           final medications = medicationProvider.medications;
@@ -25,7 +31,7 @@ class NotificationScreen extends StatelessWidget {
                   Icon(
                     Icons.notifications_off,
                     size: 80,
-                    color: Theme.of(context).primaryColor.withOpacity(0.6),
+                    // color: Theme.of(context).primaryColor.withOpacity(0.6),
                   ),
                   SizedBox(height: 24),
                   Text(
@@ -33,7 +39,7 @@ class NotificationScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
+                      // color: Theme.of(context).primaryColor,
                     ),
                   ),
                   SizedBox(height: 8),

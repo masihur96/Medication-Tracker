@@ -120,7 +120,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             calendarStyle: CalendarStyle(
               markersMaxCount: 1,
               markerDecoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).highlightColor,
                 shape: BoxShape.circle,
               ),
               selectedDecoration: BoxDecoration(
