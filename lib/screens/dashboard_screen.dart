@@ -19,8 +19,9 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Medication> _todaysMedications = [];
   Map<DateTime, int> _heatMapDataset = {};
-  // List<MedicationHistory> _medicationHistory = [];
-
+  List<Prescription> _prescriptions = [];
+  Prescription? _selectedPrescription;
+  
   bool _isLoading = true;
 
   @override
@@ -39,7 +40,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (listString != null) {
       final List decoded = jsonDecode(listString);
       final List<Prescription> loaded =
-      decoded.map((e) => Prescription.fromJson(e)).toList();
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+      
+      // Store all prescriptions
+      setState(() {
+        _prescriptions = loaded;
+        if (loaded.isNotEmpty) {
+          _selectedPrescription = loaded[0]; // Select first prescription by default
+        }
+      });
+
       // Get today's date in string format (e.g., 17/04/2025)
       final String today = _formatDate(DateTime.now());
       // Collect today's medications
@@ -171,9 +181,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
 
+            // Add Prescription Selector before Heat Map
+            const Text(
+              'Select Prescription',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButton<Prescription>(
+              isExpanded: true,
+              value: _selectedPrescription,
+              hint: const Text('Select a prescription'),
+              items: _prescriptions.map((prescription) {
+                return DropdownMenuItem<Prescription>(
+                  value: prescription,
+                  child: Text('Prescription ${prescription.doctor}'),
+                );
+              }).toList(),
+              onChanged: (Prescription? newValue) {
+                setState(() {
+                  _selectedPrescription = newValue;
+                });
+                loadHeatMapData(); // Reload heat map when prescription changes
+              },
+            ),
+            const SizedBox(height: 16),
 
-            const SizedBox(height: 24),
-            
             // Medication Dosage Chart
             const Text(
               'Medication Dosage Trend',
@@ -189,9 +224,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               colorMode: ColorMode.color,
               datasets: _heatMapDataset,
               colorsets: const {
-                1: Colors.red,
-                2: Colors.yellow,
-                3: Colors.green,
+                0: Colors.black, // Grey for scheduled dates
+                1: Colors.red,  // Red for missed
+                2: Colors.yellow, // Yellow for partially taken
+                3: Colors.green, // Green for all taken
               },
               onClick: (value) {
                 _showMedicationDetails(value, context);
@@ -321,43 +357,35 @@ Future<void> updateMedicationStatus({
   }
 }
 
-Future<Map<DateTime, int>> _generateHeatMapDataset()  async{
+Future<Map<DateTime, int>> _generateHeatMapDataset() async {
   Map<DateTime, int> dataset = {};
-  final prefs = await SharedPreferences.getInstance();
-  final String? listString = prefs.getString('prescriptions');
   
-  if (listString != null) {
-    final List decoded = jsonDecode(listString);
-    final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
-    
-    // Process each day's medications
-    for (var prescription in prescriptions) {
-      for (var medication in prescription.medications) {
-        for (var dateStr in medication.remainderDates) {
-          // Convert date string (DD/MM/YYYY) to DateTime
-          final parts = dateStr.split('/');
-          final date = DateTime(
-            int.parse(parts[2]), // year
-            int.parse(parts[1]), // month
-            int.parse(parts[0]), // day
-          );
-          
-          // Initialize if not exists
-          if (!dataset.containsKey(date)) {
-            dataset[date] = 0; // 0 means scheduled but no status yet
-          }
-          
-          // Count total medications and taken medications for the day
-          int totalMeds = medication.reminderTimes.length;
-          int takenMeds = medication.isTaken.where((taken) => taken).length;
-          
-          if (takenMeds == 0) {
-            dataset[date] = 1; // All missed (red)
-          } else if (takenMeds < totalMeds) {
-            dataset[date] = 2; // Partially taken (yellow)
-          } else {
-            dataset[date] = 3; // All taken (green)
-          }
+  if (_selectedPrescription == null) return dataset;
+
+  // Process medications only from selected prescription
+  for (var medication in _selectedPrescription!.medications) {
+    for (var dateStr in medication.remainderDates) {
+      final parts = dateStr.split('/');
+      final date = DateTime(
+        int.parse(parts[2]), // year
+        int.parse(parts[1]), // month
+        int.parse(parts[0]), // day
+      );
+      
+      // Set all dates to grey (value 0) initially
+      dataset[date] = 0;
+      
+      // Only update colors if checking taken status
+      if (medication.isTaken.isNotEmpty) {
+        int totalMeds = medication.reminderTimes.length;
+        int takenMeds = medication.isTaken.where((taken) => taken).length;
+        
+        if (takenMeds == 0) {
+          dataset[date] = 1; // All missed (red)
+        } else if (takenMeds < totalMeds) {
+          dataset[date] = 2; // Partially taken (yellow)
+        } else {
+          dataset[date] = 3; // All taken (green)
         }
       }
     }
