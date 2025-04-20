@@ -71,7 +71,23 @@ class AppLocalizations {
       'addPrescription': 'Add Prescription',
       'chamber': 'Ch',
       'patient': 'Pt',
-      // Add more translations as needed
+      'doctor': 'DR',
+      'prescriptionDetails': 'Prescription Details',
+      'name': 'Name',
+      'timesPerDay': 'Times/Day',
+      'reminderTimes': 'Reminder Times',
+      'for': 'For',
+      'required': 'Required',
+      'enterValidNumber': 'Please enter a valid number',
+      'daily': 'Daily',
+      'weekly': 'Weekly',
+      'monthly': 'Monthly',
+      'asNeeded': 'As needed',
+      'additionalInfo': 'Additional Information',
+      'additionalInstructions': 'Add any additional instructions or notes',
+      'medicationStatus': 'Medication Status',
+      'updateMedication': 'Update Medication',
+      'saveMedication': 'Save Medication',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -133,7 +149,23 @@ class AppLocalizations {
       'addPrescription': 'প্রেসক্রিপশন যোগ করুন',
       'chamber': 'চে',
       'patient': 'রো',
-      // Add more translations as needed
+      'doctor': 'ডাঃ',
+      'prescriptionDetails': 'প্রেসক্রিপশন বিবরণ',
+      'name': 'নাম',
+      'timesPerDay': 'দিনে কতবার',
+      'reminderTimes': 'রিমাইন্ডার সময়',
+      'for': 'জন্য',
+      'required': 'প্রয়োজনীয়',
+      'enterValidNumber': 'একটি বৈধ সংখ্যা লিখুন',
+      'daily': 'দৈনিক',
+      'weekly': 'সাপ্তাহিক',
+      'monthly': 'মাসিক',
+      'asNeeded': 'প্রয়োজনে',
+      'additionalInfo': 'অতিরিক্ত তথ্য',
+      'additionalInstructions': 'অতিরিক্ত নির্দেশনা বা নোট যোগ করুন',
+      'medicationStatus': 'ঔষধের স্থিতি',
+      'updateMedication': 'ঔষধ আপডেট করুন',
+      'saveMedication': 'ঔষধ সংরক্ষণ করুন',
     },
   };
 
@@ -196,6 +228,23 @@ class AppLocalizations {
   String get addPrescription => _localizedValues[locale.languageCode]!['addPrescription']!;
   String get chamber => _localizedValues[locale.languageCode]!['chamber']!;
   String get patient => _localizedValues[locale.languageCode]!['patient']!;
+  String get doctor => _localizedValues[locale.languageCode]!['doctor']!;
+  String get prescriptionDetails => _localizedValues[locale.languageCode]!['prescriptionDetails']!;
+  String get name => _localizedValues[locale.languageCode]!['name']!;
+  String get timesPerDay => _localizedValues[locale.languageCode]!['timesPerDay']!;
+  String get reminderTimes => _localizedValues[locale.languageCode]!['reminderTimes']!;
+  String get for_ => _localizedValues[locale.languageCode]!['for']!;
+  String get required => _localizedValues[locale.languageCode]!['required']!;
+  String get enterValidNumber => _localizedValues[locale.languageCode]!['enterValidNumber']!;
+  String get daily => _localizedValues[locale.languageCode]!['daily']!;
+  String get weekly => _localizedValues[locale.languageCode]!['weekly']!;
+  String get monthly => _localizedValues[locale.languageCode]!['monthly']!;
+  String get asNeeded => _localizedValues[locale.languageCode]!['asNeeded']!;
+  String get additionalInfo => _localizedValues[locale.languageCode]!['additionalInfo']!;
+  String get additionalInstructions => _localizedValues[locale.languageCode]!['additionalInstructions']!;
+  String get medicationStatus => _localizedValues[locale.languageCode]!['medicationStatus']!;
+  String get updateMedication => _localizedValues[locale.languageCode]!['updateMedication']!;
+  String get saveMedication => _localizedValues[locale.languageCode]!['saveMedication']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

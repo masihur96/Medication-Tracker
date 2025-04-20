@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 import 'add_medication_screen.dart';
 
@@ -32,12 +34,14 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,
-        title: const Text(
-          'Prescription Details',
-          style: TextStyle(
+        title: Text(
+          localizations.prescriptions,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -62,11 +66,10 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                         Column(
                           children: [
                             Text(
-                              'Rx',
+                              "Rx",
                               style: TextStyle(
                                 fontSize: 50,
                                 fontWeight: FontWeight.bold,
-
                               ),
                             ),
                             _buildLineField(label: prescription.date,size: 16),
@@ -78,14 +81,13 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLineField(label: 'DR: ${prescription.doctor}',size: 16),
-                              // SizedBox(height: 12),
-                              _buildLineField(label: 'Ch: ${prescription.chamber}',size: 12),
+                              _buildLineField(label: '${localizations.doctor}: ${prescription.doctor}',size: 16),
+                              _buildLineField(label: '${localizations.chamber}: ${prescription.chamber}',size: 12),
                 
                               Divider(
                               ),
-                              _buildLineField(label: 'Patient: ${prescription.patient}',size: 16),
-                              _buildLineField(label: 'For: ${prescription.medicationTo}',size: 12),
+                              _buildLineField(label: '${localizations.patient}: ${prescription.patient}',size: 16),
+                              _buildLineField(label: '${localizations.for_}: ${prescription.medicationTo}', size: 12),
                 
                             ],
                           ),
@@ -109,7 +111,7 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Medications',
+                  localizations.medications,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -136,13 +138,13 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                   columns: [
                     if (_isEditing)
                       const DataColumn(label: Text('')),
-                    const DataColumn(label: Text('Name')),
-                    const DataColumn(label: Text('Dosage')),
-                    const DataColumn(label: Text('Frequency')),
-                    const DataColumn(label: Text('Times/Day')),
-                    const DataColumn(label: Text('Stock')),
-                    const DataColumn(label: Text('Notes')),
-                    const DataColumn(label: Text('Reminder Times')),
+                    DataColumn(label: Text(localizations.name)),
+                    DataColumn(label: Text(localizations.dosage)),
+                    DataColumn(label: Text(localizations.frequency)),
+                    DataColumn(label: Text(localizations.timesPerDay)),
+                    DataColumn(label: Text(localizations.stock)),
+                    DataColumn(label: Text(localizations.notes)),
+                    DataColumn(label: Text(localizations.reminderTimes)),
                   ],
                   rows: prescription.medications.map((med) {
                     return DataRow(cells: [

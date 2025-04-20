@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewRxScreen extends StatefulWidget {
@@ -45,21 +46,31 @@ class _NewRxScreenState extends State<NewRxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Prescription'),
+        foregroundColor: Colors.white,
+        title: Text(
+          widget.prescription == null ? localizations.addPrescription : localizations.prescriptionDetails,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-
               TextFormField(
                 controller: _doctorController,
-                decoration: const InputDecoration(
-                  labelText: 'Doctor Name',
+                decoration: InputDecoration(
+                  labelText: localizations.doctor,
                   icon: Icon(Icons.person),
                 ),
                 validator: (value) {
@@ -73,8 +84,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _chamberController,
-                decoration: const InputDecoration(
-                  labelText: 'Chamber Name',
+                decoration: InputDecoration(
+                  labelText: localizations.chamber,
                   icon: Icon(Icons.business),
                 ),
                 validator: (value) {
@@ -87,8 +98,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _patientController,
-                decoration: const InputDecoration(
-                  labelText: 'Patient Name',
+                decoration: InputDecoration(
+                  labelText: localizations.patient,
                   icon: Icon(Icons.person_outline),
                 ),
                 validator: (value) {
@@ -101,8 +112,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _medicationController,
-                decoration: const InputDecoration(
-                  labelText: 'Medication To',
+                decoration: InputDecoration(
+                  labelText: localizations.medicationName,
                   icon: Icon(Icons.medication),
                 ),
                 validator: (value) {
@@ -115,8 +126,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _dateController,
-                decoration: const InputDecoration(
-                  labelText: 'Prescription Date',
+                decoration: InputDecoration(
+                  labelText: localizations.prescriptionDetails,
                   icon: Icon(Icons.calendar_today),
                 ),
                 readOnly: true,
@@ -130,9 +141,6 @@ class _NewRxScreenState extends State<NewRxScreen> {
                   if (picked != null) {
                     setState(() {
                       _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
-
-
-
                     });
                   }
                 },
@@ -162,7 +170,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
                     Navigator.pop(context);
                   }
                 },
-                child: Text(widget.prescription == null ? 'Save Prescription' : 'Update Prescription'),
+                child: Text(widget.prescription == null ? localizations.save : localizations.edit),
               ),
             ],
           ),

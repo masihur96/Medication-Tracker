@@ -1,9 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 class AddMedicationScreen extends StatefulWidget {
@@ -16,12 +17,18 @@ class AddMedicationScreen extends StatefulWidget {
 }
 
 class _AddMedicationScreenState extends State<AddMedicationScreen> {
+  // Add these constants at the top of the class
+  static const String FREQUENCY_DAILY = 'daily';
+  static const String FREQUENCY_WEEKLY = 'weekly';
+  static const String FREQUENCY_MONTHLY = 'monthly';
+  static const String FREQUENCY_AS_NEEDED = 'as_needed';
+
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _dosageController = TextEditingController();
   final _stockController = TextEditingController();
   final _noteController = TextEditingController();
-  String _frequency = 'Daily'; // Default frequency
+  String _frequency = FREQUENCY_DAILY; // Change default value to use constant
   bool _isActive = false;
   int _timesPer = 1; // Default frequency
   final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()];
@@ -46,7 +53,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _dosageController.text = widget.medication!.dosage;
       _stockController.text = widget.medication!.stock.toString();
       _noteController.text = widget.medication!.notes!;
-      _frequency = widget.medication!.frequency;
+      _frequency = _getFrequencyConstant(widget.medication!.frequency);
       _timesPer = widget.medication!.timesPerDay;
       _isActive = widget.medication!.isActive;
       _selectedTimes.clear();
@@ -120,20 +127,20 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          widget.medication != null ? 'Edit Medication' : 'Add Medication',
+          widget.medication != null ? localizations.edit : localizations.addMedication,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
       ),
-
       body: Form(
         key: _formKey,
         child: ListView(
@@ -145,35 +152,28 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Rx Text on Left
                     Column(
                       children: [
                         Text(
-                          'Rx',
+                          "Rx",
                           style: TextStyle(
                             fontSize: 50,
                             fontWeight: FontWeight.bold,
-
                           ),
                         ),
-                        _buildLineField(label: widget.prescription.date,size: 16),
+                        _buildLineField(label: widget.prescription.date, size: 16),
                       ],
                     ),
                     SizedBox(width: 16),
-                    // Patient Info on Right
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLineField(label: 'DR: ${widget.prescription.doctor}',size: 16),
-                          // SizedBox(height: 12),
-                          _buildLineField(label: 'Ch: ${widget.prescription.chamber}',size: 12),
-
-                          Divider(
-                          ),
-                          _buildLineField(label: 'Name: ${widget.prescription.patient}',size: 16),
-                          _buildLineField(label: 'To: ${widget.prescription.medicationTo}',size: 12),
-
+                          _buildLineField(label: '${localizations.doctor}: ${widget.prescription.doctor}', size: 16),
+                          _buildLineField(label: '${localizations.chamber}: ${widget.prescription.chamber}', size: 12),
+                          Divider(),
+                          _buildLineField(label: '${localizations.name}: ${widget.prescription.patient}', size: 16),
+                          _buildLineField(label: '${localizations.for_}: ${widget.prescription.medicationTo}', size: 12),
                         ],
                       ),
                     ),
@@ -194,7 +194,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Medication Details',
+                      localizations.prescriptionDetails,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -204,21 +204,21 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        labelText: 'Medication Name',
+                        labelText: localizations.medicationName,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.medication),
                       ),
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
+                      validator: (value) => value!.isEmpty ? localizations.required : null,
                     ),
                     SizedBox(height: 16),
                     TextFormField(
                       controller: _dosageController,
                       decoration: InputDecoration(
-                        labelText: 'Dosage',
+                        labelText: localizations.dosage,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.scale),
                       ),
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
+                      validator: (value) => value!.isEmpty ? localizations.required : null,
                     ),
                   ],
                 ),
@@ -236,7 +236,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Schedule & Stock',
+                      localizations.schedule,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -246,14 +246,14 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     TextFormField(
                       controller: _stockController,
                       decoration: InputDecoration(
-                        labelText: 'Medication Stock',
+                        labelText: localizations.stock,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.inventory),
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if (value!.isEmpty) return 'Required';
-                        if (int.tryParse(value) == null) return 'Please enter a valid number';
+                        if (value!.isEmpty) return localizations.required;
+                        if (int.tryParse(value) == null) return localizations.enterValidNumber;
                         return null;
                       },
                     ),
@@ -263,36 +263,33 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         DropdownButtonFormField<String>(
                           value: _frequency,
                           decoration: InputDecoration(
-                            labelText: 'Frequency',
+                            labelText: localizations.frequency,
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.calendar_today),
                           ),
-                          items: ['Daily', 'Weekly', 'Monthly', 'As needed']
-                              .map((String frequency) => DropdownMenuItem(
-                            value: frequency,
-                            child: Text(frequency),
-                          ))
-                              .toList(),
+                          items: [
+                            _buildFrequencyMenuItem(FREQUENCY_DAILY, localizations.daily),
+                            _buildFrequencyMenuItem(FREQUENCY_WEEKLY, localizations.weekly),
+                            _buildFrequencyMenuItem(FREQUENCY_MONTHLY, localizations.monthly),
+                            _buildFrequencyMenuItem(FREQUENCY_AS_NEEDED, localizations.asNeeded),
+                          ],
                           onChanged: (String? newValue) {
                             setState(() {
                               _frequency = newValue!;
-                              _reminderDates = []; // clear any previously selected/generated dates
+                              _reminderDates = [];
                             });
                             generateDatesBasedOnFrequency();
                           },
                         ),
-
-                        if (_frequency == 'Weekly') _buildWeeklySelector(),
-                        if (_frequency == 'Monthly') _buildMonthlySelector(),
-
+                        if (_frequency == FREQUENCY_WEEKLY) _buildWeeklySelector(),
+                        if (_frequency == FREQUENCY_MONTHLY) _buildMonthlySelector(),
                       ],
                     ),
-
                     SizedBox(height: 16),
                     DropdownButtonFormField<int>(
                       value: _timesPer,
                       decoration: InputDecoration(
-                        labelText: 'Times per $_frequency',
+                        labelText: localizations.timesPerDay,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.calendar_today),
                       ),
@@ -326,7 +323,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Additional Information',
+                      localizations.additionalInfo,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -336,8 +333,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     TextFormField(
                       controller: _noteController,
                       decoration: InputDecoration(
-                        labelText: 'Notes',
-                        hintText: 'Add any additional instructions or notes',
+                        labelText: localizations.notes,
+                        hintText: localizations.additionalInstructions,
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.note),
                       ),
@@ -345,8 +342,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     ),
                     SizedBox(height: 16),
                     SwitchListTile(
-                      title: Text('Medication Status'),
-                      subtitle: Text(_isActive ? 'Active' : 'Inactive'),
+                      title: Text(localizations.medicationStatus),
+                      subtitle: Text(_isActive ? localizations.active : localizations.inactive),
                       value: _isActive,
                       onChanged: (bool value) {
                         setState(() {
@@ -370,21 +367,19 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     stock: int.parse(_stockController.text),
                     isActive: _isActive,
                     notes: _noteController.text,
-                    frequency: _frequency,
+                    frequency: _getDisplayFrequency(_frequency, AppLocalizations.of(context)),
                     reminderTimes: _selectedTimes,
                     remainderDates: _reminderDates,
                     isTaken: _isTaken,
                   );
 
                   if (widget.medication != null) {
-                    // Update existing medication
                     updateMedicationInPrescription(widget.prescription.uid, medication);
                   } else {
-                    // Add new medication
                     addMedicationToPrescription(widget.prescription.uid, medication);
                   }
 
-                  Navigator.pop(context); // Go back after saving
+                  Navigator.pop(context);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -394,7 +389,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 ),
               ),
               child: Text(
-                widget.medication != null ? 'Update Medication' : 'Save Medication',
+                widget.medication != null ? localizations.updateMedication : localizations.saveMedication,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
@@ -506,13 +501,13 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     DateTime endDate = DateTime(now.year, now.month + 3, now.day);
     List<String> generatedDates = [];
 
-    if (_frequency == 'Daily') {
+    if (_frequency == FREQUENCY_DAILY) {
       for (var date = now;
       date.isBefore(endDate);
       date = date.add(Duration(days: 1))) {
         generatedDates.add(_formatDate(date));
       }
-    } else if (_frequency == 'Weekly') {
+    } else if (_frequency == FREQUENCY_WEEKLY) {
       Map<String, int> weekdayMap = {
         'Mon': 1,
         'Tue': 2,
@@ -532,7 +527,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           generatedDates.add(_formatDate(date));
         }
       }
-    } else if (_frequency == 'Monthly') {
+    } else if (_frequency == FREQUENCY_MONTHLY) {
       for (var date = now;
       date.isBefore(endDate);
       date = date.add(Duration(days: 1))) {
@@ -551,6 +546,43 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  DropdownMenuItem<String> _buildFrequencyMenuItem(String value, String text) {
+    return DropdownMenuItem(
+      value: value,
+      child: Text(text),
+    );
+  }
+
+  String _getDisplayFrequency(String frequencyConstant, AppLocalizations localizations) {
+    switch (frequencyConstant) {
+      case FREQUENCY_DAILY:
+        return localizations.daily;
+      case FREQUENCY_WEEKLY:
+        return localizations.weekly;
+      case FREQUENCY_MONTHLY:
+        return localizations.monthly;
+      case FREQUENCY_AS_NEEDED:
+        return localizations.asNeeded;
+      default:
+        return localizations.daily;
+    }
+  }
+
+  String _getFrequencyConstant(String storedFrequency) {
+    switch (storedFrequency.toLowerCase()) {
+      case 'daily':
+        return FREQUENCY_DAILY;
+      case 'weekly':
+        return FREQUENCY_WEEKLY;
+      case 'monthly':
+        return FREQUENCY_MONTHLY;
+      case 'as needed':
+        return FREQUENCY_AS_NEEDED;
+      default:
+        return FREQUENCY_DAILY;
+    }
   }
 
 }
