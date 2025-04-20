@@ -55,7 +55,12 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
       setState(() => _isLoading = false);
     }
   }
-
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final format = DateFormat.jm(); // e.g., 08:00 AM
+    return format.format(dt);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +210,18 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   Widget _buildMedicationList() {
     final localizations = AppLocalizations.of(context);
     
-    final medications = _getMedicationsForDay(_selectedDay!, _selectedPrescription!);
+    // Get medications for the selected date only
+    final medications = _selectedPrescription!.medications.where((medication) {
+      return medication.remainderDates.any((dateStr) {
+        try {
+          final medicationDate = DateFormat('dd/MM/yyyy').parse(dateStr);
+          return isSameDay(medicationDate, _selectedDay!);
+        } catch (e) {
+          print('Error parsing remainder date: $dateStr');
+          return false;
+        }
+      });
+    }).toList();
     
     if (medications.isEmpty) {
       return Center(child: Text(localizations.noMedicationsScheduled));
@@ -230,33 +246,26 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${localizations.dosage}: ${medication.timesPerDay}'),
                 Text('${localizations.timesPerDay}: ${medication.timesPerDay}'),
                 if (medication.notes?.isNotEmpty ?? false)
                   Text('${localizations.notes}: ${medication.notes}'),
-                Text('${localizations.reminderTimes}: ${medication.reminderTimes.join(', ')}'),
                 ...List.generate(medication.timesPerDay, (index) {
                   final bool taken = index < medication.isTaken.length ? medication.isTaken[index] : false;
                   final String time = (medication.reminderTimes != null && index >= 0 && index < medication.reminderTimes.length)
                       ? formatTimeOfDay(medication.reminderTimes[index])
                       : localizations.notSet;
-                  return GestureDetector(
-                    onTap: (){
-                      print(time);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            taken ? Icons.check_circle : Icons.schedule,
-                            color: taken ? Colors.green : Colors.orange,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text('$time - ${taken ? localizations.taken : localizations.notTakenYet}'),
-                        ],
-                      ),
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          taken ? Icons.check_circle : Icons.schedule,
+                          color: taken ? Colors.green : Colors.orange,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('$time - ${taken ? localizations.taken : localizations.notTakenYet}'),
+                      ],
                     ),
                   );
                 }),
