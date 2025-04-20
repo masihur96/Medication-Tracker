@@ -66,6 +66,11 @@ class AppLocalizations {
       'discontinued': 'Discontinued',
       'currentStock': 'Current Stock',
       'units': 'units',
+      'prescriptions': 'Prescriptions',
+      'noPrescriptionsFound': 'No prescriptions found',
+      'addPrescription': 'Add Prescription',
+      'chamber': 'Ch',
+      'patient': 'Pt',
       // Add more translations as needed
     },
     'bn': {
@@ -110,7 +115,6 @@ class AppLocalizations {
       'drug': 'ঔষধ',
       'rx': 'প্রেসক্রিপশন',
       'dosageMonitor': 'ডোজ মনিটর',
-      'pending': 'বাকি আছে',
       'medications': 'ঔষধসমূহ',
       'drugs': 'ঔষধ',
       'stock': 'মজুদ',
@@ -124,6 +128,11 @@ class AppLocalizations {
       'discontinued': 'বন্ধ করা হয়েছে',
       'currentStock': 'বর্তমান মজুদ',
       'units': 'ইউনিট',
+      'prescriptions': 'প্রেসক্রিপশন',
+      'noPrescriptionsFound': 'কোন প্রেসক্রিপশন পাওয়া যায়নি',
+      'addPrescription': 'প্রেসক্রিপশন যোগ করুন',
+      'chamber': 'চে',
+      'patient': 'রো',
       // Add more translations as needed
     },
   };
@@ -182,6 +191,11 @@ class AppLocalizations {
   String get discontinued => _localizedValues[locale.languageCode]!['discontinued']!;
   String get currentStock => _localizedValues[locale.languageCode]!['currentStock']!;
   String get units => _localizedValues[locale.languageCode]!['units']!;
+  String get prescriptions => _localizedValues[locale.languageCode]!['prescriptions']!;
+  String get noPrescriptionsFound => _localizedValues[locale.languageCode]!['noPrescriptionsFound']!;
+  String get addPrescription => _localizedValues[locale.languageCode]!['addPrescription']!;
+  String get chamber => _localizedValues[locale.languageCode]!['chamber']!;
+  String get patient => _localizedValues[locale.languageCode]!['patient']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

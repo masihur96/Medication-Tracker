@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:med_track/screens/prescription_details_screen.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_medication_screen.dart';
+
 
 class RxScreen extends StatefulWidget {
   const RxScreen({super.key});
@@ -55,18 +57,19 @@ class _RxScreenState extends State<RxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          'Prescriptions',
-          style: TextStyle(
+        title: Text(
+          localizations.rx,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-
       ),
       body: _isLoading
           ? const Center(
@@ -85,15 +88,13 @@ class _RxScreenState extends State<RxScreen> {
                                 Icon(
                                   Icons.medication_outlined,
                                   size: 64,
-
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No prescriptions found',
+                                  localizations.noMedicationsYet,
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight:FontWeight.w400 ,
-
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                               ],
@@ -128,13 +129,11 @@ class _RxScreenState extends State<RxScreen> {
                                         children: [
                                           Column(
                                             children: [
-
-
                                               CircleAvatar(
                                                 backgroundColor: Theme.of(context).primaryColor,
                                                 radius: 30,
                                                 child: Text(
-                                                  'Rx',
+                                                  "Rx",
                                                   style: TextStyle(
                                                     fontSize: 25,
                                                     fontWeight: FontWeight.bold,
@@ -167,15 +166,12 @@ class _RxScreenState extends State<RxScreen> {
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   rx.doctor,
-
                                                 ),
                                                 Text(
                                                   'Ch: ${rx.chamber}',
-
                                                 ),
                                                 Text(
                                                   'Pt: ${rx.patient}',
-
                                                 ),
                                               ],
                                             ),
@@ -197,7 +193,6 @@ class _RxScreenState extends State<RxScreen> {
                                   ),
                                 ),
                               );
-
                             },
                             childCount: _prescriptions.length,
                           ),
@@ -215,8 +210,11 @@ class _RxScreenState extends State<RxScreen> {
           );
           loadPrescriptions();
         },
-        icon: const Icon(Icons.add,color: Colors.white),
-        label: const Text('Add Prescription',style: TextStyle(color: Colors.white),),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: Text(
+          localizations.addMedication,
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );

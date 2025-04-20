@@ -121,13 +121,19 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           widget.medication != null ? 'Edit Medication' : 'Add Medication',
-          style: TextStyle(fontWeight: FontWeight.w600)
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-        elevation: 0,
       ),
+
       body: Form(
         key: _formKey,
         child: ListView(
