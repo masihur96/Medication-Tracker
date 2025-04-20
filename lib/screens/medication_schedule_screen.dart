@@ -41,7 +41,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
-    log(listString!);
+
     if (listString != null) {
       final List decoded = jsonDecode(listString);
       final List<Prescription> loaded =
@@ -230,7 +230,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${localizations.dosage}: ${medication.dosage}'),
+                Text('${localizations.dosage}: ${medication.timesPerDay}'),
                 Text('${localizations.timesPerDay}: ${medication.timesPerDay}'),
                 if (medication.notes?.isNotEmpty ?? false)
                   Text('${localizations.notes}: ${medication.notes}'),

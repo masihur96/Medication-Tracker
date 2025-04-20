@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Medication {
   late String id;
   late String name;
-  late String dosage;
+
   late int timesPerDay;
   late int stock;
   late bool isActive;
@@ -13,10 +13,11 @@ class Medication {
   late List<TimeOfDay> reminderTimes;
   late List<String> remainderDates;
 
+
   Medication({
     required this.id,
     required this.name,
-    required this.dosage,
+
     required this.timesPerDay,
     required this.stock,
     required this.isActive,
@@ -25,13 +26,14 @@ class Medication {
     required this.frequency,
     required this.reminderTimes,
     required this.remainderDates,
+// Add duration parameter
   });
 
   factory Medication.fromJson(Map<String, dynamic> json) {
     return Medication(
       id: json['id'],
       name: json['name'],
-      dosage: json['dosage'],
+
       timesPerDay: json['timesPerDay'],
       stock: json['stock'],
       isActive: json['isActive'],
@@ -42,6 +44,7 @@ class Medication {
           ?.map((timeString) => _stringToTimeOfDay(timeString))
           .toList() ??
           [],
+
       remainderDates: (json['remainderDates'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList() ??
@@ -53,7 +56,6 @@ class Medication {
     return {
       'id': id,
       'name': name,
-      'dosage': dosage,
       'timesPerDay': timesPerDay,
       'stock': stock,
       'isActive': isActive,
@@ -61,6 +63,7 @@ class Medication {
       'notes': notes,
       'frequency': frequency,
       'reminderTimes': reminderTimes.map(_timeOfDayToString).toList(),
+
       'remainderDates': remainderDates,
     };
   }
@@ -84,7 +87,6 @@ class Medication {
     return 'Medication('
         'id: $id, '
         'name: $name, '
-        'dosage: $dosage, '
         'timesPerDay: $timesPerDay, '
         'stock: $stock, '
         'isActive: $isActive, '

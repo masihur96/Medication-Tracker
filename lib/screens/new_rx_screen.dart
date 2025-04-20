@@ -127,7 +127,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
               TextFormField(
                 controller: _dateController,
                 decoration: InputDecoration(
-                  labelText: localizations.prescriptionDetails,
+                  labelText: localizations.date,
                   icon: Icon(Icons.calendar_today),
                 ),
                 readOnly: true,

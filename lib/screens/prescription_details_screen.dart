@@ -139,7 +139,7 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                     if (_isEditing)
                       const DataColumn(label: Text('')),
                     DataColumn(label: Text(localizations.name)),
-                    DataColumn(label: Text(localizations.dosage)),
+                    // DataColumn(label: Text(localizations.dosage)),
                     DataColumn(label: Text(localizations.frequency)),
                     DataColumn(label: Text(localizations.timesPerDay)),
                     DataColumn(label: Text(localizations.stock)),
@@ -166,7 +166,7 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                           ),
                         ),
                       DataCell(Text(med.name)),
-                      DataCell(Text(med.dosage)),
+                      // DataCell(Text(med.dosage)),
                       DataCell(Text(med.frequency)),
                       DataCell(Text(med.timesPerDay.toString())),
                       DataCell(Text(med.stock.toString())),

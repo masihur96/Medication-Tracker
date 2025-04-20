@@ -91,7 +91,7 @@ class _RxScreenState extends State<RxScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  localizations.noMedicationsYet,
+                                  localizations.noPrescriptionsFound,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w400,

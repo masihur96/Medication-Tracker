@@ -25,9 +25,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _dosageController = TextEditingController();
+
   final _stockController = TextEditingController();
   final _noteController = TextEditingController();
+  // final _durationController = TextEditingController();
   String _frequency = FREQUENCY_DAILY; // Change default value to use constant
   bool _isActive = false;
   int _timesPer = 1; // Default frequency
@@ -44,13 +45,17 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   List<String> _reminderDates = [];
 
+  // Add these new variables
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(const Duration(days: 30));
+
   @override
   void initState() {
     super.initState();
     // Initialize form fields if medication exists
     if (widget.medication != null) {
       _nameController.text = widget.medication!.name;
-      _dosageController.text = widget.medication!.dosage;
+
       _stockController.text = widget.medication!.stock.toString();
       _noteController.text = widget.medication!.notes!;
       _frequency = _getFrequencyConstant(widget.medication!.frequency);
@@ -60,15 +65,18 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _selectedTimes.addAll(widget.medication!.reminderTimes);
       _isTaken.clear();
       _isTaken.addAll(widget.medication!.isTaken);
+      // _durationController.text = widget.medication!.duration.toString();
+      // _startDate = widget.medication!.startDate;
+      // _endDate = widget.medication!.endDate;
     }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _dosageController.dispose();
     _stockController.dispose();
     _noteController.dispose();
+    // _durationController.dispose();
     super.dispose();
   }
 
@@ -211,15 +219,23 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       validator: (value) => value!.isEmpty ? localizations.required : null,
                     ),
                     SizedBox(height: 16),
+
+
                     TextFormField(
-                      controller: _dosageController,
+                      controller: _stockController,
                       decoration: InputDecoration(
-                        labelText: localizations.dosage,
+                        labelText: localizations.stock,
                         border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.scale),
+                        prefixIcon: Icon(Icons.inventory),
                       ),
-                      validator: (value) => value!.isEmpty ? localizations.required : null,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value!.isEmpty) return localizations.required;
+                        if (int.tryParse(value) == null) return localizations.enterValidNumber;
+                        return null;
+                      },
                     ),
+
                   ],
                 ),
               ),
@@ -243,20 +259,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    TextFormField(
-                      controller: _stockController,
-                      decoration: InputDecoration(
-                        labelText: localizations.stock,
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.inventory),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value!.isEmpty) return localizations.required;
-                        if (int.tryParse(value) == null) return localizations.enterValidNumber;
-                        return null;
-                      },
-                    ),
+                    _buildDateRangeSelector(),
+
                     SizedBox(height: 16),
                     Column(
                       children: [
@@ -362,7 +366,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   final medication = Medication(
                     id: widget.medication?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
                     name: _nameController.text,
-                    dosage: _dosageController.text,
+
                     timesPerDay: _timesPer,
                     stock: int.parse(_stockController.text),
                     isActive: _isActive,
@@ -497,30 +501,23 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   }
 
   void generateDatesBasedOnFrequency() {
-    DateTime now = DateTime.now();
-    DateTime endDate = DateTime(now.year, now.month + 3, now.day);
     List<String> generatedDates = [];
 
     if (_frequency == FREQUENCY_DAILY) {
-      for (var date = now;
-      date.isBefore(endDate);
-      date = date.add(Duration(days: 1))) {
+      for (var date = _startDate;
+          date.isBefore(_endDate.add(const Duration(days: 1)));
+          date = date.add(const Duration(days: 1))) {
         generatedDates.add(_formatDate(date));
       }
     } else if (_frequency == FREQUENCY_WEEKLY) {
       Map<String, int> weekdayMap = {
-        'Mon': 1,
-        'Tue': 2,
-        'Wed': 3,
-        'Thu': 4,
-        'Fri': 5,
-        'Sat': 6,
-        'Sun': 7,
+        'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4,
+        'Fri': 5, 'Sat': 6, 'Sun': 7,
       };
 
-      for (var date = now;
-      date.isBefore(endDate);
-      date = date.add(Duration(days: 1))) {
+      for (var date = _startDate;
+          date.isBefore(_endDate.add(const Duration(days: 1)));
+          date = date.add(const Duration(days: 1))) {
         if (_selectedWeekdays
             .map((d) => weekdayMap[d])
             .contains(date.weekday)) {
@@ -528,9 +525,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         }
       }
     } else if (_frequency == FREQUENCY_MONTHLY) {
-      for (var date = now;
-      date.isBefore(endDate);
-      date = date.add(Duration(days: 1))) {
+      for (var date = _startDate;
+          date.isBefore(_endDate.add(const Duration(days: 1)));
+          date = date.add(const Duration(days: 1))) {
         if (_selectedMonthDays.contains(date.day)) {
           generatedDates.add(_formatDate(date));
         }
@@ -541,7 +538,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _reminderDates = generatedDates;
     });
 
-    print("GGGGGG: $generatedDates");
+    print("_reminderDates:::${_reminderDates}");
   }
 
   String _formatDate(DateTime date) {
@@ -583,6 +580,67 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       default:
         return FREQUENCY_DAILY;
     }
+  }
+
+
+
+  // Add this new method
+  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isStartDate ? _startDate : _endDate,
+      firstDate: isStartDate ? DateTime.now() : _startDate,
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (picked != null) {
+      setState(() {
+        if (isStartDate) {
+          _startDate = picked;
+          if (_endDate.isBefore(_startDate)) {
+            _endDate = _startDate;
+          }
+        } else {
+          _endDate = picked;
+        }
+
+        generateDatesBasedOnFrequency();
+      });
+    }
+  }
+
+  // Replace the duration TextFormField in the build method with this new widget
+  Widget _buildDateRangeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _selectDate(context, true),
+                icon: const Icon(Icons.calendar_today),
+                label: Text('Start: ${_formatDate(_startDate)}'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _selectDate(context, false),
+                icon: const Icon(Icons.calendar_today),
+                label: Text('End: ${_formatDate(_endDate)}'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
 }

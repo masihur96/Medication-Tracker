@@ -386,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         await flutterLocalNotificationsPlugin.zonedSchedule(
           notificationId++, // Unique ID per notification
           'Time for ${medication.name}',
-          'Please take ${medication.dosage} of ${medication.name}\n${medication.notes ?? ''}',
+          'Please take ${medication.timesPerDay} of ${medication.name}\n${medication.notes ?? ''}',
           tz.TZDateTime.from(adjustedTime, tz.local),
           const NotificationDetails(
             android: AndroidNotificationDetails(

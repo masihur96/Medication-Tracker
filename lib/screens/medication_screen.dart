@@ -118,7 +118,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
         final medication = allMedications[index];
         return _buildMedicationItem(
           name: medication.name,
-          dosage: medication.dosage,
+          dosage: medication.timesPerDay.toString(),
           frequency: medication.frequency,
           timeOfDay: medication.reminderTimes.isEmpty 
               ? localizations.notSet
@@ -185,7 +185,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
         final medication = activeMedications[index];
         return _buildMedicationItem(
           name: medication.name,
-          dosage: medication.dosage,
+          dosage: medication.timesPerDay.toString(),
           frequency: medication.frequency,
           timeOfDay: medication.reminderTimes.isEmpty
               ? localizations.notSet
@@ -218,7 +218,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
         final medication = inactiveMedications[index];
         return _buildMedicationItem(
           name: medication.name,
-          dosage: medication.dosage,
+          dosage: medication.timesPerDay.toString(),
           frequency: localizations.notTaking,
           timeOfDay: 'N/A',
           notes: medication.notes ?? localizations.discontinued,

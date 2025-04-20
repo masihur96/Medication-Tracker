@@ -250,7 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-             "${medication.name} (${medication.dosage}) ",
+             "${medication.name} (${medication.timesPerDay}) ",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -343,7 +343,7 @@ Future<void> updateMedicationStatus({
             prescriptionName: "Prescription ${prescription.doctor}",
             date: today,
             medicationName: item.name,
-            dosage: item.dosage,
+            dosage: item.timesPerDay.toString(),
             notes: item.notes,
             medicationTimes: item.reminderTimes.map((t) => _formatTimeOfDay(t)).toList(),
             isTaken: item.isTaken,
@@ -436,7 +436,7 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: medicationsForDate.map((med) => ListTile(
             title: Text(med.name),
-            subtitle: Text('Dosage: ${med.dosage}\nNote: ${med.notes}'),
+            subtitle: Text('Dosage: ${med.timesPerDay}\nNote: ${med.notes}'),
             trailing: Column(
               mainAxisSize: MainAxisSize.min,
               children: med.isTaken.asMap().entries.map((entry) => 

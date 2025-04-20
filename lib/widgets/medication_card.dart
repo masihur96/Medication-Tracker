@@ -15,7 +15,7 @@ class MedicationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(medication.name, style: TextStyle(fontSize: 20)),
-            Text('Dosage: ${medication.dosage}'),
+            Text('Dosage: ${medication.timesPerDay}'),
             Text('Times: ${medication.timesPerDay}'),
             // Add more details
           ],

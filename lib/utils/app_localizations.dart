@@ -335,6 +335,9 @@ class AppLocalizations {
   String get deleteAllDataWarning => _localizedValues[locale.languageCode]!['deleteAllDataWarning']!;
   String get aboutDescription => _localizedValues[locale.languageCode]!['aboutDescription']!;
   String get close => _localizedValues[locale.languageCode]!['close']!;
+  String get duration => 'Duration';
+  String get durationInDays => 'Duration in days';
+  String get enterPositiveNumber => 'Please enter a positive number';
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

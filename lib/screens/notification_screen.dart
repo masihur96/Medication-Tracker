@@ -109,7 +109,7 @@ class NotificationScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 12),
-            _buildInfoRow(Icons.medical_information, '${AppLocalizations.of(context).dosage}: ${medication.dosage}'),
+            _buildInfoRow(Icons.medical_information, '${AppLocalizations.of(context).dosage}: ${medication.timesPerDay}'),
             SizedBox(height: 4),
             _buildInfoRow(Icons.schedule, '${AppLocalizations.of(context).frequency}: ${medication.frequency}'),
             SizedBox(height: 4),
