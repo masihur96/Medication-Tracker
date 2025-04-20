@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:med_track/utils/app_localizations.dart';
 
 import 'add_medication_screen.dart';
 
@@ -55,14 +56,16 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
 
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          'Medications',
-          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+        title: Text(
+          localizations.medications,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
 
         bottom: TabBar(
@@ -70,11 +73,11 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white,
           indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'Drugs'),
-            Tab(text: 'Stock'),
-            Tab(text: 'Active'),
-            Tab(text: 'Inactive'),
+          tabs: [
+            Tab(text: localizations.drugs),
+            Tab(text: localizations.stock),
+            Tab(text: localizations.active),
+            Tab(text: localizations.inactive),
           ],
         ),
       ),
@@ -92,12 +95,14 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   }
 
   Widget _buildMedicationList() {
+    final localizations = AppLocalizations.of(context);
+    
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     
     if (_prescriptions.isEmpty) {
-      return const Center(child: Text('No medications added yet'));
+      return Center(child: Text(localizations.noMedicationsYet));
     }
 
     // Flatten all medications from all prescriptions
@@ -116,17 +121,19 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
           dosage: medication.dosage,
           frequency: medication.frequency,
           timeOfDay: medication.reminderTimes.isEmpty 
-              ? 'Not set'
+              ? localizations.notSet
               : medication.reminderTimes
                   .map((time) => _timeOfDayToString(time))
                   .join(', '),
-          notes: medication.notes ?? 'No notes',
+          notes: medication.notes ?? localizations.noMedicationsYet,
         );
       },
     );
   }
 
   Widget _buildAvailableStock() {
+    final localizations = AppLocalizations.of(context);
+    
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -148,7 +155,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current Stock: ${medication.stock} units'),
+                Text('${localizations.currentStock}: ${medication.stock} ${localizations.units}'),
                 // Note: Add expiry date if you add it to the Medication model
               ],
             ),
@@ -159,6 +166,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
   }
 
   Widget _buildActiveMedications() {
+    final localizations = AppLocalizations.of(context);
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -180,17 +188,18 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
           dosage: medication.dosage,
           frequency: medication.frequency,
           timeOfDay: medication.reminderTimes.isEmpty
-              ? 'Not set'
+              ? localizations.notSet
               : medication.reminderTimes
                   .map((time) => _timeOfDayToString(time))
                   .join(', '),
-          notes: medication.notes ?? 'No notes',
+          notes: medication.notes ?? localizations.noMedicationsYet,
         );
       },
     );
   }
 
   Widget _buildInactiveMedications() {
+    final localizations = AppLocalizations.of(context);
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -210,9 +219,9 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
         return _buildMedicationItem(
           name: medication.name,
           dosage: medication.dosage,
-          frequency: 'Not taking',
+          frequency: localizations.notTaking,
           timeOfDay: 'N/A',
-          notes: medication.notes ?? 'Discontinued',
+          notes: medication.notes ?? localizations.discontinued,
         );
       },
     );
@@ -232,6 +241,8 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
     required String timeOfDay,
     required String notes,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
     // Initialize alarm state for this medication if not exists
     _alarmStates[name] ??= false;
 
@@ -258,7 +269,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                       children: [
                         const Icon(Icons.medication, size: 16),
                         const SizedBox(width: 8),
-                        Text('Dosage: $dosage'),
+                        Text('${localizations.dosage}: $dosage'),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -266,7 +277,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                       children: [
                         const Icon(Icons.calendar_today, size: 16),
                         const SizedBox(width: 8),
-                        Text('Frequency: $frequency'),
+                        Text('${localizations.frequency}: $frequency'),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -278,8 +289,8 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: timeOfDay == 'Not set' || timeOfDay == 'N/A'
-                                ? [Text('Time: $timeOfDay')]
+                            children: timeOfDay == localizations.notSet || timeOfDay == 'N/A'
+                                ? [Text('${localizations.time}: $timeOfDay')]
                                 : [
                               for (int i = 0; i < timeOfDay.split(', ').length; i++)
                                 Padding(
@@ -301,7 +312,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
                       children: [
                         const Icon(Icons.note, size: 16),
                         const SizedBox(width: 8),
-                        Text('Notes: $notes'),
+                        Text('${localizations.notes}: $notes'),
                       ],
                     ),
                   ],
@@ -311,7 +322,7 @@ class _MedicationScreenState extends State<MedicationScreen> with SingleTickerPr
             ],
           ),
           // New alarm control positioned at top right
-          if (frequency != 'Not taking')
+          if (frequency != localizations.notTaking)
             Positioned(
               top: 8,
               right: 8,

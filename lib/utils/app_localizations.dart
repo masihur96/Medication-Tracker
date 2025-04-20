@@ -53,6 +53,19 @@ class AppLocalizations {
       'rx': 'Rx',
       'dosageMonitor': 'Dosage Monitor',
       'pending': 'Pending',
+      'medications': 'Medications',
+      'drugs': 'Drugs',
+      'stock': 'Stock',
+      'active': 'Active',
+      'inactive': 'Inactive',
+      'noMedicationsYet': 'No medications added yet',
+      'time': 'Time',
+      'notes': 'Notes',
+      'notSet': 'Not set',
+      'notTaking': 'Not taking',
+      'discontinued': 'Discontinued',
+      'currentStock': 'Current Stock',
+      'units': 'units',
       // Add more translations as needed
     },
     'bn': {
@@ -98,6 +111,19 @@ class AppLocalizations {
       'rx': 'প্রেসক্রিপশন',
       'dosageMonitor': 'ডোজ মনিটর',
       'pending': 'বাকি আছে',
+      'medications': 'ঔষধসমূহ',
+      'drugs': 'ঔষধ',
+      'stock': 'মজুদ',
+      'active': 'সক্রিয়',
+      'inactive': 'নিষ্ক্রিয়',
+      'noMedicationsYet': 'এখনও কোন ঔষধ যোগ করা হয়নি',
+      'time': 'সময়',
+      'notes': 'নোট',
+      'notSet': 'সেট করা হয়নি',
+      'notTaking': 'খাচ্ছি না',
+      'discontinued': 'বন্ধ করা হয়েছে',
+      'currentStock': 'বর্তমান মজুদ',
+      'units': 'ইউনিট',
       // Add more translations as needed
     },
   };
@@ -143,6 +169,19 @@ class AppLocalizations {
   String get drug => _localizedValues[locale.languageCode]!['drug']!;
   String get rx => _localizedValues[locale.languageCode]!['rx']!;
   String get dosageMonitor => _localizedValues[locale.languageCode]!['dosageMonitor']!;
+  String get medications => _localizedValues[locale.languageCode]!['medications']!;
+  String get drugs => _localizedValues[locale.languageCode]!['drugs']!;
+  String get stock => _localizedValues[locale.languageCode]!['stock']!;
+  String get active => _localizedValues[locale.languageCode]!['active']!;
+  String get inactive => _localizedValues[locale.languageCode]!['inactive']!;
+  String get noMedicationsYet => _localizedValues[locale.languageCode]!['noMedicationsYet']!;
+  String get time => _localizedValues[locale.languageCode]!['time']!;
+  String get notes => _localizedValues[locale.languageCode]!['notes']!;
+  String get notSet => _localizedValues[locale.languageCode]!['notSet']!;
+  String get notTaking => _localizedValues[locale.languageCode]!['notTaking']!;
+  String get discontinued => _localizedValues[locale.languageCode]!['discontinued']!;
+  String get currentStock => _localizedValues[locale.languageCode]!['currentStock']!;
+  String get units => _localizedValues[locale.languageCode]!['units']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!
