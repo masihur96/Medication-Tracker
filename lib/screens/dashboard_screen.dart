@@ -250,14 +250,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-             "${medication.name} (${medication.timesPerDay}) ",
+             "${medication.name}",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
             ),
 
-            Text('${localizations.medicationName}: ${medication.notes}',
+            Text('${localizations.notes}: ${medication.notes}',
               style: const TextStyle(
                 fontSize: 14,
               ),),
@@ -387,8 +387,6 @@ Future<void> updateMedicationStatus({
 Future<Map<DateTime, int>> _generateHeatMapDataset() async {
   Map<DateTime, int> dataset = {};
 
-
-  print("ffffff$_medicationHistory");
   // Use history data to generate heat map
   for (var history in _medicationHistory) {
     if (_selectedPrescription != null && 
@@ -419,12 +417,11 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
   // Format date to match your storage format
   String formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   
-  List<Medication> medicationsForDate = [];
-  for (var med in _todaysMedications) {
-    if (med.remainderDates.contains(formattedDate)) {
-      medicationsForDate.add(med);
-    }
-  }
+  // Filter medication history for the selected date and prescription
+  List<EnhancedMedicationHistory> historyForDate = _medicationHistory.where((history) => 
+    history.date == formattedDate && 
+    history.prescriptionId == _selectedPrescription?.uid
+  ).toList();
 
   showDialog(
     context: context,
@@ -434,21 +431,23 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: medicationsForDate.map((med) => ListTile(
-            title: Text(med.name),
-            subtitle: Text('Dosage: ${med.timesPerDay}\nNote: ${med.notes}'),
-            trailing: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: med.isTaken.asMap().entries.map((entry) => 
-                Text(
-                  '${_formatTimeOfDay(med.reminderTimes[entry.key])}: ${entry.value ? "Taken" : "Missed"}',
-                  style: TextStyle(
-                    color: entry.value ? Colors.green : Colors.red,
-                  ),
-                )
-              ).toList(),
-            ),
-          )).toList(),
+          children: historyForDate.isEmpty
+            ? [Text('No medication records for this date')]
+            : historyForDate.map((history) => ListTile(
+                title: Text(history.medicationName),
+                subtitle: Text('Dosage: ${history.dosage}\nNote: ${history.notes}'),
+                trailing: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: history.medicationTimes.asMap().entries.map((entry) => 
+                    Text(
+                      '${history.medicationTimes[entry.key]}: ${history.isTaken[entry.key] ? "Taken" : "Missed"}',
+                      style: TextStyle(
+                        color: history.isTaken[entry.key] ? Colors.green : Colors.red,
+                      ),
+                    )
+                  ).toList(),
+                ),
+              )).toList(),
         ),
       ),
       actions: [
