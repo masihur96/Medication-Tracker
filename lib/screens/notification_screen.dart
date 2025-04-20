@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/providers/medication_provider.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:provider/provider.dart';
+
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Notifications',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          localizations.notifications,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -31,20 +35,18 @@ class NotificationScreen extends StatelessWidget {
                   Icon(
                     Icons.notifications_off,
                     size: 80,
-                    // color: Theme.of(context).primaryColor.withOpacity(0.6),
                   ),
                   SizedBox(height: 24),
                   Text(
-                    'No Notifications',
+                    localizations.noMedications,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      // color: Theme.of(context).primaryColor,
                     ),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'You have no medication reminders set',
+                    localizations.noMedicationsScheduled,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -60,7 +62,7 @@ class NotificationScreen extends StatelessWidget {
             itemCount: medications.length,
             itemBuilder: (context, index) {
               final medication = medications[index];
-              return _buildNotificationCard(medication);
+              return _buildNotificationCard(medication,context);
             },
           );
         },
@@ -68,7 +70,8 @@ class NotificationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationCard(Medication medication) {
+  Widget _buildNotificationCard(Medication medication,BuildContext context) {
+
     return Card(
       margin: EdgeInsets.only(bottom: 16),
       elevation: 4,
@@ -106,11 +109,11 @@ class NotificationScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 12),
-            _buildInfoRow(Icons.medical_information, 'Dosage: ${medication.dosage}'),
+            _buildInfoRow(Icons.medical_information, '${AppLocalizations.of(context).dosage}: ${medication.dosage}'),
             SizedBox(height: 4),
-            _buildInfoRow(Icons.schedule, 'Frequency: ${medication.frequency}'),
+            _buildInfoRow(Icons.schedule, '${AppLocalizations.of(context).frequency}: ${medication.frequency}'),
             SizedBox(height: 4),
-            _buildInfoRow(Icons.alarm, 'Next reminder: ${_formatTime(60)}'),
+            _buildInfoRow(Icons.alarm, '${AppLocalizations.of(context).time}: ${_formatTime(60)}'),
           ],
         ),
         trailing: IconButton(
