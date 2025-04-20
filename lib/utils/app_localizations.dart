@@ -48,6 +48,11 @@ class AppLocalizations {
       'deleteConfirmMessage': 'Are you sure you want to delete this medication?',
       'yes': 'Yes',
       'no': 'No',
+      'dashboard': 'Dashboard',
+      'drug': 'Drug',
+      'rx': 'Rx',
+      'dosageMonitor': 'Dosage Monitor',
+      'pending': 'Pending',
       // Add more translations as needed
     },
     'bn': {
@@ -88,6 +93,11 @@ class AppLocalizations {
       'deleteConfirmMessage': 'আপনি কি এই ঔষধটি মুছে ফেলতে চান?',
       'yes': 'হ্যাঁ',
       'no': 'না',
+      'dashboard': 'ড্যাশবোর্ড',
+      'drug': 'ঔষধ',
+      'rx': 'প্রেসক্রিপশন',
+      'dosageMonitor': 'ডোজ মনিটর',
+      'pending': 'বাকি আছে',
       // Add more translations as needed
     },
   };
@@ -129,6 +139,10 @@ class AppLocalizations {
   String get deleteConfirmMessage => _localizedValues[locale.languageCode]!['deleteConfirmMessage']!;
   String get yes => _localizedValues[locale.languageCode]!['yes']!;
   String get no => _localizedValues[locale.languageCode]!['no']!;
+  String get dashboard => _localizedValues[locale.languageCode]!['dashboard']!;
+  String get drug => _localizedValues[locale.languageCode]!['drug']!;
+  String get rx => _localizedValues[locale.languageCode]!['rx']!;
+  String get dosageMonitor => _localizedValues[locale.languageCode]!['dosageMonitor']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

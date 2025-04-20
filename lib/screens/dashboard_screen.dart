@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/medication_history.dart';
 import '../models/enhanced_medication_history.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -121,13 +121,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
        appBar: AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).primaryColor,
-      title: const Text(
+      title: Text(
         'MedTrack',
-        style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
          actions: [
            IconButton(
@@ -148,9 +150,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Today's Medications Section
-            const Text(
-              "Today's Medications",
-              style: TextStyle(
+            Text(
+              localizations.todaysMedications,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -159,11 +161,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: _todaysMedications.length,
               itemBuilder: (context, index) {
                 final medication = _todaysMedications[index];
-                return  _buildMedicationCard(
+                return _buildMedicationCard(
                   medication: medication,
                 );
 
@@ -176,9 +178,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Medication Dosage Chart
             Row(
               children: [
-                const Text(
-                  'Dosage Monitor',
-                  style: TextStyle(
+                Text(
+                  localizations.dosageMonitor,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -192,7 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: DropdownButton<Prescription>(
                       isExpanded: true,
                       value: _selectedPrescription,
-                      hint: const Text('prescription'),
+                      hint: Text(localizations.rx),
                       items: _prescriptions.map((prescription) {
                         return DropdownMenuItem<Prescription>(
                           value: prescription,
@@ -239,6 +241,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     required Medication medication,
   }) {
+    final localizations = AppLocalizations.of(context);
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -253,7 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            Text('Note: ${medication.notes}',
+            Text('${localizations.medicationName}: ${medication.notes}',
               style: const TextStyle(
                 fontSize: 14,
               ),),
@@ -261,7 +265,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Display status for each reminder time
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: medication.reminderTimes.length,
               itemBuilder: (context, index) {
                 final time = _formatTimeOfDay(medication.reminderTimes[index]);
@@ -270,7 +274,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Time: $time'),
+                      Text('${localizations.schedule}: $time'),
                       GestureDetector(
                         onTap: () async {
                           setState(() {
@@ -291,7 +295,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            medication.isTaken[index] ? 'Taken' : 'Pending',
+                            medication.isTaken[index] ? localizations.save : 'Pending',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
