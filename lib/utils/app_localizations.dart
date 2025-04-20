@@ -88,6 +88,36 @@ class AppLocalizations {
       'medicationStatus': 'Medication Status',
       'updateMedication': 'Update Medication',
       'saveMedication': 'Save Medication',
+      'selectPrescription': 'Select Prescription',
+      'selectDateToViewMedications': 'Select a date to view medications',
+      'noMedicationsScheduled': 'No medications scheduled for this date',
+      'taken': 'Taken',
+      'notTakenYet': 'Not taken yet',
+      'age': 'Age',
+      'date': 'Date',
+      'status': 'Status',
+      'takenAt': 'Taken At',
+      'medication': 'Medication',
+      'vibration': 'Vibration',
+      'sound': 'Sound',
+      'enableNotifications': 'Enable Notifications',
+      'turnOnOffReminders': 'Turn on/off all medication reminders',
+      'dataPrivacy': 'Data Privacy',
+      'dataCollection': 'Data Collection',
+      'dataCollectionDescription': 'Allow anonymous usage data collection to improve the app',
+      'showMedicationNames': 'Show Medication Names',
+      'showMedicationNamesDescription': 'Show medication names in notifications and widgets',
+      'biometricLock': 'Biometric Lock',
+      'biometricLockDescription': 'Require authentication to open the app',
+      'dataManagement': 'Data Management',
+      'exportData': 'Export Your Data',
+      'exportDataDescription': 'Download a copy of your data',
+      'deleteAllData': 'Delete All Data',
+      'deleteAllDataDescription': 'Permanently remove all your data',
+      'deleteAllDataConfirm': 'Delete All Data?',
+      'deleteAllDataWarning': 'This action cannot be undone. All your medication history and settings will be permanently deleted.',
+      'aboutDescription': 'MedTrack is your personal medication tracking assistant, helping you stay on top of your medication schedule and maintain better health.',
+      'close': 'CLOSE',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -166,6 +196,36 @@ class AppLocalizations {
       'medicationStatus': 'ঔষধের স্থিতি',
       'updateMedication': 'ঔষধ আপডেট করুন',
       'saveMedication': 'ঔষধ সংরক্ষণ করুন',
+      'selectPrescription': 'প্রেসক্রিপশন নির্বাচন করুন',
+      'selectDateToViewMedications': 'ঔষধ দেখতে একটি তারিখ নির্বাচন করুন',
+      'noMedicationsScheduled': 'এই তারিখের জন্য কোন ঔষধ নির্ধারিত নেই',
+      'taken': 'খাওয়া হয়েছে',
+      'notTakenYet': 'এখনও খাওয়া হয়নি',
+      'age': 'বয়স',
+      'date': 'তারিখ',
+      'status': 'স্থিতি',
+      'takenAt': 'খাওয়ার সময়',
+      'medication': 'ঔষধ',
+      'vibration': 'ভাইব্রেশন',
+      'sound': 'শব্দ',
+      'enableNotifications': 'নোটিফিকেশন চালু করুন',
+      'turnOnOffReminders': 'সমস্ত ঔষধের রিমাইন্ডার চালু/বন্ধ করুন',
+      'dataPrivacy': 'ডেটা গোপনীয়তা',
+      'dataCollection': 'ডেটা সংগ্রহ',
+      'dataCollectionDescription': 'অ্যাপ উন্নত করতে বেনামী ব্যবহার ডেটা সংগ্রহের অনুমতি দিন',
+      'showMedicationNames': 'ঔষধের নাম দেখান',
+      'showMedicationNamesDescription': 'নোটিফিকেশন এবং উইজেটে ঔষধের নাম দেখান',
+      'biometricLock': 'বায়োমেট্রিক লক',
+      'biometricLockDescription': 'অ্যাপ খোলার জন্য প্রমাণীকরণ প্রয়োজন',
+      'dataManagement': 'ডেটা ব্যবস্থাপনা',
+      'exportData': 'আপনার ডেটা এক্সপোর্ট করুন',
+      'exportDataDescription': 'আপনার ডেটার একটি কপি ডাউনলোড করুন',
+      'deleteAllData': 'সমস্ত ডেটা মুছবেন',
+      'deleteAllDataDescription': 'আপনার সমস্ত ডেটা স্থায়ীভাবে মুছে ফেলুন',
+      'deleteAllDataConfirm': 'সমস্ত ডেটা মুছবেন?',
+      'deleteAllDataWarning': 'এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ঔষধের ইতিহাস এবং সেটিংস স্থায়ীভাবে মুছে যাবে।',
+      'aboutDescription': 'মেডট্র্যাক আপনার ব্যক্তিগত ঔষধ ট্র্যাকিং সহকারী, যা আপনাকে আপনার ঔষধের সময়সূচী মেনে চলতে এবং আরও ভাল স্বাস্থ্য বজায় রাখতে সাহায্য করে।',
+      'close': 'বন্ধ করুন',
     },
   };
 
@@ -245,6 +305,36 @@ class AppLocalizations {
   String get medicationStatus => _localizedValues[locale.languageCode]!['medicationStatus']!;
   String get updateMedication => _localizedValues[locale.languageCode]!['updateMedication']!;
   String get saveMedication => _localizedValues[locale.languageCode]!['saveMedication']!;
+  String get selectPrescription => _localizedValues[locale.languageCode]!['selectPrescription']!;
+  String get selectDateToViewMedications => _localizedValues[locale.languageCode]!['selectDateToViewMedications']!;
+  String get noMedicationsScheduled => _localizedValues[locale.languageCode]!['noMedicationsScheduled']!;
+  String get taken => _localizedValues[locale.languageCode]!['taken']!;
+  String get notTakenYet => _localizedValues[locale.languageCode]!['notTakenYet']!;
+  String get age => _localizedValues[locale.languageCode]!['age']!;
+  String get date => _localizedValues[locale.languageCode]!['date']!;
+  String get status => _localizedValues[locale.languageCode]!['status']!;
+  String get takenAt => _localizedValues[locale.languageCode]!['takenAt']!;
+  String get medication => _localizedValues[locale.languageCode]!['medication']!;
+  String get vibration => _localizedValues[locale.languageCode]!['vibration']!;
+  String get sound => _localizedValues[locale.languageCode]!['sound']!;
+  String get enableNotifications => _localizedValues[locale.languageCode]!['enableNotifications']!;
+  String get turnOnOffReminders => _localizedValues[locale.languageCode]!['turnOnOffReminders']!;
+  String get dataPrivacy => _localizedValues[locale.languageCode]!['dataPrivacy']!;
+  String get dataCollection => _localizedValues[locale.languageCode]!['dataCollection']!;
+  String get dataCollectionDescription => _localizedValues[locale.languageCode]!['dataCollectionDescription']!;
+  String get showMedicationNames => _localizedValues[locale.languageCode]!['showMedicationNames']!;
+  String get showMedicationNamesDescription => _localizedValues[locale.languageCode]!['showMedicationNamesDescription']!;
+  String get biometricLock => _localizedValues[locale.languageCode]!['biometricLock']!;
+  String get biometricLockDescription => _localizedValues[locale.languageCode]!['biometricLockDescription']!;
+  String get dataManagement => _localizedValues[locale.languageCode]!['dataManagement']!;
+  String get exportData => _localizedValues[locale.languageCode]!['exportData']!;
+  String get exportDataDescription => _localizedValues[locale.languageCode]!['exportDataDescription']!;
+  String get deleteAllData => _localizedValues[locale.languageCode]!['deleteAllData']!;
+  String get deleteAllDataDescription => _localizedValues[locale.languageCode]!['deleteAllDataDescription']!;
+  String get deleteAllDataConfirm => _localizedValues[locale.languageCode]!['deleteAllDataConfirm']!;
+  String get deleteAllDataWarning => _localizedValues[locale.languageCode]!['deleteAllDataWarning']!;
+  String get aboutDescription => _localizedValues[locale.languageCode]!['aboutDescription']!;
+  String get close => _localizedValues[locale.languageCode]!['close']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

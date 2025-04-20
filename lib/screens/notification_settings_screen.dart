@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({Key? key}) : super(key: key);
@@ -69,14 +70,15 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Notification Settings',
+        title: Text(
+          localizations.notifications,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -86,15 +88,15 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         : ListView(
           padding: EdgeInsets.all(16),
           children: [
-            _buildGlobalSettingsCard(),
+            _buildGlobalSettingsCard(localizations),
             SizedBox(height: 16),
-            _buildMedicationNotificationsCard(),
+            _buildMedicationNotificationsCard(localizations),
           ],
         ),
     );
   }
 
-  Widget _buildGlobalSettingsCard() {
+  Widget _buildGlobalSettingsCard(AppLocalizations localizations) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -106,7 +108,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Global Settings',
+              localizations.appSettings,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -114,25 +116,22 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             ),
             SizedBox(height: 16),
             SwitchListTile(
-              title: Text('Enable Notifications'),
-              subtitle: Text('Turn on/off all medication reminders'),
+              title: Text(localizations.enableDisableNotifications),
+              subtitle: Text(localizations.enableDisableNotifications),
               value: _notificationsEnabled,
               onChanged: (bool value) async {
                 setState(() => _notificationsEnabled = value);
                 await _saveSettings();
                 if (!value) {
-                  // Cancel all notifications if disabled
                   await FlutterLocalNotificationsPlugin().cancelAll();
                 } else {
-                  // Reschedule notifications for all active medications
-                  // This will use the existing scheduling logic
                   await scheduleMedicationNotifications();
                 }
               },
             ),
             SwitchListTile(
-              title: Text('Sound'),
-              subtitle: Text('Play sound with notifications'),
+              title: Text(localizations.sound),
+              subtitle: Text(localizations.shareApp),
               value: _soundEnabled,
               onChanged: _notificationsEnabled ? (bool value) async {
                 setState(() => _soundEnabled = value);
@@ -140,8 +139,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               } : null,
             ),
             SwitchListTile(
-              title: Text('Vibration'),
-              subtitle: Text('Vibrate with notifications'),
+              title: Text(localizations.vibration),
+              subtitle: Text(localizations.vibration),
               value: _vibrationEnabled,
               onChanged: _notificationsEnabled ? (bool value) async {
                 setState(() => _vibrationEnabled = value);
@@ -154,7 +153,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     );
   }
 
-  Widget _buildMedicationNotificationsCard() {
+  Widget _buildMedicationNotificationsCard(AppLocalizations localizations) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -166,7 +165,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Medication Reminders',
+              localizations.reminderTimes,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -178,7 +177,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 child: Padding(
                   padding: EdgeInsets.all(16),
                   child: Text(
-                    'No active medications found',
+                    localizations.noMedications,
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 16,
@@ -193,7 +192,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 itemCount: _medications.length,
                 itemBuilder: (context, index) {
                   final medication = _medications[index];
-                  return _buildMedicationNotificationItem(medication);
+                  return _buildMedicationNotificationItem(medication, localizations);
                 },
               ),
           ],
@@ -202,10 +201,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     );
   }
 
-  Widget _buildMedicationNotificationItem(Medication medication) {
+  Widget _buildMedicationNotificationItem(Medication medication, AppLocalizations localizations) {
     return ExpansionTile(
       title: Text(medication.name),
-      subtitle: Text('${medication.frequency} - ${medication.reminderTimes.length} times'),
+      subtitle: Text('${medication.frequency} - ${medication.reminderTimes.length} ${localizations.timesPerDay}'),
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -213,7 +212,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Reminder Times:',
+                localizations.reminderTimes,
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               SizedBox(height: 8),

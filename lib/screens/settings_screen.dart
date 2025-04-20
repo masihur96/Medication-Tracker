@@ -405,6 +405,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void showCustomAboutDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -420,23 +421,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Version: 1.0.0',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                '${localizations.version}: 1.0.0',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 12),
-              Text(
-                'MedTrack is your personal medication tracking assistant, '
-                    'helping you stay on top of your medication schedule and '
-                    'maintain better health.',
-              ),
+              const SizedBox(height: 12),
+              Text(localizations.aboutDescription),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('CLOSE'),
+              child: Text(localizations.close),
             ),
           ],
         );

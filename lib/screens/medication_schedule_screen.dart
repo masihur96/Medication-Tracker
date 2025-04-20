@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:pdf/pdf.dart';
@@ -12,6 +13,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:io';
+
 
 class MedicationScheduleScreen extends StatefulWidget {
   const MedicationScheduleScreen({super.key});
@@ -57,13 +59,15 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          'Medication Schedule',
-          style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+        title: Text(
+          localizations.medicationHistory,
+          style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
         ),
         actions: [
           IconButton(
@@ -79,12 +83,12 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButton<Prescription>(
               isExpanded: true,
-              hint: const Text('Select Prescription'),
+              hint: Text(localizations.selectPrescription),
               value: _selectedPrescription,
               items: _prescriptions.map((prescription) {
                 return DropdownMenuItem<Prescription>(
                   value: prescription,
-                  child: Text('Dr. ${prescription.doctor} - ${_formatDisplayDate(prescription.date)}'),
+                  child: Text('${localizations.doctor} ${prescription.doctor} - ${_formatDisplayDate(prescription.date)}'),
                 );
               }).toList(),
               onChanged: (Prescription? newValue) {
@@ -110,6 +114,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             lastDay: DateTime.now().add(const Duration(days: 365)),
             focusedDay: _focusedDay,
             calendarFormat: _calendarFormat,
+            locale: Localizations.localeOf(context).languageCode,
             selectedDayPredicate: (day) {
               return isSameDay(_selectedDay, day);
             },
@@ -145,11 +150,11 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             },
           ),
           
-          const Padding(
-            padding: EdgeInsets.all(8.0),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Medications for Selected Date',
-              style: TextStyle(
+              localizations.todaysMedications,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -160,11 +165,11 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _selectedPrescription == null
-                    ? const Center(child: Text('Please select a prescription'))
+                    ? Center(child: Text(localizations.selectPrescription))
                     : _selectedDay != null
                         ? _buildMedicationList()
-                        : const Center(
-                            child: Text('Select a date to view medications'),
+                        : Center(
+                            child: Text(localizations.selectDateToViewMedications),
                           ),
           ),
         ],
@@ -198,14 +203,12 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   }
 
   Widget _buildMedicationList() {
-    if (_selectedPrescription == null || _selectedDay == null) {
-      return const Center(child: Text('No data available'));
-    }
-
+    final localizations = AppLocalizations.of(context);
+    
     final medications = _getMedicationsForDay(_selectedDay!, _selectedPrescription!);
     
     if (medications.isEmpty) {
-      return const Center(child: Text('No medications scheduled for this date'));
+      return Center(child: Text(localizations.noMedicationsScheduled));
     }
 
     return ListView.builder(
@@ -227,20 +230,18 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Dosage: ${medication.dosage}'),
-                Text('Times per day: ${medication.timesPerDay}'),
+                Text('${localizations.dosage}: ${medication.dosage}'),
+                Text('${localizations.timesPerDay}: ${medication.timesPerDay}'),
                 if (medication.notes?.isNotEmpty ?? false)
-                  Text('Notes: ${medication.notes}'),
-                Text('Reminder times: ${medication.reminderTimes.join(', ')}'),
+                  Text('${localizations.notes}: ${medication.notes}'),
+                Text('${localizations.reminderTimes}: ${medication.reminderTimes.join(', ')}'),
                 ...List.generate(medication.timesPerDay, (index) {
                   final bool taken = index < medication.isTaken.length ? medication.isTaken[index] : false;
                   final String time = (medication.reminderTimes != null && index >= 0 && index < medication.reminderTimes.length)
                       ? formatTimeOfDay(medication.reminderTimes[index])
-                      : 'N/A';
-                  //final String time = getReminderTime(medication.reminderTimes, index);
+                      : localizations.notSet;
                   return GestureDetector(
                     onTap: (){
-
                       print(time);
                     },
                     child: Padding(
@@ -253,7 +254,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                         Text('$time - ${taken ? 'Taken' : 'Not taken yet'}'),
+                          Text('$time - ${taken ? localizations.taken : localizations.notTakenYet}'),
                         ],
                       ),
                     ),
@@ -282,7 +283,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
   String _formatDisplayDate(String date) {
     try {
       final DateTime parsedDate = DateFormat('dd/M/yyyy').parse(date);
-      return DateFormat('MMMM d, yyyy').format(parsedDate);
+      return DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(parsedDate);
     } catch (e) {
       return date;
     }
@@ -290,10 +291,12 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
 
 
   Future<void> _generateAndOpenPDF() async {
+    final localizations = AppLocalizations.of(context);
     final pdf = pw.Document();
 
-    final String patientName = 'John Doe';
-    final int patientAge = 35;
+    // TODO: Get actual patient info from your user/profile system
+    final String patientName = 'John Doe'; // This should come from user profile
+    final int patientAge = 35; // This should come from user profile
 
     // Example mock grouped data — replace this with your real grouped data
     Map<DateTime, List<Map<String, dynamic>>> medicationHistory = {
@@ -336,10 +339,10 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
         build: (context) => [
           pw.Header(
             level: 0,
-            child: pw.Text('Medication History'),
+            child: pw.Text(localizations.medicationHistory),
           ),
-          pw.Text('Name: $patientName'),
-          pw.Text('Age: $patientAge'),
+          pw.Text('${localizations.name}: $patientName'),
+          pw.Text('${localizations.age}: $patientAge'),
           pw.SizedBox(height: 20),
 
           // Loop through each date and print a table
@@ -350,16 +353,24 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Date: $date', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text('${localizations.date}: $date', 
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)
+                ),
                 pw.SizedBox(height: 10),
                 pw.Table.fromTextArray(
-                  headers: ['Medication', 'Time', 'Dosage', 'Status', 'Taken At'],
+                  headers: [
+                    localizations.medication,
+                    localizations.time,
+                    localizations.dosage,
+                    localizations.status,
+                    localizations.takenAt
+                  ],
                   data: meds.map((med) {
                     return [
                       med['name'],
                       med['time'],
                       med['dosage'],
-                      med['taken'] ? 'Taken' : 'Not Taken',
+                      med['taken'] ? localizations.taken : localizations.notTakenYet,
                       med['taken']
                           ? _formatDateTime(med['takenAt'])
                           : '-',
@@ -391,7 +402,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
     await OpenFile.open(file.path);
   }
   String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    return DateFormat.jm(Localizations.localeOf(context).languageCode).format(dateTime);
   }
 
 

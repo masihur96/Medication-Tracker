@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:med_track/utils/app_localizations.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class PrivacyScreen extends StatefulWidget {
   const PrivacyScreen({super.key});
@@ -38,14 +40,16 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Privacy Settings',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          localizations.privacy,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: ListView(
@@ -62,16 +66,15 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Privacy Policy',
+                  localizations.privacy,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Your privacy is important to us. This section controls how your data is handled within MedTrack.',
+                Text(
+                  localizations.managePrivacy,
                   style: TextStyle(fontSize: 14),
                 ),
               ],
@@ -82,7 +85,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Data Privacy',
+              localizations.dataPrivacy,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -94,11 +97,10 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
-              title: const Text('Data Collection'),
-              subtitle: const Text('Allow anonymous usage data collection to improve the app'),
+              title: Text(localizations.dataCollection),
+              subtitle: Text(localizations.dataCollectionDescription),
               secondary: Icon(
                 Icons.analytics_outlined,
-
               ),
               value: _dataCollection,
               onChanged: (bool value) {
@@ -114,8 +116,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
-              title: const Text('Show Medication Names'),
-              subtitle: const Text('Show medication names in notifications and widgets'),
+              title: Text(localizations.showMedicationNames),
+              subtitle: Text(localizations.showMedicationNamesDescription),
               secondary: Icon(
                 Icons.visibility,
               ),
@@ -133,8 +135,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
-              title: const Text('Biometric Lock'),
-              subtitle: const Text('Require authentication to open the app'),
+              title: Text(localizations.biometricLock),
+              subtitle: Text(localizations.biometricLockDescription),
               secondary: Icon(
                 Icons.fingerprint,
               ),
@@ -152,7 +154,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'Data Management',
+              localizations.dataManagement,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -167,8 +169,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               leading: Icon(
                 Icons.download,
               ),
-              title: const Text('Export Your Data'),
-              subtitle: const Text('Download a copy of your data'),
+              title: Text(localizations.exportData),
+              subtitle: Text(localizations.exportDataDescription),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 // TODO: Implement data export functionality
@@ -184,29 +186,27 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                 Icons.delete_outline,
                 color: Colors.red,
               ),
-              title: const Text('Delete All Data'),
-              subtitle: const Text('Permanently remove all your data'),
+              title: Text(localizations.deleteAllData),
+              subtitle: Text(localizations.deleteAllDataDescription),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Delete All Data?'),
-                    content: const Text(
-                      'This action cannot be undone. All your medication history and settings will be permanently deleted.',
-                    ),
+                    title: Text(localizations.deleteAllDataConfirm),
+                    content: Text(localizations.deleteAllDataWarning),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CANCEL'),
+                        child: Text(localizations.cancel),
                       ),
                       TextButton(
                         onPressed: () {
                           // TODO: Implement data deletion
                           Navigator.pop(context);
                         },
-                        child: const Text(
-                          'DELETE',
+                        child: Text(
+                          localizations.delete,
                           style: TextStyle(color: Colors.red),
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -56,10 +57,8 @@ bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    // Sort history by date (most recent first)
-
-
-
+    final localizations = AppLocalizations.of(context);
+    
     final sortedHistory = List<EnhancedMedicationHistory>.from(_medicationHistory)
       ..sort((a, b) {
         final aDate = _parseDate(a.date);
@@ -69,19 +68,19 @@ bool _isLoading = false;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medication History'),
+        title: Text(localizations.medicationHistory),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.print,color: Colors.white,),
+            icon: const Icon(Icons.print, color: Colors.white,),
             onPressed: () => _generateAndOpenPDF(),
           ),
         ],
       ),
       body: sortedHistory.isEmpty
-          ? const Center(
-              child: Text('No medication history available'),
+          ? Center(
+              child: Text(localizations.noMedicationsScheduled),
             )
           : ListView.builder(
               itemCount: sortedHistory.length,
@@ -103,6 +102,7 @@ bool _isLoading = false;
   }
 
   Widget _buildHistoryCard(EnhancedMedicationHistory history) {
+    final localizations = AppLocalizations.of(context);
     final date = _parseDate(history.date);
     final formattedDate = DateFormat('MMMM d, yyyy').format(date);
 
@@ -135,7 +135,7 @@ bool _isLoading = false;
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '$adherencePercentage% Taken',
+                    '${adherencePercentage}% ${localizations.taken}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -146,7 +146,7 @@ bool _isLoading = false;
             ),
             const SizedBox(height: 8),
             Text(
-              'Prescription: ${history.prescriptionName}',
+              '${localizations.prescriptions}: ${history.prescriptionName}',
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -163,7 +163,7 @@ bool _isLoading = false;
             if (history.notes!.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
-                'Notes: ${history.notes}',
+                '${localizations.notes}: ${history.notes}',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.grey,
@@ -183,7 +183,7 @@ bool _isLoading = false;
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${history.medicationTimes[index]} - ${history.isTaken[index] ? "Taken" : "Missed"}',
+                    '${history.medicationTimes[index]} - ${history.isTaken[index] ? localizations.taken : localizations.notTakenYet}',
                     style: TextStyle(
                       color: history.isTaken[index] ? Colors.green[900] : Colors.red[900],
                       fontSize: 12,
