@@ -31,6 +31,23 @@ class AppLocalizations {
       'language': 'Language',
       'selectLanguage': 'Select your preferred language',
       'version': 'Version',
+      'addMedication': 'Add Medication',
+      'medicationName': 'Medication Name',
+      'dosage': 'Dosage',
+      'frequency': 'Frequency',
+      'schedule': 'Schedule',
+      'save': 'Save',
+      'cancel': 'Cancel',
+      'delete': 'Delete',
+      'edit': 'Edit',
+      'home': 'Home',
+      'upcomingDoses': 'Upcoming Doses',
+      'todaysMedications': "Today's Medications",
+      'noMedications': 'No medications scheduled',
+      'confirmDelete': 'Confirm Delete',
+      'deleteConfirmMessage': 'Are you sure you want to delete this medication?',
+      'yes': 'Yes',
+      'no': 'No',
       // Add more translations as needed
     },
     'bn': {
@@ -54,6 +71,23 @@ class AppLocalizations {
       'language': 'ভাষা',
       'selectLanguage': 'আপনার পছন্দের ভাষা নির্বাচন করুন',
       'version': 'ভার্সন',
+      'addMedication': 'ঔষধ যোগ করুন',
+      'medicationName': 'ঔষধের নাম',
+      'dosage': 'মাত্রা',
+      'frequency': 'ফ্রিকোয়েন্সি',
+      'schedule': 'সময়সূচী',
+      'save': 'সংরক্ষণ করুন',
+      'cancel': 'বাতিল করুন',
+      'delete': 'মুছে ফেলুন',
+      'edit': 'সম্পাদনা করুন',
+      'home': 'হোম',
+      'upcomingDoses': 'আসন্ন ডোজ',
+      'todaysMedications': 'আজকের ঔষধ',
+      'noMedications': 'কোন ঔষধ নির্ধারিত নেই',
+      'confirmDelete': 'মুছে ফেলা নিশ্চিত করুন',
+      'deleteConfirmMessage': 'আপনি কি এই ঔষধটি মুছে ফেলতে চান?',
+      'yes': 'হ্যাঁ',
+      'no': 'না',
       // Add more translations as needed
     },
   };
@@ -78,6 +112,28 @@ class AppLocalizations {
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get selectLanguage => _localizedValues[locale.languageCode]!['selectLanguage']!;
   String get version => _localizedValues[locale.languageCode]!['version']!;
+  String get addMedication => _localizedValues[locale.languageCode]!['addMedication']!;
+  String get medicationName => _localizedValues[locale.languageCode]!['medicationName']!;
+  String get dosage => _localizedValues[locale.languageCode]!['dosage']!;
+  String get frequency => _localizedValues[locale.languageCode]!['frequency']!;
+  String get schedule => _localizedValues[locale.languageCode]!['schedule']!;
+  String get save => _localizedValues[locale.languageCode]!['save']!;
+  String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
+  String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  String get edit => _localizedValues[locale.languageCode]!['edit']!;
+  String get home => _localizedValues[locale.languageCode]!['home']!;
+  String get upcomingDoses => _localizedValues[locale.languageCode]!['upcomingDoses']!;
+  String get todaysMedications => _localizedValues[locale.languageCode]!['todaysMedications']!;
+  String get noMedications => _localizedValues[locale.languageCode]!['noMedications']!;
+  String get confirmDelete => _localizedValues[locale.languageCode]!['confirmDelete']!;
+  String get deleteConfirmMessage => _localizedValues[locale.languageCode]!['deleteConfirmMessage']!;
+  String get yes => _localizedValues[locale.languageCode]!['yes']!;
+  String get no => _localizedValues[locale.languageCode]!['no']!;
+
+  String medicationDueIn(String time) {
+    return _localizedValues[locale.languageCode]!['medicationDueIn']!
+        .replaceAll('{time}', time);
+  }
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
