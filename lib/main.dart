@@ -6,7 +6,9 @@ import 'package:med_track/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:med_track/providers/language_provider.dart';
+import 'package:med_track/utils/app_localizations.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -21,19 +23,19 @@ void main() async {
   final medicationProvider = MedicationProvider();
   await medicationProvider.initialize();
   final themeProvider = ThemeProvider();
+  final languageProvider = LanguageProvider();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: medicationProvider),
         ChangeNotifierProvider.value(value: themeProvider),
+        ChangeNotifierProvider(create: (_) => languageProvider),
       ],
       child: MyApp(),
     ),
   );
 }
-
-
 
 Future<void> initializeNotifications() async {
   final prefs = await SharedPreferences.getInstance();
@@ -60,11 +62,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+    return Consumer2<ThemeProvider, LanguageProvider>(
+      builder: (context, themeProvider, languageProvider, child) {
         return MaterialApp(
           title: 'MedTrack',
           theme: themeProvider.getTheme(),
+          locale: languageProvider.currentLocale,
+          supportedLocales: const [
+            Locale('en'), // English
+            Locale('bn'), // Bengali
+          ],
+          localizationsDelegates: const [
+            AppLocalizationsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           home: HomeScreen(),
         );
       },

@@ -15,6 +15,8 @@ import 'privacy_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:med_track/providers/language_provider.dart';
+import 'package:med_track/utils/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,6 +28,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _isDarkMode = false;
+  String _currentLanguage = 'English';
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
+      _currentLanguage = prefs.getString('language') ?? 'English';
     });
   }
 
@@ -45,18 +49,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setBool('dark_mode', _isDarkMode);
+    await prefs.setString('language', _currentLanguage);
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          localizations.settings,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -75,18 +82,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 backgroundColor: Theme.of(context).primaryColor,
                 child: const Icon(Icons.person, size: 35, color: Colors.white),
               ),
-              title: const Text(
-                'Profile',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              title: Text(
+                localizations.profile,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text(
-                'Manage your profile information',
-                style: TextStyle(fontSize: 14),
+              subtitle: Text(
+                localizations.manageProfile,
+                style: const TextStyle(fontSize: 14),
               ),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>ProfileScreen()));
-                // Navigate to profile screen
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen()));
               },
+            ),
+          ),
+
+          // Language Selection Card (Add this)
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: ListTile(
+              leading: const Icon(Icons.language),
+              title: Text(localizations.language),
+              subtitle: Text(localizations.selectLanguage),
+              trailing: DropdownButton<String>(
+                value: Provider.of<LanguageProvider>(context).currentLocale.languageCode,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text('English'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'bn',
+                    child: Text('বাংলা'),
+                  ),
+                ],
+                onChanged: (String? value) {
+                  if (value != null) {
+                    Provider.of<LanguageProvider>(context, listen: false)
+                        .changeLanguage(value);
+                  }
+                },
+              ),
             ),
           ),
 
@@ -94,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'App Settings',
+              localizations.appSettings,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -111,8 +146,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.history,
 
               ),
-              title: const Text('Medication History'),
-              subtitle: const Text('View your medication tracking history'),
+              title: Text(localizations.medicationHistory),
+              subtitle: Text(localizations.viewHistory),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.push(
@@ -142,8 +177,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.notifications,
 
               ),
-              title: const Text('Notifications'),
-              subtitle: const Text('Enable or disable notifications'),
+              title: Text(localizations.notifications),
+              subtitle: Text(localizations.enableDisableNotifications),
               trailing: Switch(
                 value: _notificationsEnabled,
                 onChanged: (bool value) async {
@@ -163,14 +198,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-
-
           // Theme Settings
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
-              title: const Text('Dark Theme'),
-              subtitle: const Text('Switch between light and dark theme'),
+              title: Text(localizations.darkTheme),
+              subtitle: Text(localizations.switchTheme),
               secondary: Icon(
                 Icons.dark_mode,
 
@@ -192,7 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
-              'More Options',
+              localizations.moreOptions,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -209,8 +242,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.privacy_tip,
 
               ),
-              title: const Text('Privacy'),
-              subtitle: const Text('Manage your privacy settings'),
+              title: Text(localizations.privacy),
+              subtitle: Text(localizations.managePrivacy),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.push(
@@ -229,8 +262,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.share,
 
               ),
-              title: const Text('Tell a Friend'),
-              subtitle: const Text('Share this app with friends'),
+              title: Text(localizations.tellFriend),
+              subtitle: Text(localizations.shareApp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 const String appLink = "https://medtrack.app"; // Replace with your actual app link
@@ -248,8 +281,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.info,
 
               ),
-              title: const Text('About'),
-              subtitle: const Text('Learn more about MedTrack'),
+              title: Text(localizations.about),
+              subtitle: Text(localizations.learnMore),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
 
