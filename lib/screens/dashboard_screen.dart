@@ -340,13 +340,16 @@ Future<void> updateMedicationStatus({
           // Create or update history entry
           EnhancedMedicationHistory historyEntry = EnhancedMedicationHistory(
             prescriptionId: prescription.uid,
-            prescriptionName: "Prescription ${prescription.doctor}",
+            prescriptionName: "Prescription ${prescription.medicationTo}",
             date: today,
             medicationName: item.name,
             dosage: item.timesPerDay.toString(),
-            notes: item.notes,
+            notes: item.notes!,
             medicationTimes: item.reminderTimes.map((t) => _formatTimeOfDay(t)).toList(),
             isTaken: item.isTaken,
+            doctorName: prescription.doctor,
+            patientName: prescription.patient,
+            patientAge: prescription.age!,
           );
           
           // Update history list
@@ -435,7 +438,15 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
             ? [Text('No medication records for this date')]
             : historyForDate.map((history) => ListTile(
                 title: Text(history.medicationName),
-                subtitle: Text('Dosage: ${history.dosage}\nNote: ${history.notes}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Doctor: ${history.doctorName}'),
+                    Text('Patient: ${history.patientName} (${history.patientAge} years)'),
+                    Text('Dosage: ${history.dosage}'),
+                    Text('Note: ${history.notes}'),
+                  ],
+                ),
                 trailing: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: history.medicationTimes.asMap().entries.map((entry) => 

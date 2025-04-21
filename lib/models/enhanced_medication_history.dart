@@ -4,9 +4,12 @@ class EnhancedMedicationHistory {
   final String date;
   final String medicationName;
   final String dosage;
-  final String? notes;
+  final String notes;
   final List<String> medicationTimes;
   final List<bool> isTaken;
+  final String doctorName;
+  final String patientName;
+  final int patientAge;
 
   EnhancedMedicationHistory({
     required this.prescriptionId,
@@ -14,9 +17,12 @@ class EnhancedMedicationHistory {
     required this.date,
     required this.medicationName,
     required this.dosage,
-    this.notes,
+    required this.notes,
     required this.medicationTimes,
     required this.isTaken,
+    required this.doctorName,
+    required this.patientName,
+    required this.patientAge,
   });
 
   factory EnhancedMedicationHistory.fromJson(Map<String, dynamic> json) {
@@ -29,6 +35,9 @@ class EnhancedMedicationHistory {
       notes: json['notes'],
       medicationTimes: List<String>.from(json['medicationTimes']),
       isTaken: List<bool>.from(json['isTaken']),
+      doctorName: json['doctorName'] ?? '',
+      patientName: json['patientName'] ?? '',
+      patientAge: json['patientAge'] ?? 0,
     );
   }
 
@@ -42,6 +51,9 @@ class EnhancedMedicationHistory {
       'notes': notes,
       'medicationTimes': medicationTimes,
       'isTaken': isTaken,
+      'doctorName': doctorName,
+      'patientName': patientName,
+      'patientAge': patientAge,
     };
   }
 } 

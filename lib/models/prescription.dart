@@ -7,6 +7,7 @@ class Prescription {
   final String chamber;
   final String patient;
   final String medicationTo;
+  final int? age;  //;
   final List<Medication> medications;
 
   Prescription({
@@ -15,6 +16,7 @@ class Prescription {
     required this.date,
     required this.chamber,
     required this.patient,
+    required this.age,
     required this.medicationTo,
     required this.medications,
   });
@@ -26,6 +28,7 @@ class Prescription {
       date: json['date']??"",
       chamber: json['chamber']??"",
       patient: json['patient']??"",
+      age: json['age']??0,
       medicationTo: json['medicationTo']??"",
       medications: (json['medications'] as List<dynamic>?)
           ?.map((e) => Medication.fromJson(e))
@@ -39,6 +42,7 @@ class Prescription {
       'uid': uid,
       'doctor': doctor,
       'date': date,
+      'age': age,
       'chamber': chamber,
       'patient': patient,
       'medicationTo': medicationTo,

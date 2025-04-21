@@ -209,10 +209,18 @@ bool _isLoading = false;
     final pdf = pw.Document();
     final localizations = AppLocalizations.of(context);
 
-    // Get patient information - you'll need to implement these getters
-    final patientName = await _getPatientName() ?? 'N/A';
-    final doctorName = await _getDoctorName() ?? 'N/A';
-    final patientAge = await _getPatientAge() ?? 'N/A';
+    // Get patient and doctor info from the first history entry
+    String patientName = 'N/A';
+    String doctorName = 'N/A';
+    if (_medicationHistory.isNotEmpty) {
+      final prescriptionParts = _medicationHistory[0].prescriptionName.split(' - ');
+      if (prescriptionParts.length >= 2) {
+        patientName = _medicationHistory.first.patientName;
+        doctorName = _medicationHistory.first.doctorName;
+      }
+    }
+
+    final patientAge = _medicationHistory.first..patientAge;
 
     // Sort history by date
     final sortedHistory = List<EnhancedMedicationHistory>.from(_medicationHistory)
@@ -340,21 +348,6 @@ bool _isLoading = false;
     await OpenFile.open(file.path);
   }
 
-  // Add these methods to fetch patient information
-  Future<String?> _getPatientName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('patientName');
-  }
-
-  Future<String?> _getDoctorName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('doctorName');
-  }
-
-  Future<String?> _getPatientAge() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('patientAge');
-  }
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';

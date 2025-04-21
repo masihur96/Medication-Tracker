@@ -20,6 +20,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
   final _dateController = TextEditingController();
   final _chamberController = TextEditingController();
   final _patientController = TextEditingController();
+  final _ageController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
       _dateController.text = widget.prescription!.date;
       _chamberController.text = widget.prescription!.chamber;
       _patientController.text = widget.prescription!.patient;
+      _ageController.text = widget.prescription!.age?.toString() ?? '';
     }
   }
 
@@ -41,6 +43,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
     _dateController.dispose();
     _chamberController.dispose();
     _patientController.dispose();
+    _ageController.dispose();
     super.dispose();
   }
 
@@ -111,6 +114,24 @@ class _NewRxScreenState extends State<NewRxScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _ageController,
+                decoration: InputDecoration(
+                  labelText: localizations.age,
+                  icon: Icon(Icons.calendar_view_day),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter patient age';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid age';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: _medicationController,
                 decoration: InputDecoration(
                   labelText: localizations.medicationName,
@@ -163,6 +184,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
                       date: _dateController.text,
                       chamber: _chamberController.text,
                       patient: _patientController.text,
+                      age: int.parse(_ageController.text),
                       medications: widget.prescription?.medications ?? [],
                     );
 
