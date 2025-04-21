@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
@@ -301,88 +299,65 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
 
   Future<void> _generateAndOpenPDF() async {
     final localizations = AppLocalizations.of(context);
+    
+    // Check if a prescription is selected
+    if (_selectedPrescription == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizations.selectPrescription))
+      );
+      return;
+    }
+
     final pdf = pw.Document();
 
-    // TODO: Get actual patient info from your user/profile system
-    final String patientName = 'John Doe'; // This should come from user profile
-    final int patientAge = 35; // This should come from user profile
-
-    // Example mock grouped data — replace this with your real grouped data
-    Map<DateTime, List<Map<String, dynamic>>> medicationHistory = {
-      DateTime(2024, 3, 15): [
-        {
-          'name': 'Medication A',
-          'time': '08:00',
-          'dosage': '1 tablet',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 15, 8, 5),
-        },
-        {
-          'name': 'Medication B',
-          'time': '12:00',
-          'dosage': '2 tablets',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 15, 12, 3),
-        },
-        {
-          'name': 'Medication C',
-          'time': '20:00',
-          'dosage': '1 tablet',
-          'taken': false,
-          'takenAt': null,
-        },
-      ],
-      DateTime(2024, 3, 16): [
-        {
-          'name': 'Medication D',
-          'time': '08:00',
-          'dosage': '1 tablet',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 16, 8, 10),
-        },
-      ],
-    };
+    // Group medications by date
+    Map<String, List<Medication>> medicationsByDate = {};
+    for (var medication in _selectedPrescription!.medications) {
+      for (var dateStr in medication.remainderDates) {
+        if (!medicationsByDate.containsKey(dateStr)) {
+          medicationsByDate[dateStr] = [];
+        }
+        medicationsByDate[dateStr]!.add(medication);
+      }
+    }
 
     pdf.addPage(
       pw.MultiPage(
         build: (context) => [
           pw.Header(
             level: 0,
-            child: pw.Text(localizations.medicationHistory),
+            child: pw.Text('${localizations.medicationHistory} - ${_selectedPrescription!.doctor}'),
           ),
-          pw.Text('${localizations.name}: $patientName'),
-          pw.Text('${localizations.age}: $patientAge'),
+          pw.Text('${localizations.date}: ${_selectedPrescription!.date}'),
           pw.SizedBox(height: 20),
 
           // Loop through each date and print a table
-          ...medicationHistory.entries.map((entry) {
-            final date = DateFormat('yyyy-MM-dd').format(entry.key);
-            final meds = entry.value;
+          ...medicationsByDate.entries.map((entry) {
+            final dateStr = entry.key;
+            final medications = entry.value;
 
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('${localizations.date}: $date', 
+                pw.Text('${localizations.date}: $dateStr', 
                   style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)
                 ),
                 pw.SizedBox(height: 10),
                 pw.Table.fromTextArray(
                   headers: [
                     localizations.medication,
-                    localizations.time,
-                    localizations.dosage,
-                    localizations.status,
-                    localizations.takenAt
+                    localizations.timesPerDay,
+                    localizations.reminderTimes,
+                    localizations.notes,
                   ],
-                  data: meds.map((med) {
+                  data: medications.map((med) {
                     return [
-                      med['name'],
-                      med['time'],
-                      med['dosage'],
-                      med['taken'] ? localizations.taken : localizations.notTakenYet,
-                      med['taken']
-                          ? _formatDateTime(med['takenAt'])
-                          : '-',
+                      med.name,
+                      med.timesPerDay.toString(),
+                      med.reminderTimes
+                          ?.map((time) => _formatTimeOfDay(time))
+                          ?.join(', ') ?? '-',
+                      med.notes ?? '-',
                     ];
                   }).toList(),
                   headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -392,8 +367,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
                     0: pw.Alignment.centerLeft,
                     1: pw.Alignment.center,
                     2: pw.Alignment.center,
-                    3: pw.Alignment.center,
-                    4: pw.Alignment.center,
+                    3: pw.Alignment.centerLeft,
                   },
                 ),
                 pw.SizedBox(height: 30),
@@ -405,7 +379,7 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
     );
 
     final output = await getTemporaryDirectory();
-    final file = File('${output.path}/medication_history.pdf');
+    final file = File('${output.path}/prescription_schedule.pdf');
     await file.writeAsBytes(await pdf.save());
 
     await OpenFile.open(file.path);

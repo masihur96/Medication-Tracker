@@ -47,6 +47,8 @@ bool _isLoading = false;
     final String? historyString = prefs.getString('history');
     if (historyString != null) {
       final List decoded = jsonDecode(historyString);
+
+      print("decodeddecoded: $decoded");
       setState(() {
         _medicationHistory = decoded
             .map((e) => EnhancedMedicationHistory.fromJson(e))
@@ -111,88 +113,93 @@ bool _isLoading = false;
     final totalCount = history.isTaken.length;
     final adherencePercentage = (takenCount / totalCount * 100).round();
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formattedDate,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getAdherenceColor(adherencePercentage),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${adherencePercentage}% ${localizations.taken}',
+    return GestureDetector(
+      onTap: (){
+        print(history.prescriptionName);
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formattedDate,
                     style: const TextStyle(
-                      color: Colors.white,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${localizations.prescriptions}: ${history.prescriptionName}',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getAdherenceColor(adherencePercentage),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$adherencePercentage% ${localizations.taken}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${history.medicationName} - ${history.dosage}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (history.notes!.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
-                '${localizations.notes}: ${history.notes}',
+                '${localizations.prescriptions}: ${history.prescriptionName}',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   color: Colors.grey,
                 ),
               ),
-            ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(
-                history.medicationTimes.length,
-                (index) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: history.isTaken[index] ? Colors.green[100] : Colors.red[100],
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 8),
+              Text(
+                '${history.medicationName} - ${history.dosage}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (history.notes!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '${localizations.notes}: ${history.notes}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
                   ),
-                  child: Text(
-                    '${history.medicationTimes[index]} - ${history.isTaken[index] ? localizations.taken : localizations.notTakenYet}',
-                    style: TextStyle(
-                      color: history.isTaken[index] ? Colors.green[900] : Colors.red[900],
-                      fontSize: 12,
+                ),
+              ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: List.generate(
+                  history.medicationTimes.length,
+                  (index) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: history.isTaken[index] ? Colors.green[100] : Colors.red[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${history.medicationTimes[index]} - ${history.isTaken[index] ? localizations.taken : localizations.notTakenYet}',
+                      style: TextStyle(
+                        color: history.isTaken[index] ? Colors.green[900] : Colors.red[900],
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -200,90 +207,123 @@ bool _isLoading = false;
 
   Future<void> _generateAndOpenPDF() async {
     final pdf = pw.Document();
+    final localizations = AppLocalizations.of(context);
 
-    final String patientName = 'John Doe';
-    final int patientAge = 35;
+    // Get patient information - you'll need to implement these getters
+    final patientName = await _getPatientName() ?? 'N/A';
+    final doctorName = await _getDoctorName() ?? 'N/A';
+    final patientAge = await _getPatientAge() ?? 'N/A';
 
-    // Example mock grouped data — replace this with your real grouped data
-    Map<DateTime, List<Map<String, dynamic>>> medicationHistory = {
-      DateTime(2024, 3, 15): [
-        {
-          'name': 'Medication A',
-          'time': '08:00',
-          'dosage': '1 tablet',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 15, 8, 5),
-        },
-        {
-          'name': 'Medication B',
-          'time': '12:00',
-          'dosage': '2 tablets',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 15, 12, 3),
-        },
-        {
-          'name': 'Medication C',
-          'time': '20:00',
-          'dosage': '1 tablet',
-          'taken': false,
-          'takenAt': null,
-        },
-      ],
-      DateTime(2024, 3, 16): [
-        {
-          'name': 'Medication D',
-          'time': '08:00',
-          'dosage': '1 tablet',
-          'taken': true,
-          'takenAt': DateTime(2024, 3, 16, 8, 10),
-        },
-      ],
-    };
+    // Sort history by date
+    final sortedHistory = List<EnhancedMedicationHistory>.from(_medicationHistory)
+      ..sort((a, b) {
+        final aDate = _parseDate(a.date);
+        final bDate = _parseDate(b.date);
+        return bDate.compareTo(aDate);
+      });
+
+    // Group medication history by date and medication
+    Map<DateTime, Map<String, Map<String, dynamic>>> medicationHistory = {};
+    
+    for (var history in sortedHistory) {
+      final date = _parseDate(history.date);
+      if (!medicationHistory.containsKey(date)) {
+        medicationHistory[date] = {};
+      }
+
+      // Combine all times for the same medication
+      String scheduledTimes = '';
+      String takenTimes = '';
+      
+      for (int i = 0; i < history.medicationTimes.length; i++) {
+        if (i > 0) {
+          scheduledTimes += '\n';
+          takenTimes += '\n';
+        }
+        scheduledTimes += history.medicationTimes[i];
+        takenTimes += history.isTaken[i] ? history.medicationTimes[i] : '-';
+      }
+
+      medicationHistory[date]![history.medicationName] = {
+        'name': history.medicationName,
+        'scheduledTimes': scheduledTimes,
+        'takenTimes': takenTimes,
+        'dosage': history.dosage,
+        'notes': history.notes,
+      };
+    }
 
     pdf.addPage(
       pw.MultiPage(
         build: (context) => [
+          // Add patient information header
+          pw.Container(
+            padding: const pw.EdgeInsets.all(10),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Patient Information',
+                    style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 10),
+                pw.Text('Patient Name: $patientName'),
+                pw.Text('Age: $patientAge'),
+                pw.Text('Doctor: $doctorName'),
+              ],
+            ),
+          ),
+          pw.SizedBox(height: 20),
           pw.Header(
             level: 0,
-            child: pw.Text('Medication History'),
+            child: pw.Text(localizations.medicationHistory),
           ),
-          pw.Text('Name: $patientName'),
-          pw.Text('Age: $patientAge'),
           pw.SizedBox(height: 20),
 
           // Loop through each date and print a table
           ...medicationHistory.entries.map((entry) {
             final date = DateFormat('yyyy-MM-dd').format(entry.key);
-            final meds = entry.value;
+            final meds = entry.value.values.toList();
 
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('Date: $date', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.Text('Date: $date', 
+                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)
+                ),
                 pw.SizedBox(height: 10),
                 pw.Table.fromTextArray(
-                  headers: ['Medication', 'Time', 'Dosage', 'Status', 'Taken At'],
+                  headers: [
+                    'Medication',
+                    'Scheduled Times',
+                    'Taken Times',
+                    'Dosage',
+                    'Notes'
+                  ],
                   data: meds.map((med) {
                     return [
                       med['name'],
-                      med['time'],
+                      med['scheduledTimes'],
+                      med['takenTimes'],
                       med['dosage'],
-                      med['taken'] ? 'Taken' : 'Not Taken',
-                      med['taken']
-                          ? _formatDateTime(med['takenAt'])
-                          : '-',
+                      med['notes'] ?? '-',
                     ];
                   }).toList(),
                   headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                   headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-                  cellHeight: 30,
+                  cellHeight: 40,
                   cellAlignments: {
                     0: pw.Alignment.centerLeft,
                     1: pw.Alignment.center,
                     2: pw.Alignment.center,
                     3: pw.Alignment.center,
-                    4: pw.Alignment.center,
+                    4: pw.Alignment.centerLeft,
                   },
+                  cellStyle: const pw.TextStyle(
+                    lineSpacing: 2,
+                  ),
                 ),
                 pw.SizedBox(height: 30),
               ],
@@ -299,6 +339,23 @@ bool _isLoading = false;
 
     await OpenFile.open(file.path);
   }
+
+  // Add these methods to fetch patient information
+  Future<String?> _getPatientName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('patientName');
+  }
+
+  Future<String?> _getDoctorName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('doctorName');
+  }
+
+  Future<String?> _getPatientAge() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('patientAge');
+  }
+
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }

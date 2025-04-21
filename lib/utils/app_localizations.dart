@@ -118,6 +118,7 @@ class AppLocalizations {
       'deleteAllDataWarning': 'This action cannot be undone. All your medication history and settings will be permanently deleted.',
       'aboutDescription': 'MedTrack is your personal medication tracking assistant, helping you stay on top of your medication schedule and maintain better health.',
       'close': 'CLOSE',
+      'adherence': 'Adherence',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -226,6 +227,7 @@ class AppLocalizations {
       'deleteAllDataWarning': 'এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ঔষধের ইতিহাস এবং সেটিংস স্থায়ীভাবে মুছে যাবে।',
       'aboutDescription': 'মেডট্র্যাক আপনার ব্যক্তিগত ঔষধ ট্র্যাকিং সহকারী, যা আপনাকে আপনার ঔষধের সময়সূচী মেনে চলতে এবং আরও ভাল স্বাস্থ্য বজায় রাখতে সাহায্য করে।',
       'close': 'বন্ধ করুন',
+      'adherence': 'Adherence',
     },
   };
 
@@ -338,6 +340,7 @@ class AppLocalizations {
   String get duration => 'Duration';
   String get durationInDays => 'Duration in days';
   String get enterPositiveNumber => 'Please enter a positive number';
+  String get adherence => 'Adherence';
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!
