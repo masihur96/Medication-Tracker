@@ -8,6 +8,9 @@ import 'package:med_track/screens/notification_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 
 class DashboardScreen extends StatefulWidget {
@@ -24,12 +27,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Prescription? _selectedPrescription;
   List<EnhancedMedicationHistory> _medicationHistory = [];
   bool _isLoading = true;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   
   @override
   void initState() {
     super.initState();
+    // Initialize notifications
+    _initializeNotifications();
     // Initialize data
     initializeData();
+  }
+
+  Future<void> _initializeNotifications() async {
+    tz.initializeTimeZones();
+    
+    const androidInitialize = AndroidInitializationSettings('app_icon');
+    const iOSInitialize = DarwinInitializationSettings();
+    const initializationSettings = InitializationSettings(
+      android: androidInitialize,
+      iOS: iOSInitialize,
+    );
+    
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
+        // Handle notification tap
+      },
+    );
   }
 
   Future<void> initializeData() async {
@@ -71,6 +95,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
         }
       }
+
+      // After loading today's medications, schedule notifications
+      for (final medication in todaysMedications) {
+        _scheduleNotificationsForMedication(medication);
+      }
+
       setState(() {
         _todaysMedications = todaysMedications;
       });
@@ -490,5 +520,50 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
       ],
     ),
   );
+}
+
+Future<void> _scheduleNotificationsForMedication(Medication medication) async {
+  final now = DateTime.now();
+  
+  for (int i = 0; i < medication.reminderTimes.length; i++) {
+    if (!medication.isTaken[i]) {  // Only schedule if not taken
+      final reminderTime = medication.reminderTimes[i];
+      var scheduledTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        reminderTime.hour,
+        reminderTime.minute,
+      );
+      
+      // If the time has already passed today, don't schedule
+      if (scheduledTime.isBefore(now)) continue;
+
+      const androidDetails = AndroidNotificationDetails(
+        'medication_channel',
+        'Medication Reminders',
+        channelDescription: 'Notifications for medication reminders',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+
+      const iOSDetails = DarwinNotificationDetails();
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iOSDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        medication.id.hashCode + i,  // Unique ID for each notification
+        'Medication Reminder',
+        'Time to take ${medication.name}${medication.notes != null ? "\nNotes: ${medication.notes}" : ""}',
+        tz.TZDateTime.from(scheduledTime, tz.local),
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        // uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
+  }
 }
 }
