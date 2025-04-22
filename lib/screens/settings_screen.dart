@@ -29,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   bool _isDarkMode = false;
   String _currentLanguage = 'English';
+  String? _profileImagePath;
 
   @override
   void initState() {
@@ -42,6 +43,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
       _currentLanguage = prefs.getString('language') ?? 'English';
+      _profileImagePath = prefs.getString('profileImage');
+
     });
   }
 
@@ -80,7 +83,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: CircleAvatar(
                 radius: 30,
                 backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(Icons.person, size: 35, color: Colors.white),
+                child: _profileImagePath != null
+                    ? ClipOval(
+                        child: Image.file(
+                          File(_profileImagePath!),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : const Icon(Icons.person, size: 35, color: Colors.white),
               ),
               title: Text(
                 localizations.profile,
@@ -91,7 +103,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: const TextStyle(fontSize: 14),
               ),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                ).then((_) => _loadSettings());
               },
             ),
           ),
