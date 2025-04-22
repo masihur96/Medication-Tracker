@@ -163,7 +163,6 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
               ),
             ),
           ),
-          
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -182,9 +181,8 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
 
   List<Medication> _getMedicationsForDay(DateTime day, Prescription prescription) {
     try {
-      final prescriptionDate = DateFormat('dd/M/yyyy').parse(prescription.date);
-      
-      bool isValidDate = prescription.medications.any((medication) {
+      // Filter medications that have the specific day in their remainderDates
+      return prescription.medications.where((medication) {
         return medication.remainderDates.any((dateStr) {
           try {
             final medicationDate = DateFormat('dd/MM/yyyy').parse(dateStr);
@@ -194,15 +192,11 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
             return false;
           }
         });
-      });
-
-      if (isValidDate) {
-        return prescription.medications;
-      }
+      }).toList();
     } catch (e) {
       print('Error parsing date: ${prescription.date}');
+      return [];
     }
-    return [];
   }
 
   Widget _buildMedicationList() {
@@ -247,26 +241,24 @@ class _MedicationScheduleScreenState extends State<MedicationScheduleScreen> {
                 Text('${localizations.timesPerDay}: ${medication.timesPerDay}'),
                 if (medication.notes?.isNotEmpty ?? false)
                   Text('${localizations.notes}: ${medication.notes}'),
-                ...List.generate(medication.timesPerDay, (index) {
-                  final bool taken = index < medication.isTaken.length ? medication.isTaken[index] : false;
-                  final String time = (medication.reminderTimes != null && index >= 0 && index < medication.reminderTimes.length)
-                      ? formatTimeOfDay(medication.reminderTimes[index])
-                      : localizations.notSet;
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          taken ? Icons.check_circle : Icons.schedule,
-                          color: taken ? Colors.green : Colors.orange,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text('$time - ${taken ? localizations.taken : localizations.notTakenYet}'),
-                      ],
+
+
+                Row(
+                  children: [
+                    Text('${localizations.takenAt}:  '),
+                    Wrap(
+                      spacing: 13,
+                      runSpacing: 8,
+                      children: List.generate(medication.timesPerDay, (index) {
+                         final String time = (index >= 0 && index < medication.reminderTimes.length)
+                            ? formatTimeOfDay(medication.reminderTimes[index])
+                            : localizations.notSet;
+
+                        return Text(time);
+                      }),
                     ),
-                  );
-                }),
+                  ],
+                ),
               ],
             ),
             isThreeLine: true,
