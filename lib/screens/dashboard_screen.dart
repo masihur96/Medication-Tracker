@@ -329,7 +329,18 @@ Future<void> updateMedicationStatus({
     for (var item in _todaysMedications) {
       if (item.id == medicationId) {
         if (timeIndex < item.isTaken.length) {
+          // Check if the status is changing from not taken to taken
+          bool wasPreviouslyTaken = item.isTaken[timeIndex];
           item.isTaken[timeIndex] = isTaken;
+          
+          // Update stock only when medication is marked as taken
+          if (!wasPreviouslyTaken && isTaken && item.stock != null) {
+            item.stock = item.stock - 1;
+          }
+          // If medication is unmarked as taken, increment the stock back
+          else if (wasPreviouslyTaken && !isTaken && item.stock != null) {
+            item.stock = item.stock + 1;
+          }
           
           // Update or create history entry
           final String today = _formatDate(DateTime.now());
@@ -367,12 +378,22 @@ Future<void> updateMedicationStatus({
       }
     }
     
-    // Update the status in the full prescriptions list
+    // Update the status and stock in the full prescriptions list
     for (var prescription in prescriptions) {
       for (var medication in prescription.medications) {
         if (medication.id == medicationId) {
           if (timeIndex < medication.isTaken.length) {
+            bool wasPreviouslyTaken = medication.isTaken[timeIndex];
             medication.isTaken[timeIndex] = isTaken;
+            
+            // Update stock in the main prescriptions list
+            if (!wasPreviouslyTaken && isTaken && medication.stock != null) {
+              medication.stock = medication.stock - 1;
+            }
+            // If medication is unmarked as taken, increment the stock back
+            else if (wasPreviouslyTaken && !isTaken && medication.stock != null) {
+              medication.stock = medication.stock + 1;
+            }
           }
           break;
         }
