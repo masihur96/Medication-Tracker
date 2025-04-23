@@ -12,6 +12,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  // Handle notification tap in background
+  print('Notification tapped in background: ${notificationResponse.payload}');
+}
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -39,64 +46,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _initializeNotifications() async {
-    tz.initializeTimeZones();
-    
-    const androidInitialize = AndroidInitializationSettings('logo');
-    const iOSInitialize = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-    const initializationSettings = InitializationSettings(
-      android: androidInitialize,
-      iOS: iOSInitialize,
-    );
-    
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
-        // Handle notification tap
-        if (notificationResponse.payload != null) {
-          // You can handle the payload here if needed
-        }
-      },
-    );
+    try {
+      tz.initializeTimeZones();
+      
+      const androidInitialize = AndroidInitializationSettings('logo');
+      final iOSInitialize = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        notificationCategories: [
+          DarwinNotificationCategory(
+            'medication_category',
+            actions: [
+              DarwinNotificationAction.plain('take', 'Take'),
+              DarwinNotificationAction.plain('skip', 'Skip'),
+            ],
+            options: {
+              DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+            },
+          ),
+        ],
+      );
+      final initializationSettings = InitializationSettings(
+        android: androidInitialize,
+        iOS: iOSInitialize,
+      );
+      
+      // Add debug print before initialization
+      print('Initializing notifications...');
+      
+      bool? initialized = await flutterLocalNotificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
+          // Handle notification tap
+          print('Notification received: ${notificationResponse.payload}');
+          if (notificationResponse.payload != null) {
+            // Navigate to relevant screen or perform action
+            print('Notification payload: ${notificationResponse.payload}');
+          }
+        },
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+      );
+      
+      print('Notifications initialized: $initialized');
 
+      // Request permissions
+      await _requestNotificationPermissions();
+      
+      // Test if notifications work immediately
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Initialization Test',
+        'Testing if notifications are working',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'test_channel',
+            'Test Notifications',
+            channelDescription: 'Test notification channel',
+            importance: Importance.max,
+            priority: Priority.max,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+      );
+      
+      print('Test notification sent');
+    } catch (e, stackTrace) {
+      print('Error in notification initialization: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
+
+  Future<void> _requestNotificationPermissions() async {
     // Request permissions for iOS
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+    if (Platform.isIOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+            critical: true, // Enable critical alerts
+          );
+    }
 
-    // Request notification permission for Android 13 and above
-    if (Theme.of(context).platform == TargetPlatform.android) {
+    // Request notification permission for Android
+    if (Platform.isAndroid) {
       final status = await Permission.notification.request();
       if (status.isDenied) {
-        // Handle the case where permission is denied
         print('Notification permission denied');
       }
     }
-
-    print('Notification initialization complete');
-    // Test if notifications work immediately
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      'Test Notification',
-      'This is a test notification',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'medication_channel',
-          'Medication Reminders',
-          channelDescription: 'Notifications for medication reminders',
-          importance: Importance.max,
-          priority: Priority.max,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-    );
   }
 
   Future<void> _cancelAllNotifications() async {
@@ -575,8 +619,19 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
 Future<void> _scheduleNotificationsForMedication(Medication medication) async {
   try {
     final now = DateTime.now();
+    final today = _formatDate(now);
+    
+    // Only schedule notifications if the medication is for today or future dates
+    if (!medication.remainderDates.contains(today)) {
+      return;
+    }
     
     for (int i = 0; i < medication.reminderTimes.length; i++) {
+      // Skip scheduling if medication is already taken for this time
+      if (medication.isTaken[i]) {
+        continue;
+      }
+      
       final reminderTime = medication.reminderTimes[i];
       var scheduledTime = DateTime(
         now.year,
@@ -586,56 +641,71 @@ Future<void> _scheduleNotificationsForMedication(Medication medication) async {
         reminderTime.minute,
       );
       
-      // If the time has already passed today, schedule for tomorrow
-      if (scheduledTime.isBefore(now)) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
+      // Only schedule if the time hasn't passed yet
+      if (!scheduledTime.isBefore(now)) {
+        // Create a unique notification channel ID for each medication
+        String channelId = 'medication_channel_${medication.id}';
+        
+        final androidDetails = AndroidNotificationDetails(
+          channelId,
+          'Medication Reminders',
+          channelDescription: 'Notifications for medication reminders',
+          importance: Importance.max,
+          priority: Priority.max,
+          enableVibration: true,
+          enableLights: true,
+          playSound: true,
+          color: Colors.blue,
+          ledColor: Colors.blue,
+          ledOnMs: 1000,
+          ledOffMs: 500,
+          icon: 'logo',
+          channelShowBadge: true,
+          fullScreenIntent: true,
+          category: AndroidNotificationCategory.alarm,
+          visibility: NotificationVisibility.public,
+          actions: [
+            const AndroidNotificationAction('take', 'Take'),
+            const AndroidNotificationAction('skip', 'Skip'),
+          ],
+          ongoing: true,
+          autoCancel: false,
+          timeoutAfter: 300000, // 5 minutes
+        );
+
+        final iOSDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          interruptionLevel: InterruptionLevel.timeSensitive,
+          categoryIdentifier: 'medication_category',
+          threadIdentifier: channelId,
+        );
+
+        final notificationDetails = NotificationDetails(
+          android: androidDetails,
+          iOS: iOSDetails,
+        );
+
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          medication.id.hashCode + i,
+          'Medication Reminder',
+          'Time to take ${medication.name}${medication.notes != null ? "\nNotes: ${medication.notes}" : ""}',
+          tz.TZDateTime.from(scheduledTime, tz.local),
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+          payload: 'medication_${medication.id}_$i',
+        );
+        
+        print('Scheduled notification for ${medication.name} at ${scheduledTime.toString()}');
+        print('Channel ID: $channelId');
+        print('Notification ID: ${medication.id.hashCode + i}');
       }
-
-      const androidDetails = AndroidNotificationDetails(
-        'medication_channel',
-        'Medication Reminders',
-        channelDescription: 'Notifications for medication reminders',
-        importance: Importance.max, // Changed to max
-        priority: Priority.max,     // Changed to max
-        enableVibration: true,
-        enableLights: true,
-        color: Colors.blue,
-        ledColor: Colors.blue,
-        ledOnMs: 1000,
-        ledOffMs: 500,
-        icon: 'logo',              // Make sure this matches your icon name
-        channelShowBadge: true,
-      );
-
-      const iOSDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-      );
-
-      const notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iOSDetails,
-      );
-
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        medication.id.hashCode + i,  // Unique ID for each notification
-        'Medication Reminder',
-        'Time to take ${medication.name}${medication.notes != null ? "\nNotes: ${medication.notes}" : ""}',
-        tz.TZDateTime.from(scheduledTime, tz.local),
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        // uiLocalNotificationDateInterpretation:
-        //     UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'medication_${medication.id}_$i',
-      );
-      
-      print('Scheduled notification for ${medication.name} at ${scheduledTime.toString()}');
     }
-  } catch (e) {
+  } catch (e, stackTrace) {
     print('Error scheduling notification: $e');
+    print('Stack trace: $stackTrace');
   }
 }
 }
