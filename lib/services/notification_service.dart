@@ -1,18 +1,27 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
-  static final _notifications = FlutterLocalNotificationsPlugin();
+  static final notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+
+  bool _isInitialized = false;
+
+
+  bool get isInitialized => _isInitialized;
+
+
 
   static Future<void> init() async {
     // Timezone setup
     tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('Asia/Dhaka')); // Change if needed
+    final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(currentTimeZone)); // Change if needed
 
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+
 
     // Initialization settings for Android
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -20,25 +29,66 @@ class NotificationService {
 
     // Initialization settings for iOS
     const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings();
+        DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestCriticalPermission: true,
+          requestSoundPermission: true,
+          requestProvisionalPermission: true
+        );
 
     // Initialize notification plugin
     const InitializationSettings initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid,
         iOS: initializationSettingsIOS);
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await notificationsPlugin.initialize(initializationSettings);
   }
 
-  static Future<void> schedule(DateTime scheduledTime, int id, {String? title, String? body}) async {
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = 
-        FlutterLocalNotificationsPlugin();
-        
-    await flutterLocalNotificationsPlugin.zonedSchedule(
+
+  // Make the phone go ding!
+  static Future<void> showNotification(String title, String body) async {
+    await notificationsPlugin.show(
+      0,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'channel_id',
+          'Important Alerts',
+          importance: Importance.high,
+        ),
+      ),
+    );
+  }
+  static Future<void> schedule(
+      DateTime scheduledTime,
+      int id,
+      {
+        String? title,
+        String? body
+      }
+      ) async {
+    final now = tz.TZDateTime.now(tz.local);
+
+
+
+    var scheduleDate = tz.TZDateTime(
+
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      scheduledTime.hour,
+      scheduledTime.month
+    );
+
+
+    await notificationsPlugin.zonedSchedule(
       id,
       title ?? 'Medication Reminder',
       body ?? 'Time to take your medication',
-      tz.TZDateTime.from(scheduledTime, tz.local),
+      scheduleDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'medication_channel',
@@ -50,7 +100,14 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
 
-      matchDateTimeComponents: DateTimeComponents.time, androidScheduleMode: AndroidScheduleMode.exact,
+
+      matchDateTimeComponents: DateTimeComponents.time,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
+  Future<void> cancelAllNotification()async{
+    await notificationsPlugin.cancelAll();
+  }
+
+
 }
