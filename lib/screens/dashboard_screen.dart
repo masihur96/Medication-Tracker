@@ -1,24 +1,22 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/notification_screen.dart';
+import 'package:med_track/services/notification_service.dart';
+import 'package:med_track/services/scheduler.dart';
+
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:permission_handler/permission_handler.dart';
-import 'dart:io' show Platform;
 
-@pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) {
-  // Handle notification tap in background
-  print('Notification tapped in background: ${notificationResponse.payload}');
-}
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,118 +32,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Prescription? _selectedPrescription;
   List<EnhancedMedicationHistory> _medicationHistory = [];
   bool _isLoading = true;
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   
   @override
   void initState() {
     super.initState();
-    // Initialize notifications
-    _initializeNotifications();
+    initTask();
     // Initialize data
-    initializeData();
+
   }
 
-  Future<void> _initializeNotifications() async {
-    try {
-      tz.initializeTimeZones();
-      
-      const androidInitialize = AndroidInitializationSettings('logo');
-      final iOSInitialize = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        notificationCategories: [
-          DarwinNotificationCategory(
-            'medication_category',
-            actions: [
-              DarwinNotificationAction.plain('take', 'Take'),
-              DarwinNotificationAction.plain('skip', 'Skip'),
-            ],
-            options: {
-              DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
-            },
-          ),
-        ],
-      );
-      final initializationSettings = InitializationSettings(
-        android: androidInitialize,
-        iOS: iOSInitialize,
-      );
-      
-      // Add debug print before initialization
-      print('Initializing notifications...');
-      
-      bool? initialized = await flutterLocalNotificationsPlugin.initialize(
-        initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
-          // Handle notification tap
-          print('Notification received: ${notificationResponse.payload}');
-          if (notificationResponse.payload != null) {
-            // Navigate to relevant screen or perform action
-            print('Notification payload: ${notificationResponse.payload}');
-          }
-        },
-        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-      );
-      
-      print('Notifications initialized: $initialized');
 
-      // Request permissions
-      await _requestNotificationPermissions();
-      
-      // Test if notifications work immediately
-      await flutterLocalNotificationsPlugin.show(
-        0,
-        'Initialization Test',
-        'Testing if notifications are working',
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'test_channel',
-            'Test Notifications',
-            channelDescription: 'Test notification channel',
-            importance: Importance.max,
-            priority: Priority.max,
-          ),
-          iOS: DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-          ),
-        ),
-      );
-      
-      print('Test notification sent');
-    } catch (e, stackTrace) {
-      print('Error in notification initialization: $e');
-      print('Stack trace: $stackTrace');
-    }
+  initTask()async{
+   await initializeData();
+
   }
 
-  Future<void> _requestNotificationPermissions() async {
-    // Request permissions for iOS
-    if (Platform.isIOS) {
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-            critical: true, // Enable critical alerts
-          );
-    }
 
-    // Request notification permission for Android
-    if (Platform.isAndroid) {
-      final status = await Permission.notification.request();
-      if (status.isDenied) {
-        print('Notification permission denied');
-      }
-    }
-  }
 
-  Future<void> _cancelAllNotifications() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
+
 
   Future<void> initializeData() async {
     setState(() => _isLoading = true);
@@ -158,46 +63,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> loadPrescriptions() async {
-    List<Medication> todaysMedications = [];
-    final prefs = await SharedPreferences.getInstance();
-    final String? listString = prefs.getString('prescriptions');
-    if (listString != null) {
-      final List decoded = jsonDecode(listString);
-      final List<Prescription> loaded =
-          decoded.map((e) => Prescription.fromJson(e)).toList();
-      
-      // Store all prescriptions
-      setState(() {
-        _prescriptions = loaded;
-        if (loaded.isNotEmpty) {
-          _selectedPrescription = loaded[0]; // Select first prescription by default
-        }
-      });
+    try {
+      List<Medication> todaysMedications = [];
+      final prefs = await SharedPreferences.getInstance();
+      final String? listString = prefs.getString('prescriptions');
+      if (listString != null) {
+        final List decoded = jsonDecode(listString);
+        final List<Prescription> loaded =
+            decoded.map((e) => Prescription.fromJson(e)).toList();
+        
+        setState(() {
+          _prescriptions = loaded;
+          if (loaded.isNotEmpty) {
+            _selectedPrescription = loaded[0];
+          }
+        });
 
-      // Get today's date in string format (e.g., 17/04/2025)
-      final String today = _formatDate(DateTime.now());
-      // Collect today's medications
-      for (final prescription in loaded) {
-        if(prescription.medications.isNotEmpty){
-          for (final med in prescription.medications) {
-            if (med.remainderDates.contains(today)) {
-              todaysMedications.add(med);
+        final String today = _formatDate(DateTime.now());
+        
+        // Cancel existing notifications before scheduling new ones
+
+        // Collect today's medications and schedule notifications
+        for (final prescription in loaded) {
+          if(prescription.medications.isNotEmpty){
+            for (final med in prescription.medications) {
+              // Create a list to store all scheduled DateTimes
+              List<DateTime> scheduleList = [];
+              
+              // For each date, combine with all times
+              for (String dateStr in med.remainderDates) {
+                // Parse the date string (DD/MM/YYYY format)
+                List<String> dateParts = dateStr.split('/');
+                int day = int.parse(dateParts[0]);
+                int month = int.parse(dateParts[1]);
+                int year = int.parse(dateParts[2]);
+                
+                // For each time, create a DateTime object
+                for (TimeOfDay time in med.reminderTimes) {
+                  DateTime scheduledDateTime = DateTime(
+                    year,
+                    month,
+                    day,
+                    time.hour,
+                    time.minute,
+                  );
+                  scheduleList.add(scheduledDateTime);
+                }
+              }
+              
+              // Now scheduleList contains all date-time combinations
+              log("Scheduled times: $scheduleList");
+              await NotificationScheduler.scheduleAll(scheduleList);
+
+
+              for (DateTime scheduledDateTime in scheduleList) {
+                // Check if the scheduled time is in the future
+                if (scheduledDateTime.isAfter(DateTime.now())) {
+                  // Generate a unique ID for each notification
+                  // Using milliseconds since epoch to ensure uniqueness
+                  int notificationId = scheduledDateTime.millisecondsSinceEpoch ~/ 1000;
+                  
+                  await NotificationService.schedule(
+                    scheduledDateTime,
+                    notificationId,
+                    title: '${med.name} Reminder', // Add medication name
+                    body: 'Time to take your medication: ${med.name}\nDosage: ${med.notes}', // Add relevant details
+                  );
+                }
+              }
+
+              if (med.remainderDates.contains(today)) {
+                todaysMedications.add(med);
+              }
             }
           }
         }
-      }
 
-      // Cancel all existing notifications before scheduling new ones
-      await _cancelAllNotifications();
-      
-      // After loading today's medications, schedule notifications
-      for (final medication in todaysMedications) {
-        _scheduleNotificationsForMedication(medication);
-      }
+        setState(() {
+          _todaysMedications = todaysMedications;
+        });
 
-      setState(() {
-        _todaysMedications = todaysMedications;
-      });
+      }
+    } catch (e, stackTrace) {
+      print('Error loading prescriptions: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
@@ -231,17 +180,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    final format = DateFormat.jm(); // e.g., 08:00 AM
-    return format.format(dt);
+    return DateFormat('dd/MM/yyyy hh:mm a').format(dt);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -616,96 +563,5 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
   );
 }
 
-Future<void> _scheduleNotificationsForMedication(Medication medication) async {
-  try {
-    final now = DateTime.now();
-    final today = _formatDate(now);
-    
-    // Only schedule notifications if the medication is for today or future dates
-    if (!medication.remainderDates.contains(today)) {
-      return;
-    }
-    
-    for (int i = 0; i < medication.reminderTimes.length; i++) {
-      // Skip scheduling if medication is already taken for this time
-      if (medication.isTaken[i]) {
-        continue;
-      }
-      
-      final reminderTime = medication.reminderTimes[i];
-      var scheduledTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        reminderTime.hour,
-        reminderTime.minute,
-      );
-      
-      // Only schedule if the time hasn't passed yet
-      if (!scheduledTime.isBefore(now)) {
-        // Create a unique notification channel ID for each medication
-        String channelId = 'medication_channel_${medication.id}';
-        
-        final androidDetails = AndroidNotificationDetails(
-          channelId,
-          'Medication Reminders',
-          channelDescription: 'Notifications for medication reminders',
-          importance: Importance.max,
-          priority: Priority.max,
-          enableVibration: true,
-          enableLights: true,
-          playSound: true,
-          color: Colors.blue,
-          ledColor: Colors.blue,
-          ledOnMs: 1000,
-          ledOffMs: 500,
-          icon: 'logo',
-          channelShowBadge: true,
-          fullScreenIntent: true,
-          category: AndroidNotificationCategory.alarm,
-          visibility: NotificationVisibility.public,
-          actions: [
-            const AndroidNotificationAction('take', 'Take'),
-            const AndroidNotificationAction('skip', 'Skip'),
-          ],
-          ongoing: true,
-          autoCancel: false,
-          timeoutAfter: 300000, // 5 minutes
-        );
 
-        final iOSDetails = DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-          interruptionLevel: InterruptionLevel.timeSensitive,
-          categoryIdentifier: 'medication_category',
-          threadIdentifier: channelId,
-        );
-
-        final notificationDetails = NotificationDetails(
-          android: androidDetails,
-          iOS: iOSDetails,
-        );
-
-        await flutterLocalNotificationsPlugin.zonedSchedule(
-          medication.id.hashCode + i,
-          'Medication Reminder',
-          'Time to take ${medication.name}${medication.notes != null ? "\nNotes: ${medication.notes}" : ""}',
-          tz.TZDateTime.from(scheduledTime, tz.local),
-          notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-          payload: 'medication_${medication.id}_$i',
-        );
-        
-        print('Scheduled notification for ${medication.name} at ${scheduledTime.toString()}');
-        print('Channel ID: $channelId');
-        print('Notification ID: ${medication.id.hashCode + i}');
-      }
-    }
-  } catch (e, stackTrace) {
-    print('Error scheduling notification: $e');
-    print('Stack trace: $stackTrace');
-  }
-}
 }
