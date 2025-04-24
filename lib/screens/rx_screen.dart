@@ -119,7 +119,7 @@ class _RxScreenState extends State<RxScreen> {
 
                                        await _localRepository.deletePrescription(rx.uid);
                                        await loadPrescriptions();
-                                        print("object");
+
                                       },
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
