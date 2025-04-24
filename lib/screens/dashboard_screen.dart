@@ -422,7 +422,7 @@ Future<void> updateMedicationStatus({
           // Create or update history entry
           EnhancedMedicationHistory historyEntry = EnhancedMedicationHistory(
             prescriptionId: prescription.uid,
-            prescriptionName: "Prescription ${prescription.medicationTo}",
+
             date: today,
             medicationName: item.name,
             dosage: item.timesPerDay.toString(),

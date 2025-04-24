@@ -115,7 +115,7 @@ bool _isLoading = false;
 
     return GestureDetector(
       onTap: (){
-        print(history.prescriptionName);
+        print(history.doctorName);
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -150,14 +150,7 @@ bool _isLoading = false;
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${localizations.prescriptions}: ${history.prescriptionName}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
+
               const SizedBox(height: 8),
               Text(
                 '${history.medicationName} - ${history.dosage}',
@@ -213,7 +206,7 @@ bool _isLoading = false;
     String patientName = 'N/A';
     String doctorName = 'N/A';
     if (_medicationHistory.isNotEmpty) {
-      final prescriptionParts = _medicationHistory[0].prescriptionName.split(' - ');
+      final prescriptionParts = _medicationHistory[0].doctorName.split(' - ');
       if (prescriptionParts.length >= 2) {
         patientName = _medicationHistory.first.patientName;
         doctorName = _medicationHistory.first.doctorName;

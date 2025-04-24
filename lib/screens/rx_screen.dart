@@ -156,20 +156,12 @@ class _RxScreenState extends State<RxScreen> {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  rx.medicationTo,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
+
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   rx.doctor,
                                                 ),
-                                                Text(
-                                                  'Ch: ${rx.chamber}',
-                                                ),
+
                                                 Text(
                                                   'Pt: ${rx.patient}',
                                                 ),

@@ -2,8 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/screens/add_medication_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:med_track/utils/bounching_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../utils/custom_size.dart';
 
 class NewRxScreen extends StatefulWidget {
   final Prescription? prescription;
@@ -15,10 +19,9 @@ class NewRxScreen extends StatefulWidget {
 
 class _NewRxScreenState extends State<NewRxScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _medicationController = TextEditingController();
+
   final _doctorController = TextEditingController();
-  final _dateController = TextEditingController();
-  final _chamberController = TextEditingController();
+
   final _patientController = TextEditingController();
   final _ageController = TextEditingController();
 
@@ -27,10 +30,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
     super.initState();
     // Initialize controllers with existing prescription data if available
     if (widget.prescription != null) {
-      _medicationController.text = widget.prescription!.medicationTo;
       _doctorController.text = widget.prescription!.doctor;
-      _dateController.text = widget.prescription!.date;
-      _chamberController.text = widget.prescription!.chamber;
       _patientController.text = widget.prescription!.patient;
       _ageController.text = widget.prescription!.age?.toString() ?? '';
     }
@@ -38,10 +38,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
 
   @override
   void dispose() {
-    _medicationController.dispose();
     _doctorController.dispose();
-    _dateController.dispose();
-    _chamberController.dispose();
+
     _patientController.dispose();
     _ageController.dispose();
     super.dispose();
@@ -70,119 +68,131 @@ class _NewRxScreenState extends State<NewRxScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _doctorController,
-                decoration: InputDecoration(
-                  labelText: localizations.doctor,
-                  icon: Icon(Icons.person),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter doctor name';
-                  }
-                  return null;
-                },
+
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            "Rx",
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "24 Aug 2025",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _ageController,
+                          decoration: InputDecoration(
+                            labelText: localizations.age,
+                            icon: Icon(Icons.date_range),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter patient age';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Please enter a valid age';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _doctorController,
+                        decoration: InputDecoration(
+                          labelText: localizations.doctor,
+                          icon: Icon(Icons.person),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter doctor name';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      TextFormField(
+                        controller: _patientController,
+                        decoration: InputDecoration(
+                          labelText: localizations.patient,
+                          icon: Icon(Icons.person_outline),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter patient name';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      // _buildLineField(label: '${localizations.for_}: ${widget.prescription.medicationTo}', size: 12),
+                    ],
+                  ),
+
+                  Row(
+                    children: [
+                      Expanded(child: Divider(thickness: 1, color: Colors.black87)),
+                      IconButton(onPressed: (){
+
+    if (_formKey.currentState!.validate()) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (_) => BounchingDialog(
+            width: screenSize(context, 0.6),
+            child: AddMedicationScreen(prescription: Prescription(uid: DateTime.now().microsecondsSinceEpoch.toString(), doctor: _doctorController.text,
+                date: DateTime.now().toString(), patient: _patientController.text, age: int.parse(_ageController.text), medications: []))),
+      );
+
+    }
+
+
+
+
+
+                      }, icon: Icon(Icons.add_circle_outlined))
+                    ],
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _chamberController,
-                decoration: InputDecoration(
-                  labelText: localizations.chamber,
-                  icon: Icon(Icons.business),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter chamber name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _patientController,
-                decoration: InputDecoration(
-                  labelText: localizations.patient,
-                  icon: Icon(Icons.person_outline),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter patient name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _ageController,
-                decoration: InputDecoration(
-                  labelText: localizations.age,
-                  icon: Icon(Icons.calendar_view_day),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter patient age';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Please enter a valid age';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _medicationController,
-                decoration: InputDecoration(
-                  labelText: localizations.medicationName,
-                  icon: Icon(Icons.medication),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter medication title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _dateController,
-                decoration: InputDecoration(
-                  labelText: localizations.date,
-                  icon: Icon(Icons.calendar_today),
-                ),
-                readOnly: true,
-                onTap: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (_dateController.text.isEmpty) {
-                    return 'Please select prescription date';
-                  }
-                  return null;
-                },
-              ),
+
+
+
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     final prescription = Prescription(
-                      medicationTo: _medicationController.text,
+
                       uid: widget.prescription?.uid ?? 
                            DateTime.now().microsecondsSinceEpoch.toString(),
                       doctor: _doctorController.text,
-                      date: _dateController.text,
-                      chamber: _chamberController.text,
+                      date: DateTime.now().toString(),
+
                       patient: _patientController.text,
                       age: int.parse(_ageController.text),
                       medications: widget.prescription?.medications ?? [],

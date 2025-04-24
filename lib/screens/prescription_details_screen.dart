@@ -82,12 +82,12 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildLineField(label: '${localizations.doctor}: ${prescription.doctor}',size: 16),
-                              _buildLineField(label: '${localizations.chamber}: ${prescription.chamber}',size: 12),
+                              // _buildLineField(label: '${localizations.chamber}: ${prescription.chamber}',size: 12),
                 
                               Divider(
                               ),
                               _buildLineField(label: '${localizations.patient}: ${prescription.patient}',size: 16),
-                              _buildLineField(label: '${localizations.for_}: ${prescription.medicationTo}', size: 12),
+                              // _buildLineField(label: '${localizations.for_}: ${prescription.medicationTo}', size: 12),
                 
                             ],
                           ),

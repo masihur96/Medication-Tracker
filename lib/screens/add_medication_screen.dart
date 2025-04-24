@@ -152,45 +152,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(10),
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          "Rx",
-                          style: TextStyle(
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        _buildLineField(label: widget.prescription.date, size: 16),
-                      ],
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLineField(label: '${localizations.doctor}: ${widget.prescription.doctor}', size: 16),
-                          _buildLineField(label: '${localizations.chamber}: ${widget.prescription.chamber}', size: 12),
-                          Divider(),
-                          _buildLineField(label: '${localizations.name}: ${widget.prescription.patient}', size: 16),
-                          _buildLineField(label: '${localizations.for_}: ${widget.prescription.medicationTo}', size: 12),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(thickness: 1, color: Colors.black87),
-              ],
-            ),
-            SizedBox(height: 16),
+
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -258,7 +222,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+
                     _buildDateRangeSelector(),
 
                     SizedBox(height: 16),
@@ -452,12 +416,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     }
   }
 
-  Widget _buildLineField({required String label,required double size}) {
-    return Text(
-      label,
-      style: TextStyle(fontSize: size, fontWeight: FontWeight.w500),
-    );
-  }
+
 
   Widget _buildWeeklySelector() {
     return Wrap(
@@ -533,12 +492,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         }
       }
     }
-
     setState(() {
       _reminderDates = generatedDates;
     });
-
-    print("_reminderDates:::${_reminderDates}");
   }
 
   String _formatDate(DateTime date) {
@@ -611,37 +567,93 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   // Replace the duration TextFormField in the build method with this new widget
   Widget _buildDateRangeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _selectDate(context, true),
-                icon: const Icon(Icons.calendar_today),
-                label: Text('Start: ${_formatDate(_startDate)}'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
+            Text(
+              'Select Date Range',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _selectDate(context, false),
-                icon: const Icon(Icons.calendar_today),
-                label: Text('End: ${_formatDate(_endDate)}'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _selectDate(context, true),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      backgroundColor: Colors.blue.shade50,
+                      foregroundColor: Colors.blue,
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_month_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Start: ${_formatDate(_startDate)}',
+                            style: const TextStyle(fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _selectDate(context, false),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      backgroundColor: Colors.blue.shade50,
+                      foregroundColor: Colors.blue,
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_month_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'End: ${_formatDate(_endDate)}',
+                            style: const TextStyle(fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
   }
+
 
 }
 
