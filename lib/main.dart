@@ -4,8 +4,6 @@ import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/home_screen.dart';
 import 'package:med_track/services/notification_service.dart';
-import 'package:med_track/services/notify.dart';
-import 'package:med_track/services/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/utils/app_localizations.dart';
@@ -30,7 +31,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _noteController = TextEditingController();
   // final _durationController = TextEditingController();
   String _frequency = FREQUENCY_DAILY; // Change default value to use constant
-  bool _isActive = false;
+
   int _timesPer = 1; // Default frequency
   final List<TimeOfDay> _selectedTimes = [TimeOfDay.now()];
   final List<bool> _isTaken = [false];
@@ -60,7 +61,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _noteController.text = widget.medication!.notes!;
       _frequency = _getFrequencyConstant(widget.medication!.frequency);
       _timesPer = widget.medication!.timesPerDay;
-      _isActive = widget.medication!.isActive;
       _selectedTimes.clear();
       _selectedTimes.addAll(widget.medication!.reminderTimes);
       _isTaken.clear();
@@ -308,17 +308,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       ),
                       maxLines: 3,
                     ),
-                    SizedBox(height: 16),
-                    SwitchListTile(
-                      title: Text(localizations.medicationStatus),
-                      subtitle: Text(_isActive ? localizations.active : localizations.inactive),
-                      value: _isActive,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isActive = value;
-                        });
-                      },
-                    ),
+
                   ],
                 ),
               ),
@@ -334,7 +324,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                     uid: widget.prescription.uid,
                     doctor: widget.prescription.doctor,
-                    date: DateTime.now().toString(),
+                    date:  DateFormat('d MMM y').format(DateTime.now()) ,
 
                     patient: widget.prescription.patient,
                     age: widget.prescription.age,
@@ -344,7 +334,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         name: _nameController.text,
                         timesPerDay: _timesPer,
                         stock: int.parse(_stockController.text),
-                        isActive: _isActive,
+                        isActive: true,
                         notes: _noteController.text,
                         frequency: _getDisplayFrequency(_frequency, AppLocalizations.of(context)),
                         reminderTimes: _selectedTimes,
@@ -408,7 +398,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
     // If editing, remove the old prescription
     if (widget.prescription != null) {
-      prescriptions.removeWhere((p) => p.uid == widget.prescription!.uid);
+      prescriptions.removeWhere((p) => p.uid == widget.prescription.uid);
     }
 
     // Add the prescription (new or updated)

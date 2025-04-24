@@ -5,9 +5,7 @@ import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
-import 'package:med_track/screens/notification_screen.dart';
 import 'package:med_track/services/notification_service.dart';
-import 'package:med_track/services/scheduler.dart';
 
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';

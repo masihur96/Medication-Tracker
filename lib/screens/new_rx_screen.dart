@@ -1,6 +1,8 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/add_medication_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
@@ -58,10 +60,16 @@ class _NewRxScreenState extends State<NewRxScreen> {
     return Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,
-        title: Text(
-          widget.prescription == null ? localizations.addPrescription : localizations.prescriptionDetails,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
+        title: GestureDetector(
+          onTap: (){
+
+            loadPrescriptions();
+          },
+          child: Text(
+            widget.prescription == null ? localizations.addPrescription : localizations.prescriptionDetails,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         backgroundColor: Theme.of(context).primaryColor,
@@ -90,8 +98,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            "24 Aug 2025",
+                          Text( DateFormat('d MMM y').format(DateTime.now()) ,
+
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.normal,
@@ -169,12 +177,16 @@ class _NewRxScreenState extends State<NewRxScreen> {
         context: context,
         builder: (_) => BounchingDialog(
             width: screenSize(context, 0.6),
-            child: AddMedicationScreen(prescription: Prescription(uid: widget.uuid, doctor: _doctorController.text,
-                date: DateTime.now().toString(), patient: _patientController.text, age: int.parse(_ageController.text), medications: []))),
-      ).then((value) {
+            child: AddMedicationScreen(prescription: Prescription(uid: widget.uuid,
+                doctor: _doctorController.text,
+                date: DateTime.now().toString(),
+                patient: _patientController.text,
+                age: int.parse(_ageController.text),
+                medications: _prescription == null?[]:_prescription!.medications))),
+      ).then((value)async {
         // 👇 Do something after dialog closes
 
-          loadPrescriptions();
+        await  loadPrescriptions();
           // Maybe update UI or show a snackbar?
           print("Dialog closed with result: $value");
 
@@ -190,24 +202,45 @@ class _NewRxScreenState extends State<NewRxScreen> {
               ),
 
 
-              _prescription ==null?SizedBox(): ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _prescription!.medications.length,
-              itemBuilder: (context, index) {
-                final medication = _prescription!.medications[index];
-                return _buildMedicationItem(
-                  name: medication.name,
-                  dosage: medication.timesPerDay.toString(),
-                  frequency: medication.frequency,
-                  timeOfDay: medication.reminderTimes.isEmpty
-                      ? localizations.notSet
-                      : medication.reminderTimes
-                      .map((time) => _timeOfDayToString(time))
-                      .join(', '),
-                  notes: medication.notes ?? localizations.noMedicationsYet,
-                );
-              },
-            ),
+              _prescription ==null?SizedBox(): SizedBox(
+                height: screenSize(context, 1.3),
+
+                child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: _prescription!.medications.length,
+                itemBuilder: (context, index) {
+                  final medication = _prescription!.medications[index];
+                  return Slidable(
+                    key: ValueKey(medication.id),
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (context) {
+                      print("object");
+                          },
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        ),
+                      ],
+                    ),
+                    child: _buildMedicationItem(
+                      name: medication.name,
+                      dosage: medication.timesPerDay.toString(),
+                      frequency: medication.frequency,
+                      timeOfDay: medication.reminderTimes.isEmpty
+                          ? localizations.notSet
+                          : medication.reminderTimes
+                          .map((time) => _timeOfDayToString(time))
+                          .join(', '),
+                      notes: medication.notes ?? localizations.noMedicationsYet,
+                    ),
+                  );
+                },
+                            ),
+              ),
               // const SizedBox(height: 24),
               // ElevatedButton(
               //   onPressed: () {
@@ -362,6 +395,8 @@ class _NewRxScreenState extends State<NewRxScreen> {
       }catch(e){
         print("loadPrescriptions$e");
       }
+
+      print(_prescription!.doctor);
 
     } else {
       setState(() => _isLoading = false);
