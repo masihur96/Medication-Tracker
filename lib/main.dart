@@ -19,12 +19,10 @@ FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  tz.initializeTimeZones();
   // await initializeNotifications();
-  // await NotificationService.init();
+  await NotificationService.init();
 
-  await NotificationHelper.init();
-  NotificationScheduler.setup();
+
   // Initialize providers
   final medicationProvider = MedicationProvider();
   await medicationProvider.initialize();

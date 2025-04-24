@@ -113,7 +113,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               
               // Now scheduleList contains all date-time combinations
               log("Scheduled times: $scheduleList");
-              await NotificationScheduler.scheduleAll(scheduleList);
+              // await NotificationScheduler.scheduleAll(scheduleList);
 
 
               for (DateTime scheduledDateTime in scheduleList) {
@@ -206,7 +206,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
            IconButton(
              icon: const Icon(Icons.notifications_outlined,color: Colors.white),
              onPressed: () {
-               Navigator.push(context, MaterialPageRoute(builder: (_)=>NotificationScreen(),),);
+
+               NotificationService.showNotification("title", "body");
+               // Navigator.push(context, MaterialPageRoute(builder: (_)=>NotificationScreen(),),);
                // Handle notifications
              },
            ),
