@@ -24,40 +24,48 @@ class _RxScreenState extends State<RxScreen> {
 
   final LocalRepository _localRepository = LocalRepository();
   List<Prescription> _prescriptions = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    loadPrescriptions();
+    fetchPrescription();
   }
 
-  Future<void> loadPrescriptions() async {
-    setState(() => _isLoading = true);
-    final prefs = await SharedPreferences.getInstance();
+  fetchPrescription()async{
+    _isLoading = true;
+    _prescriptions = await _localRepository.loadPrescriptions();
+    _isLoading = false;
+    setState(() {
 
-      final String? listString = prefs.getString('prescriptions');
-      if (listString != null) {
-
-        try{
-          final List decoded = jsonDecode(listString);
-          final List<Prescription> loaded =
-          decoded.map((e) => Prescription.fromJson(e)).toList();
-          setState(() {
-            _prescriptions = loaded;
-            _isLoading = false;
-          });
-        }catch(e){
-          print("loadPrescriptions$e");
-        }
-
-      } else {
-        setState(() => _isLoading = false);
-      }
-
-
+    });
 
   }
+
+  // Future<List<Prescription>> loadPrescriptions() async {
+  //   setState(() => _isLoading = true);
+  //   final prefs = await SharedPreferences.getInstance();
+  //
+  //     final String? listString = prefs.getString('prescriptions');
+  //     if (listString != null) {
+  //
+  //       try{
+  //         final List decoded = jsonDecode(listString);
+  //         final List<Prescription> loaded =
+  //         decoded.map((e) => Prescription.fromJson(e)).toList();
+  //         setState(() {
+  //           _prescriptions = loaded;
+  //           _isLoading = false;
+  //         });
+  //       }catch(e){
+  //         print("loadPrescriptions$e");
+  //       }
+  //     } else {
+  //       setState(() => _isLoading = false);
+  //     }
+  //
+  //     return _prescriptions;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +126,7 @@ class _RxScreenState extends State<RxScreen> {
                                       onPressed: (context) async{
 
                                        await _localRepository.deletePrescription(rx.uid);
-                                       await loadPrescriptions();
+                                       await _localRepository.loadPrescriptions();
 
                                       },
                                       backgroundColor: Colors.red,
@@ -227,7 +235,7 @@ class _RxScreenState extends State<RxScreen> {
               builder: (context) =>  NewRxScreen(uuid: uuid,),
             ),
           );
-          loadPrescriptions();
+          _localRepository.loadPrescriptions();
         },
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(

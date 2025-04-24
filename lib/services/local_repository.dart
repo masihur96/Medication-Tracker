@@ -29,7 +29,25 @@ class LocalRepository {
     jsonEncode(prescriptions.map((e) => e.toJson()).toList());
     await prefs.setString('prescriptions', encodedList);
   }
+  Future<List<Prescription>> loadPrescriptions() async {
 
+    final prefs = await SharedPreferences.getInstance();
+    List<Prescription> prescriptions = [];
+    final String? listString = prefs.getString('prescriptions');
+    if (listString != null) {
+
+      try{
+        final List decoded = jsonDecode(listString);
+        final List<Prescription> loaded =
+        decoded.map((e) => Prescription.fromJson(e)).toList();
+          prescriptions = loaded;
+      }catch(e){
+        print("loadPrescriptions$e");
+      }
+    }
+
+    return prescriptions;
+  }
   Future<void> updatePrescription(Prescription updatedPrescription) async {
     final prefs = await SharedPreferences.getInstance();
     final String? existingListString = prefs.getString('prescriptions');
