@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+
 
 import 'package:flutter/material.dart';
 import 'package:med_track/models/prescription.dart';
@@ -44,7 +44,7 @@ class _RxScreenState extends State<RxScreen> {
             _isLoading = false;
           });
         }catch(e){
-          log("loadPrescriptions$e");
+          print("loadPrescriptions$e");
         }
 
       } else {
@@ -194,10 +194,12 @@ class _RxScreenState extends State<RxScreen> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
+
+         String uuid =  DateTime.now().microsecondsSinceEpoch.toString();
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NewRxScreen(),
+              builder: (context) =>  NewRxScreen(uuid: uuid,),
             ),
           );
           loadPrescriptions();

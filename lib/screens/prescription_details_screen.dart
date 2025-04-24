@@ -101,7 +101,7 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                   right: -10,
                   top: -10,
                   child: IconButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,),),);
+                    Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,uuid: "",),),);
                   }, icon: Icon(Icons.edit_outlined),),),
               ],
             ),
