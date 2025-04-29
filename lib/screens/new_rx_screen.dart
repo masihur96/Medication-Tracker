@@ -420,29 +420,5 @@ class _NewRxScreenState extends State<NewRxScreen> {
 
 
   }
-  Future<void> savePrescription(Prescription prescription) async {
-    final prefs = await SharedPreferences.getInstance();
 
-    // Get existing list
-    final String? existingListString = prefs.getString('prescriptions');
-    List<Prescription> prescriptions = [];
-
-    if (existingListString != null) {
-      final List decodedList = jsonDecode(existingListString);
-      prescriptions = decodedList.map((e) => Prescription.fromJson(e)).toList();
-    }
-
-    // If editing, remove the old prescription
-    if (widget.prescription != null) {
-      prescriptions.removeWhere((p) => p.uid == widget.prescription!.uid);
-    }
-
-    // Add the prescription (new or updated)
-    prescriptions.add(prescription);
-
-    // Save updated list
-    final String encodedList =
-        jsonEncode(prescriptions.map((e) => e.toJson()).toList());
-    await prefs.setString('prescriptions', encodedList);
-  }
 } 

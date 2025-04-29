@@ -28,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // List of screens
   final List<Widget> _screens = [
     DashboardScreen(),
-    MedicationScreen(),
     RxScreen(),
     MedicationScheduleScreen(),
     SettingsScreen(),
@@ -42,25 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-
-      // Column(
-      //   children: [
-      //     // Today's medications
-      //     Expanded(
-      //       child: Consumer<MedicationProvider>(
-      //         builder: (ctx, medProvider, _) => ListView.builder(
-      //           itemCount: medProvider.medications.length,
-      //           itemBuilder: (ctx, i) => MedicationCard(
-      //             medication: medProvider.medications[i],
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //     // Add medication button
-      //
-      //   ],
-      // ),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -73,10 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             label: AppLocalizations.of(context).dashboard,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medication_outlined),
-            label: AppLocalizations.of(context).drug,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.note_add_outlined),
