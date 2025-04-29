@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/main.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
+import 'package:med_track/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
@@ -26,6 +27,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
+  final NotificationService _notificationService = NotificationService();
+
   bool _notificationsEnabled = true;
   bool _isDarkMode = false;
   String _currentLanguage = 'English';
@@ -202,11 +206,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   });
                   await _saveSettings();
 
-                  final medications = await getMedications(); // Implement this
                   if (_notificationsEnabled) {
-                    await scheduleDailyAlarms(medications);
+                     await _notificationService.setScheduleNotification();
+
                   } else {
-                    await cancelAllNotifications();
+                    await _notificationService.cancelAllNotification();
+
                   }
                 },
               ),
