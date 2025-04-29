@@ -67,7 +67,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
             loadPrescriptions();
           },
           child: Text(
-            widget.prescription == null ? localizations.addPrescription : localizations.prescriptionDetails,
+            widget.prescription == null ? localizations.addPrescription : localizations.updatePrescription,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
             ),
@@ -183,7 +183,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
                                 date: DateTime.now().toString(),
                                 patient: _patientController.text,
                                 age: int.parse(_ageController.text),
-                                medications: _prescription == null?[]:_prescription!.medications),),),
+                                medications: widget.prescription  != null?widget.prescription!.medications:_prescription!.medications),),),
                               ).then((value)async {
                                 await  loadPrescriptions();
                               });

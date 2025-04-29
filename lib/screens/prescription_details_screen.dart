@@ -97,34 +97,15 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                     Divider(thickness: 1, color: Colors.black87),
                   ],
                 ),
-                // Positioned(
-                //   right: -10,
-                //   top: -10,
-                //   child: IconButton(onPressed: (){
-                //     Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,uuid: "",),),);
-                //   }, icon: Icon(Icons.edit_outlined),),),
               ],
             ),
 
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  localizations.medications,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = !_isEditing;
-                    });
-                  },
-                ),
-              ],
+            Text(
+              localizations.medications,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
             Card(

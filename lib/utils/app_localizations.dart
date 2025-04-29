@@ -86,7 +86,7 @@ class AppLocalizations {
       'additionalInfo': 'Additional Information',
       'additionalInstructions': 'Add any additional instructions or notes',
       'medicationStatus': 'Medication Status',
-      'updateMedication': 'Update Medication',
+      'updatePrescription': 'Update Prescription',
       'saveMedication': 'Save Medication',
       'selectPrescription': 'Select Prescription',
       'selectDateToViewMedications': 'Select a date to view medications',
@@ -195,7 +195,7 @@ class AppLocalizations {
       'additionalInfo': 'অতিরিক্ত তথ্য',
       'additionalInstructions': 'অতিরিক্ত নির্দেশনা বা নোট যোগ করুন',
       'medicationStatus': 'ঔষধের স্থিতি',
-      'updateMedication': 'ঔষধ আপডেট করুন',
+      'updatePrescription': 'ঔষধ আপডেট করুন',
       'saveMedication': 'ঔষধ সংরক্ষণ করুন',
       'selectPrescription': 'প্রেসক্রিপশন নির্বাচন করুন',
       'selectDateToViewMedications': 'ঔষধ দেখতে একটি তারিখ নির্বাচন করুন',
@@ -305,7 +305,7 @@ class AppLocalizations {
   String get additionalInfo => _localizedValues[locale.languageCode]!['additionalInfo']!;
   String get additionalInstructions => _localizedValues[locale.languageCode]!['additionalInstructions']!;
   String get medicationStatus => _localizedValues[locale.languageCode]!['medicationStatus']!;
-  String get updateMedication => _localizedValues[locale.languageCode]!['updateMedication']!;
+  String get updatePrescription => _localizedValues[locale.languageCode]!['updatePrescription']!;
   String get saveMedication => _localizedValues[locale.languageCode]!['saveMedication']!;
   String get selectPrescription => _localizedValues[locale.languageCode]!['selectPrescription']!;
   String get selectDateToViewMedications => _localizedValues[locale.languageCode]!['selectDateToViewMedications']!;

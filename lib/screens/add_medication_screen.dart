@@ -374,7 +374,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 ),
               ),
               child: Text(
-                widget.medication != null ? localizations.updateMedication : localizations.saveMedication,
+                widget.medication != null ? localizations.updatePrescription : localizations.saveMedication,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
