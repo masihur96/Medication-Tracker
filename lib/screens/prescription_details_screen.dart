@@ -43,13 +43,17 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
         ),
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,uuid: "",),),);
+          }, icon: Icon(Icons.edit_outlined))
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Stack(
               children: [
                 Column(
@@ -93,12 +97,12 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                     Divider(thickness: 1, color: Colors.black87),
                   ],
                 ),
-                Positioned(
-                  right: -10,
-                  top: -10,
-                  child: IconButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,uuid: "",),),);
-                  }, icon: Icon(Icons.edit_outlined),),),
+                // Positioned(
+                //   right: -10,
+                //   top: -10,
+                //   child: IconButton(onPressed: (){
+                //     Navigator.push(context, MaterialPageRoute(builder: (_)=>NewRxScreen(prescription: prescription,uuid: "",),),);
+                //   }, icon: Icon(Icons.edit_outlined),),),
               ],
             ),
 

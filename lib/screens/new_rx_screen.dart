@@ -172,22 +172,22 @@ class _NewRxScreenState extends State<NewRxScreen> {
                       Expanded(child: Divider(thickness: 1, color: Colors.black87)),
                       IconButton(onPressed: (){
 
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (_) => BounchingDialog(
-            width: screenSize(context, 0.6),
-            child: AddMedicationScreen(prescription: Prescription(uid: widget.prescription != null?widget.prescription!.uid: widget.uuid,
-                doctor: _doctorController.text,
-                date: DateTime.now().toString(),
-                patient: _patientController.text,
-                age: int.parse(_ageController.text),
-                medications: _prescription == null?[]:_prescription!.medications))),
-      ).then((value)async {
-        await  loadPrescriptions();
-      });
-    }
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (_) => BounchingDialog(
+                            width: screenSize(context, 0.6),
+                            child: AddMedicationScreen(prescription: Prescription(uid: widget.prescription != null?widget.prescription!.uid: widget.uuid,
+                                doctor: _doctorController.text,
+                                date: DateTime.now().toString(),
+                                patient: _patientController.text,
+                                age: int.parse(_ageController.text),
+                                medications: _prescription == null?[]:_prescription!.medications),),),
+                              ).then((value)async {
+                                await  loadPrescriptions();
+                              });
+                            }
                       }, icon: Icon(Icons.add_circle_outlined))
                     ],
                   ),
@@ -195,16 +195,58 @@ class _NewRxScreenState extends State<NewRxScreen> {
               ),
 
 
-              _prescription ==null?SizedBox(): SizedBox(
+               if(widget.prescription != null)
+                    SizedBox(
+                 height: screenSize(context, 1.3),
+                 child: ListView.builder(
+                   padding: const EdgeInsets.all(16.0),
+                   itemCount:  widget.prescription!.medications.length,
+                   itemBuilder: (context, index) {
+                     final medication =  widget.prescription!.medications[index];
+                     return Slidable(
+                       key: ValueKey(medication),
+                       endActionPane: ActionPane(
+                         motion: const ScrollMotion(),
+                         children: [
+                           SlidableAction(
+                             onPressed: (context) async{
+                               await _localRepository.deleteMedication(widget.prescription!.uid,medication.id);
+                               await  loadPrescriptions();
+                             },
+                             backgroundColor: Colors.red,
+                             foregroundColor: Colors.white,
+                             icon: Icons.delete,
+                             label: 'Delete',
+                           ),
+                         ],
+                       ),
+                       child: _buildMedicationItem(
+                         name: medication.name,
+                         dosage: medication.timesPerDay.toString(),
+                         frequency: medication.frequency,
+                         timeOfDay: medication.reminderTimes.isEmpty
+                             ? localizations.notSet
+                             : medication.reminderTimes
+                             .map((time) => _timeOfDayToString(time))
+                             .join(', '),
+                         notes: medication.notes ?? localizations.noMedicationsYet,
+                       ),
+                     );
+                   },
+                 ),
+               ),
+
+              if(_prescription != null)
+              SizedBox(
                 height: screenSize(context, 1.3),
 
                 child: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
-                itemCount: _prescription!.medications.length,
+                itemCount:  _prescription!.medications.length,
                 itemBuilder: (context, index) {
                   final medication = _prescription!.medications[index];
                   return Slidable(
-                    key: ValueKey(medication.id),
+                    key: ValueKey(medication),
                     endActionPane: ActionPane(
                       motion: const ScrollMotion(),
                       children: [
@@ -233,30 +275,9 @@ class _NewRxScreenState extends State<NewRxScreen> {
                     ),
                   );
                 },
-                            ),
+               ),
               ),
-              // const SizedBox(height: 24),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     if (_formKey.currentState!.validate()) {
-              //       final prescription = Prescription(
-              //
-              //         uid: widget.prescription?.uid ??
-              //              DateTime.now().microsecondsSinceEpoch.toString(),
-              //         doctor: _doctorController.text,
-              //         date: DateTime.now().toString(),
-              //
-              //         patient: _patientController.text,
-              //         age: int.parse(_ageController.text),
-              //         medications: widget.prescription?.medications ?? [],
-              //       );
-              //
-              //       savePrescription(prescription);
-              //       Navigator.pop(context);
-              //     }
-              //   },
-              //   child: Text(widget.prescription == null ? localizations.save : localizations.edit),
-              // ),
+
             ],
           ),
         ),
