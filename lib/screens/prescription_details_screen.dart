@@ -1,13 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 import 'add_medication_screen.dart';
 
 class PrescriptionDetailsScreen extends StatefulWidget {

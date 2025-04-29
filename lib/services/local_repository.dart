@@ -73,6 +73,8 @@ class LocalRepository {
   Future<void> deletePrescription(String uid) async {
     final prefs = await SharedPreferences.getInstance();
     final String? existingListString = prefs.getString('prescriptions');
+
+    print("fdfsfdf$existingListString");
     List<Prescription> prescriptions = [];
 
     if (existingListString != null) {

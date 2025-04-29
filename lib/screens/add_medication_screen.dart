@@ -142,7 +142,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          widget.medication != null ? localizations.edit : localizations.addMedication,
+          widget.medication != null ? localizations.edit : localizations.newRx,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -400,10 +400,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     if (widget.prescription != null) {
       prescriptions.removeWhere((p) => p.uid == widget.prescription.uid);
     }
-
     // Add the prescription (new or updated)
     prescriptions.add(prescription);
-
     // Save updated list
     final String encodedList =
     jsonEncode(prescriptions.map((e) => e.toJson()).toList());

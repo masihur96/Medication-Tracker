@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/add_medication_screen.dart';
+import 'package:med_track/services/local_repository.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/utils/bounching_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,8 +14,8 @@ import '../utils/custom_size.dart';
 
 class NewRxScreen extends StatefulWidget {
   final Prescription? prescription;
-
   final String uuid;
+
   const NewRxScreen({super.key, this.prescription,required this.uuid});
 
   @override
@@ -23,7 +24,7 @@ class NewRxScreen extends StatefulWidget {
 
 class _NewRxScreenState extends State<NewRxScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  final LocalRepository _localRepository = LocalRepository();
   bool _isLoading = false;
  Prescription? _prescription;
 
@@ -177,24 +178,16 @@ class _NewRxScreenState extends State<NewRxScreen> {
         context: context,
         builder: (_) => BounchingDialog(
             width: screenSize(context, 0.6),
-            child: AddMedicationScreen(prescription: Prescription(uid: widget.uuid,
+            child: AddMedicationScreen(prescription: Prescription(uid: widget.prescription != null?widget.prescription!.uid: widget.uuid,
                 doctor: _doctorController.text,
                 date: DateTime.now().toString(),
                 patient: _patientController.text,
                 age: int.parse(_ageController.text),
                 medications: _prescription == null?[]:_prescription!.medications))),
       ).then((value)async {
-        // 👇 Do something after dialog closes
-
         await  loadPrescriptions();
-          // Maybe update UI or show a snackbar?
-          print("Dialog closed with result: $value");
-
       });
-
     }
-
-
                       }, icon: Icon(Icons.add_circle_outlined))
                     ],
                   ),
@@ -216,8 +209,9 @@ class _NewRxScreenState extends State<NewRxScreen> {
                       motion: const ScrollMotion(),
                       children: [
                         SlidableAction(
-                          onPressed: (context) {
-                      print("object");
+                          onPressed: (context) async{
+                            await _localRepository.deleteMedication(_prescription!.uid,medication.id);
+                            await  loadPrescriptions();
                           },
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,

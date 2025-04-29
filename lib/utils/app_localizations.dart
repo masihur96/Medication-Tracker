@@ -31,7 +31,7 @@ class AppLocalizations {
       'language': 'Language',
       'selectLanguage': 'Select your preferred language',
       'version': 'Version',
-      'addMedication': 'Add Medication',
+      'newRx': 'New Rx',
       'medicationName': 'Medication Name',
       'dosage': 'Dosage',
       'frequency': 'Frequency',
@@ -141,7 +141,7 @@ class AppLocalizations {
       'language': 'ভাষা',
       'selectLanguage': 'আপনার পছন্দের ভাষা নির্বাচন করুন',
       'version': 'ভার্সন',
-      'addMedication': 'ঔষধ যোগ করুন',
+      'newRx': 'নতুন প্রেসক্রিপশন',
       'medicationName': 'ঔষধের নাম',
       'dosage': 'মাত্রা',
       'frequency': 'ফ্রিকোয়েন্সি',
@@ -251,7 +251,7 @@ class AppLocalizations {
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get selectLanguage => _localizedValues[locale.languageCode]!['selectLanguage']!;
   String get version => _localizedValues[locale.languageCode]!['version']!;
-  String get addMedication => _localizedValues[locale.languageCode]!['addMedication']!;
+  String get newRx => _localizedValues[locale.languageCode]!['newRx']!;
   String get medicationName => _localizedValues[locale.languageCode]!['medicationName']!;
   String get dosage => _localizedValues[locale.languageCode]!['dosage']!;
   String get frequency => _localizedValues[locale.languageCode]!['frequency']!;

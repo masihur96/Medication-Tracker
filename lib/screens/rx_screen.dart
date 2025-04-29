@@ -42,35 +42,10 @@ class _RxScreenState extends State<RxScreen> {
 
   }
 
-  // Future<List<Prescription>> loadPrescriptions() async {
-  //   setState(() => _isLoading = true);
-  //   final prefs = await SharedPreferences.getInstance();
-  //
-  //     final String? listString = prefs.getString('prescriptions');
-  //     if (listString != null) {
-  //
-  //       try{
-  //         final List decoded = jsonDecode(listString);
-  //         final List<Prescription> loaded =
-  //         decoded.map((e) => Prescription.fromJson(e)).toList();
-  //         setState(() {
-  //           _prescriptions = loaded;
-  //           _isLoading = false;
-  //         });
-  //       }catch(e){
-  //         print("loadPrescriptions$e");
-  //       }
-  //     } else {
-  //       setState(() => _isLoading = false);
-  //     }
-  //
-  //     return _prescriptions;
-  // }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -124,10 +99,8 @@ class _RxScreenState extends State<RxScreen> {
                                   children: [
                                     SlidableAction(
                                       onPressed: (context) async{
-
                                        await _localRepository.deletePrescription(rx.uid);
-                                       await _localRepository.loadPrescriptions();
-
+                                       await fetchPrescription();
                                       },
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
@@ -200,17 +173,17 @@ class _RxScreenState extends State<RxScreen> {
                                                 ],
                                               ),
                                             ),
-                                            IconButton(
-                                              icon: const Icon(Icons.medication_outlined,size: 40,),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) => AddMedicationScreen(prescription: rx),
-                                                  ),
-                                                );
-                                              },
-                                            ),
+                                            // IconButton(
+                                            //   icon: const Icon(Icons.medication_outlined,size: 40,),
+                                            //   onPressed: () {
+                                            //     Navigator.push(
+                                            //       context,
+                                            //       MaterialPageRoute(
+                                            //         builder: (_) => AddMedicationScreen(prescription: rx),
+                                            //       ),
+                                            //     );
+                                            //   },
+                                            // ),
                                           ],
                                         ),
                                       ),
@@ -235,11 +208,11 @@ class _RxScreenState extends State<RxScreen> {
               builder: (context) =>  NewRxScreen(uuid: uuid,),
             ),
           );
-          _localRepository.loadPrescriptions();
+       await   _localRepository.loadPrescriptions();
         },
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
-          localizations.addMedication,
+          localizations.newRx,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Theme.of(context).primaryColor,
