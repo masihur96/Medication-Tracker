@@ -183,7 +183,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
                                 date: DateTime.now().toString(),
                                 patient: _patientController.text,
                                 age: int.parse(_ageController.text),
-                                medications: widget.prescription  != null?widget.prescription!.medications:_prescription!.medications),),),
+                                medications: _prescription ==null || widget.prescription == null?[]: _prescription ==null ?widget.prescription!.medications:_prescription!.medications),),),
                               ).then((value)async {
                                 await  loadPrescriptions();
                               });
@@ -411,7 +411,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
         print("loadPrescriptions$e");
       }
 
-      print(_prescription!.doctor);
+      // print(_prescription!.doctor);
 
     } else {
       setState(() => _isLoading = false);
