@@ -348,6 +348,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   );
 
               await    savePrescription(prescription);
+              await _notificationService.cancelAllNotification();
               await _notificationService.setScheduleNotification();
                   Navigator.pop(context);
 

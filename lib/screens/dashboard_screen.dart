@@ -34,13 +34,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   }
 
-
   initTask()async{
    await initializeData();
 
   }
-
-
 
 
 

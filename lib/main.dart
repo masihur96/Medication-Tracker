@@ -17,7 +17,7 @@ FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // await initializeNotifications();
+   await initializeNotifications();
   await NotificationService.init();
 
 
