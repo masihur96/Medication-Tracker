@@ -493,8 +493,8 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          history.medicationName,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          history.medicationName.toUpperCase(),
+                          style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                         Text('Dosage: ${history.dosage}'),
                         Text('Note: ${history.notes}'),
@@ -509,7 +509,7 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: history.medicationTimes.asMap().entries.map((entry) =>
                           Text(
-                            '  ${entry.value.split(" ")[1]} ${entry.value.split(" ")[2]}\n${history.isTaken[entry.key] ? "Taken" : "Missed"}',
+                            '  ${entry.value}\n${history.isTaken[entry.key] ? "Taken" : "Missed"}',
                             style: TextStyle(
                               color: history.isTaken[entry.key] ? Colors.green : Colors.red,
 
