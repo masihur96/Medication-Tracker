@@ -136,7 +136,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    return DateFormat('dd/MM/yyyy hh:mm a').format(dt);
+    return DateFormat('hh:mm a').format(dt);
   }
 
 
@@ -293,7 +293,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${localizations.schedule}: $time'),
+                      GestureDetector(
+                        onTap: (){
+                          print(time);
+                        },
+                          child: Text('${localizations.time}: $time')),
                       GestureDetector(
                         onTap: () async {
                           setState(() {
@@ -470,35 +474,54 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
     context: context,
     builder: (context) => AlertDialog(
       title: Text('Medications for ${DateFormat('MMM d, yyyy').format(date)}'),
-      content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: historyForDate.isEmpty
-            ? [Text('No medication records for this date')]
-            : historyForDate.map((history) => ListTile(
-                title: Text(history.medicationName),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Doctor: ${history.doctorName}'),
-                    Text('Patient: ${history.patientName} (${history.patientAge} years)'),
-                    Text('Dosage: ${history.dosage}'),
-                    Text('Note: ${history.notes}'),
-                  ],
-                ),
-                trailing: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: history.medicationTimes.asMap().entries.map((entry) => 
-                    Text(
-                      '${history.medicationTimes[entry.key]}: ${history.isTaken[entry.key] ? "Taken" : "Missed"}',
-                      style: TextStyle(
-                        color: history.isTaken[entry.key] ? Colors.green : Colors.red,
-                      ),
-                    )
-                  ).toList(),
-                ),
-              )).toList(),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: historyForDate.isEmpty
+                ? [Text('No medication records for this date')]
+                : historyForDate.map((history) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left side (medication details)
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          history.medicationName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text('Dosage: ${history.dosage}'),
+                        Text('Note: ${history.notes}'),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  // Right side (medication times and status)
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: history.medicationTimes.asMap().entries.map((entry) =>
+                          Text(
+                            '  ${entry.value.split(" ")[1]} ${entry.value.split(" ")[2]}\n${history.isTaken[entry.key] ? "Taken" : "Missed"}',
+                            style: TextStyle(
+                              color: history.isTaken[entry.key] ? Colors.green : Colors.red,
+
+                            ),textAlign: TextAlign.center,
+                          )
+                      ).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            )).toList(),
+          ),
         ),
       ),
       actions: [
@@ -509,6 +532,8 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
       ],
     ),
   );
+
+
 }
 
 

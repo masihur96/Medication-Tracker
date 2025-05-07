@@ -93,43 +93,6 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             ),
           ),
 
-          // Data Collection Setting
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SwitchListTile(
-              title: Text(localizations.dataCollection),
-              subtitle: Text(localizations.dataCollectionDescription),
-              secondary: Icon(
-                Icons.analytics_outlined,
-              ),
-              value: _dataCollection,
-              onChanged: (bool value) {
-                setState(() {
-                  _dataCollection = value;
-                  _savePrivacySettings();
-                });
-              },
-            ),
-          ),
-
-          // Medication Names Visibility
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SwitchListTile(
-              title: Text(localizations.showMedicationNames),
-              subtitle: Text(localizations.showMedicationNamesDescription),
-              secondary: Icon(
-                Icons.visibility,
-              ),
-              value: _showMedNames,
-              onChanged: (bool value) {
-                setState(() {
-                  _showMedNames = value;
-                  _savePrivacySettings();
-                });
-              },
-            ),
-          ),
 
           // Biometric Lock
           Card(

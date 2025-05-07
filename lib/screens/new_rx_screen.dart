@@ -183,7 +183,7 @@ class _NewRxScreenState extends State<NewRxScreen> {
                                 date: DateTime.now().toString(),
                                 patient: _patientController.text,
                                 age: int.parse(_ageController.text),
-                                medications: _prescription ==null || widget.prescription == null?[]: _prescription ==null ?widget.prescription!.medications:_prescription!.medications),),),
+                                medications: _prescription ==null && widget.prescription == null?[]: _prescription ==null ?widget.prescription!.medications:_prescription!.medications),),),
                               ).then((value)async {
                                 await  loadPrescriptions();
                               });
@@ -211,7 +211,11 @@ class _NewRxScreenState extends State<NewRxScreen> {
                            SlidableAction(
                              onPressed: (context) async{
                                await _localRepository.deleteMedication(widget.prescription!.uid,medication.id);
-                               await  loadPrescriptions();
+                               widget.prescription!.medications.remove(medication);
+                               setState(() {
+
+                               });
+                               // await  loadPrescriptions();
                              },
                              backgroundColor: Colors.red,
                              foregroundColor: Colors.white,

@@ -86,7 +86,10 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                 
                               Divider(
                               ),
-                              _buildLineField(label: '${localizations.patient}: ${prescription.patient}',size: 16),
+                              SizedBox(height: 5,),
+                              _buildLineField(label: '${localizations.patient}: ${prescription.patient}',size: 14),
+                              SizedBox(height: 5,),
+                              _buildLineField(label: '${localizations.age}: ${prescription.age}',size: 14),
                               // _buildLineField(label: '${localizations.for_}: ${prescription.medicationTo}', size: 12),
                 
                             ],

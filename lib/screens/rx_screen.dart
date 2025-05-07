@@ -8,6 +8,7 @@ import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:med_track/screens/prescription_details_screen.dart';
 import 'package:med_track/services/local_repository.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:med_track/utils/custom_size.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_medication_screen.dart';
@@ -164,12 +165,40 @@ class _RxScreenState extends State<RxScreen> {
 
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    rx.doctor,
+                                                    "${localizations.doctor}: ${rx.doctor}",
+                                                    style: TextStyle(fontSize: screenSize(context, .05),fontWeight: FontWeight.w500),
                                                   ),
 
                                                   Text(
-                                                    'Pt: ${rx.patient}',
+                                                    '${localizations.patient}: ${rx.patient}',
+                                                    style: TextStyle(fontSize: screenSize(context, .04)),
+
                                                   ),
+                                                  Text(
+                                                    '${localizations.age}: ${rx.age}',
+                                                    style: TextStyle(fontSize: screenSize(context, .04)),
+                                                  ),
+
+                                                  // SizedBox(height: 10,),
+
+                                                  SizedBox(
+                                                    height: screenSize(context, .10), // height is important for horizontal lists
+                                                    child: ListView.builder(
+                                                      scrollDirection: Axis.horizontal,
+                                                      itemCount: rx.medications.length,
+                                                      itemBuilder: (context, index) {
+                                                        return Padding(
+                                                          padding: const EdgeInsets.only(right: 3.0,top: 8),
+                                                          child: Text(
+                                                            "${rx.medications[index].name.toUpperCase()} ",
+                                                            style: TextStyle(color: Colors.green),
+
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+
                                                 ],
                                               ),
                                             ),
