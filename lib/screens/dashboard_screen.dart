@@ -5,13 +5,9 @@ import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
-import 'package:med_track/services/notification_service.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
-
 
 
 class DashboardScreen extends StatefulWidget {
@@ -22,7 +18,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  List<Medication> _todaysMedications = [];
+  List<Medication> _todayMedications = [];
   Map<DateTime, int> _heatMapDataset = {};
   List<Prescription> _prescriptions = [];
   Prescription? _selectedPrescription;
@@ -60,7 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> loadPrescriptions() async {
     try {
-      List<Medication> todaysMedications = [];
+      List<Medication> todayMedications = [];
       final prefs = await SharedPreferences.getInstance();
       final String? listString = prefs.getString('prescriptions');
       if (listString != null) {
@@ -83,20 +79,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // Create a list to store all scheduled DateTimes
 
               if (med.remainderDates.contains(today)) {
-                todaysMedications.add(med);
+                todayMedications.add(med);
               }
             }
           }
         }
 
         setState(() {
-          _todaysMedications = todaysMedications;
+          _todayMedications = todayMedications;
         });
 
       }
     } catch (e, stackTrace) {
-      print('Error loading prescriptions: $e');
-      print('Stack trace: $stackTrace');
+      log('Error loading prescriptions: $e');
+      log('Stack trace: $stackTrace');
     }
   }
 
@@ -181,9 +177,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _todaysMedications.length,
+              itemCount: _todayMedications.length,
               itemBuilder: (context, index) {
-                final medication = _todaysMedications[index];
+                final medication = _todayMedications[index];
                 return _buildMedicationCard(
                   medication: medication,
                 );
@@ -217,7 +213,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       items: _prescriptions.map((prescription) {
                         return DropdownMenuItem<Prescription>(
                           value: prescription,
-                          child: Text('${prescription.doctor}'),
+                          child: Text(prescription.doctor),
                         );
                       }).toList(),
                       onChanged: (Prescription? newValue) {
@@ -269,7 +265,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-             "${medication.name}",
+             medication.name,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -293,11 +289,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GestureDetector(
-                        onTap: (){
-                          print(time);
-                        },
-                          child: Text('${localizations.time}: $time')),
+                      Text('${localizations.time}: $time'),
                       GestureDetector(
                         onTap: () async {
                           setState(() {
@@ -349,7 +341,7 @@ Future<void> updateMedicationStatus({
     final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
     
     // Update the status in today's medications list for UI
-    for (var item in _todaysMedications) {
+    for (var item in _todayMedications) {
       if (item.id == medicationId) {
         if (timeIndex < item.isTaken.length) {
           // Check if the status is changing from not taken to taken
@@ -357,11 +349,11 @@ Future<void> updateMedicationStatus({
           item.isTaken[timeIndex] = isTaken;
           
           // Update stock only when medication is marked as taken
-          if (!wasPreviouslyTaken && isTaken && item.stock != null) {
+          if (!wasPreviouslyTaken && isTaken) {
             item.stock = item.stock - 1;
           }
           // If medication is unmarked as taken, increment the stock back
-          else if (wasPreviouslyTaken && !isTaken && item.stock != null) {
+          else if (wasPreviouslyTaken && !isTaken) {
             item.stock = item.stock + 1;
           }
           
@@ -410,11 +402,11 @@ Future<void> updateMedicationStatus({
             medication.isTaken[timeIndex] = isTaken;
             
             // Update stock in the main prescriptions list
-            if (!wasPreviouslyTaken && isTaken && medication.stock != null) {
+            if (!wasPreviouslyTaken && isTaken) {
               medication.stock = medication.stock - 1;
             }
             // If medication is unmarked as taken, increment the stock back
-            else if (wasPreviouslyTaken && !isTaken && medication.stock != null) {
+            else if (wasPreviouslyTaken && !isTaken) {
               medication.stock = medication.stock + 1;
             }
           }
