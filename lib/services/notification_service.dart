@@ -75,7 +75,6 @@ class NotificationService {
       }
       ) async {
 
-
     var scheduleDate = tz.TZDateTime(
       tz.local,
       scheduledTime.year,

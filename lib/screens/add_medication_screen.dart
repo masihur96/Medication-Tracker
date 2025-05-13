@@ -30,7 +30,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  final _stockController = TextEditingController();
+  final _stockController = TextEditingController(text: "10");
   final _noteController = TextEditingController();
   // final _durationController = TextEditingController();
   String _frequency = FREQUENCY_DAILY; // Change default value to use constant
@@ -51,7 +51,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   // Add these new variables
   DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 30));
+  DateTime _endDate = DateTime.now().add(const Duration(days: 7));
 
   @override
   void initState() {
@@ -68,10 +68,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _selectedTimes.addAll(widget.medication!.reminderTimes);
       _isTaken.clear();
       _isTaken.addAll(widget.medication!.isTaken);
-      // _durationController.text = widget.medication!.duration.toString();
-      // _startDate = widget.medication!.startDate;
-      // _endDate = widget.medication!.endDate;
+
     }
+
+    generateDatesBasedOnFrequency();
   }
 
   @override
@@ -528,7 +528,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    return  DateFormat('d MMM , yyyy').format(date);
   }
 
   DropdownMenuItem<String> _buildFrequencyMenuItem(String value, String text) {
@@ -602,6 +602,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+
+
       margin: const EdgeInsets.symmetric(vertical: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -634,12 +636,12 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.calendar_month_outlined, size: 20),
-                        const SizedBox(width: 8),
+
                         Flexible(
                           child: Text(
-                            'Start: ${_formatDate(_startDate)}',
+                            'Start\n${_formatDate(_startDate)}',
                             style: const TextStyle(fontSize: 14),
+                            textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -663,11 +665,11 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.calendar_month_outlined, size: 20),
-                        const SizedBox(width: 8),
+
                         Flexible(
                           child: Text(
-                            'End: ${_formatDate(_endDate)}',
+                            'End\n${_formatDate(_endDate)}',
+                            textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
