@@ -1,10 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/services/voice_service.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 
 
 class NotificationSettingsScreen extends StatefulWidget {
@@ -225,14 +233,46 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   leading: Icon(Icons.access_time),
                   title: Text(_formatTime(time)),
                   trailing: IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: Icon(Icons.edit_outlined),
                     onPressed: () => _editReminderTime(medication, index),
                   ),
                 );
-              }).toList(),
-              ElevatedButton(
-                onPressed: () => _recordMedicationSound(medication.id),
-                child: Text("localizations.recordSound"),
+              }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  buildRecordingButton(context),
+                  // TextButton.icon(
+                  //   onPressed: () async{
+                  //     final recorderService = RecorderService();
+                  //
+                  //     try {
+                  //       // Start recording
+                  //       final filePath = await recorderService.startRecording("my_recording");
+                  //       print("Recording to: $filePath");
+                  //
+                  //       // Check if recording
+                  //       final isRecording = await recorderService.isRecording();
+                  //       print("Is recording: $isRecording");
+                  //
+                  //       // Stop recording after some time
+                  //       await Future.delayed(Duration(seconds: 5));
+                  //     final recordedFile = await recorderService.stopRecording();
+                  //     print("Recorded file: $recordedFile");
+                  //
+                  //     // Clean up
+                  //     await recorderService.dispose();
+                  //     } catch (e) {
+                  //     log("Error: $e");
+                  //     }
+                  //     // Your action
+                  //   },
+                  //   icon: Icon(Icons.record_voice_over_outlined),
+                  //   label: Text('Voice'),
+                  // ),
+
+                ],
               ),
             ],
           ),
@@ -299,5 +339,112 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
     return TimeOfDay.fromDateTime(dt).format(context);
+  }
+
+  void showRecordingDialog(BuildContext context, Future<String?> Function() onStop) {
+    int secondsElapsed = 0;
+    Timer? timer;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            timer ??= Timer.periodic(Duration(seconds: 1), (timer) {
+              setState(() {
+                secondsElapsed++;
+              });
+            });
+
+            return AlertDialog(
+              title: Text('Recording'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic, color: Colors.red, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    'Recording time: ${formatDuration(secondsElapsed)}',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    timer?.cancel();
+                    Navigator.of(context).pop();
+                    final filePath = await onStop();
+                    if (filePath != null) {
+                      await playAudio(filePath, context);
+                    }
+                  },
+                  child: Text('Stop'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      timer?.cancel();
+    });
+  }
+
+  String formatDuration(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$secs';
+  }
+
+  Future<void> playAudio(String filePath, BuildContext context) async {
+    final player = AudioPlayer();
+    try {
+      await player.setFilePath(filePath);
+      await player.play();
+    } catch (e) {
+      developer.log("Error playing audio: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to play audio: $e")),
+      );
+    } finally {
+      await player.dispose();
+    }
+  }
+
+  Widget buildRecordingButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () async {
+        final recorderService = RecorderService();
+
+        try {
+          final filePath = await recorderService.startRecording("my_recording");
+          developer.log("Recording to: $filePath");
+
+          final isRecording = await recorderService.isRecording();
+          developer.log("Is recording: $isRecording");
+
+          showRecordingDialog(context, () async => await recorderService.stopRecording());
+
+          // Remove this block if stopping only via dialog
+          await Future.delayed(Duration(seconds: 5));
+          final recordedFile = await recorderService.stopRecording();
+          developer.log("Recorded file: $recordedFile");
+          if (recordedFile != null) {
+            await playAudio(recordedFile, context);
+          }
+
+          await recorderService.dispose();
+        } catch (e) {
+          developer.log("Error: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: $e")),
+          );
+        }
+      },
+      icon: Icon(Icons.record_voice_over_outlined),
+      label: Text('Voice/analysis'),
+    );
   }
 } 
