@@ -30,7 +30,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
-  final _stockController = TextEditingController(text: "10");
+  final _stockController = TextEditingController(text: '10');
   final _noteController = TextEditingController();
   // final _durationController = TextEditingController();
   String _frequency = FREQUENCY_DAILY; // Change default value to use constant
@@ -70,7 +70,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _isTaken.addAll(widget.medication!.isTaken);
 
     }
-
     generateDatesBasedOnFrequency();
   }
 
@@ -528,7 +527,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return  DateFormat('d MMM , yyyy').format(date);
+    return  '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   DropdownMenuItem<String> _buildFrequencyMenuItem(String value, String text) {
@@ -639,7 +638,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                         Flexible(
                           child: Text(
-                            'Start\n${_formatDate(_startDate)}',
+                            'Start\n${   DateFormat('d MMM , yyyy').format(_startDate)}',
                             style: const TextStyle(fontSize: 14),
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -668,7 +667,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
                         Flexible(
                           child: Text(
-                            'End\n${_formatDate(_endDate)}',
+                            'End\n${ DateFormat('d MMM , yyyy').format(_endDate)}',
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 14),
                             overflow: TextOverflow.ellipsis,
