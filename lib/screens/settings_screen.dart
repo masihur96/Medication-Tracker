@@ -4,6 +4,7 @@ import 'package:med_track/main.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
 import 'package:med_track/services/notification_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
@@ -207,7 +208,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await _saveSettings();
 
                   if (_notificationsEnabled) {
-                     await _notificationService.setScheduleNotification();
+
+                bool isEnable =await    checkAndRequestNotificationPermission();
+
+                if(isEnable){
+                  await _notificationService.setScheduleNotification();
+                }
+
+
+
 
                   } else {
                     await _notificationService.cancelAllNotification();
@@ -342,6 +351,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<bool> checkAndRequestNotificationPermission() async {
+    var status = await Permission.notification.status;
+
+    if (status.isDenied || status.isRestricted || status.isLimited) {
+      // Request permission
+      status = await Permission.notification.request();
+
+      if (status.isGranted) {
+
+        return true;
+        // Permission granted
+        print('Notification permission granted.');
+      } else {
+        return false;
+        // Permission denied
+        print('Notification permission denied.');
+      }
+    } else if (status.isGranted) {
+      return true;
+      // Permission already granted
+      print('Notification permission already granted.');
+    } else {
+      return false;
+      // Handle other statuses if necessary
+      print('Notification permission status: $status');
+    }
   }
   Future<void> cancelAllNotifications() async {
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
