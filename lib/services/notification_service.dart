@@ -74,18 +74,15 @@ class NotificationService {
         String? body
       }
       ) async {
-    final now = tz.TZDateTime.now(tz.local);
-
 
 
     var scheduleDate = tz.TZDateTime(
-
       tz.local,
-      now.year,
-      now.month,
-      now.day,
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
       scheduledTime.hour,
-      scheduledTime.month
+      scheduledTime.minute,
     );
 
 
@@ -105,8 +102,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
 
-
-      matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }

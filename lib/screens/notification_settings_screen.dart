@@ -20,6 +20,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   bool _vibrationEnabled = true;
   List<Medication> _medications = [];
   bool _isLoading = true;
+  Map<String, String?> _medicationSounds = {}; // Store sound file paths for each medication
 
   @override
   void initState() {
@@ -229,6 +230,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   ),
                 );
               }).toList(),
+              ElevatedButton(
+                onPressed: () => _recordMedicationSound(medication.id),
+                child: Text("localizations.recordSound"),
+              ),
             ],
           ),
         ),
@@ -282,6 +287,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Future<void> scheduleMedicationNotifications() async {
     // This will use the existing scheduling logic from settings_screen.dart
     // You'll need to implement this based on your notification scheduling needs
+  }
+
+  Future<void> _recordMedicationSound(String medicationId) async {
+    // Implement the logic to record audio and save it
+    // For example, using a package like 'audio_recorder' or 'flutter_sound'
+    // After recording, save the file path in _medicationSounds[medicationId]
   }
 
   String _formatTime(TimeOfDay time) {

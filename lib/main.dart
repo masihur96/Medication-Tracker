@@ -17,7 +17,6 @@ FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-   await initializeNotifications();
   await NotificationService.init();
 
 
@@ -39,25 +38,6 @@ void main() async {
   );
 }
 
-Future<void> initializeNotifications() async {
-  final prefs = await SharedPreferences.getInstance();
-  final soundEnabled = prefs.getBool('notification_sound_enabled') ?? true;
-  final vibrationEnabled = prefs.getBool('notification_vibration_enabled') ?? true;
-
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-  
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) {
-      // Handle notification tapped logic here
-    },
-  );
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
