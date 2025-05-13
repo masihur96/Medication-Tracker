@@ -242,7 +242,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
 
-                  buildRecordingButton(context),
+                  buildRecordingButton(context,medication),
                   // TextButton.icon(
                   //   onPressed: () async{
                   //     final recorderService = RecorderService();
@@ -378,6 +378,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     final filePath = await onStop();
                     if (filePath != null) {
                       await playAudio(filePath, context);
+
+
                     }
                   },
                   child: Text('Stop'),
@@ -413,7 +415,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     }
   }
 
-  Widget buildRecordingButton(BuildContext context) {
+  Widget buildRecordingButton(BuildContext context,Medication medication) {
     return TextButton.icon(
       onPressed: () async {
         final recorderService = RecorderService();
@@ -427,12 +429,15 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
           showRecordingDialog(context, () async => await recorderService.stopRecording());
 
-          // Remove this block if stopping only via dialog
+        //  Remove this block if stopping only via dialog
           await Future.delayed(Duration(seconds: 5));
+          Navigator.pop(context);
           final recordedFile = await recorderService.stopRecording();
           developer.log("Recorded file: $recordedFile");
           if (recordedFile != null) {
             await playAudio(recordedFile, context);
+
+            recordAndAssignAudio(medication);
           }
 
           await recorderService.dispose();
@@ -447,4 +452,63 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       label: Text('Voice/analysis'),
     );
   }
+
+
+
+  Future<void> recordAndAssignAudio(Medication medicationName) async {
+    final recorder = RecorderService();
+    try {
+      // Start recording
+      final filePath = await recorder.startRecording('med_${medicationName.name}');
+      // Simulate recording for 5 seconds (replace with user interaction)
+      await Future.delayed(Duration(seconds: 5));
+      // Stop recording
+      final savedFilePath = await recorder.stopRecording();
+
+      if (savedFilePath != null) {
+        // Load existing prescriptions
+        final prefs = await SharedPreferences.getInstance();
+        final String? listString = prefs.getString('prescriptions');
+        if (listString != null) {
+          final List decoded = jsonDecode(listString);
+          final List<Prescription> prescriptions =
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+
+          // Update the specific medication
+          for (var prescription in prescriptions) {
+            for (var med in prescription.medications) {
+              if (med.name == medicationName.name) {
+                // Create a new Medication instance with updated audioFilePath
+                final updatedMed = Medication(
+                  name: med.name,
+                  notes: med.notes,
+                  remainderDates: med.remainderDates,
+                  reminderTimes: med.reminderTimes,
+                  audioFilePath: savedFilePath,
+                  id: med.id,
+                  timesPerDay: med.timesPerDay,
+                  stock: med.stock,
+                  isActive: med.isActive,
+                  isTaken: med.isTaken,
+                  frequency: med.frequency,
+
+                );
+                // Replace the old medication in the list
+                prescription.medications[prescription.medications.indexOf(med)] =
+                    updatedMed;
+
+              }
+            }
+          }
+
+          // Save updated prescriptions
+          await prefs.setString(
+              'prescriptions', jsonEncode(prescriptions.map((p) => p.toJson()).toList()));
+        }
+      }
+    } catch (e) {
+      print('Error recording audio: $e');
+    }
+  }
+
 } 

@@ -53,6 +53,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 7));
 
+  String audioFilePath="";
   @override
   void initState() {
     super.initState();
@@ -64,6 +65,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _noteController.text = widget.medication!.notes!;
       _frequency = _getFrequencyConstant(widget.medication!.frequency);
       _timesPer = widget.medication!.timesPerDay;
+      audioFilePath = widget.medication?.audioFilePath??"";
       _selectedTimes.clear();
       _selectedTimes.addAll(widget.medication!.reminderTimes);
       _isTaken.clear();
@@ -342,6 +344,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         reminderTimes: _selectedTimes,
                         remainderDates: _reminderDates,
                         isTaken: _isTaken,
+                        audioFilePath: audioFilePath
                       ),
                     ),
                   );

@@ -12,6 +12,7 @@ class Medication {
   late String frequency;
   late List<TimeOfDay> reminderTimes;
   late List<String> remainderDates;
+  final String? audioFilePath;
 
 
   Medication({
@@ -26,6 +27,7 @@ class Medication {
     required this.frequency,
     required this.reminderTimes,
     required this.remainderDates,
+    this.audioFilePath, //
 // Add duration parameter
   });
 
@@ -49,6 +51,7 @@ class Medication {
           ?.map((e) => e.toString())
           .toList() ??
           [],
+      audioFilePath: json['audioFilePath'],
     );
   }
 
@@ -65,6 +68,7 @@ class Medication {
       'reminderTimes': reminderTimes.map(_timeOfDayToString).toList(),
 
       'remainderDates': remainderDates,
+      'audioFilePath': audioFilePath,
     };
   }
 
