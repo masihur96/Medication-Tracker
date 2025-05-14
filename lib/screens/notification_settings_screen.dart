@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/services/notification_service.dart';
 import 'package:med_track/services/voice_service.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'dart:convert';
@@ -23,6 +24,7 @@ class NotificationSettingsScreen extends StatefulWidget {
 }
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+  final NotificationService _notificationService = NotificationService();
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
@@ -416,6 +418,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   }
 
   Widget buildRecordingButton(BuildContext context,Medication medication) {
+
+
     return TextButton.icon(
       onPressed: () async {
         final recorderService = RecorderService();
@@ -506,6 +510,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'prescriptions', jsonEncode(prescriptions.map((p) => p.toJson()).toList()));
         }
       }
+      await _notificationService.cancelAllNotification();
+      await _notificationService.setScheduleNotification();
     } catch (e) {
       print('Error recording audio: $e');
     }

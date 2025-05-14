@@ -177,8 +177,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemCount: _todayMedications.length,
               itemBuilder: (context, index) {
                 final medication = _todayMedications[index];
-                return _buildMedicationCard(
-                  medication: medication,
+                return GestureDetector(
+                  onTap: (){
+                    print(medication.audioFilePath);
+
+                  },
+                  child: _buildMedicationCard(
+                    medication: medication,
+                  ),
                 );
 
               },
