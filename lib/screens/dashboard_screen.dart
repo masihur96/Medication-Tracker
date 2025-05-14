@@ -186,7 +186,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     medication: medication,
                   ),
                 );
-
               },
             ),
 
