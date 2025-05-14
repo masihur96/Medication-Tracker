@@ -295,6 +295,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       });
       // Update medication in storage and reschedule notifications
       await _updateMedicationTime(medication);
+      await _notificationService.cancelAllNotification();
+      await _notificationService.setScheduleNotification();
     }
   }
 

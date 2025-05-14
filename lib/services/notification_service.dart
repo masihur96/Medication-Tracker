@@ -15,7 +15,8 @@ class NotificationService {
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
     await AwesomeNotifications().initialize(
-      null, // Use default icon
+      'resource://drawable/ic_notification',
+       // Use default icon
       [
         NotificationChannel(
           channelKey: 'medication_channel',
@@ -40,6 +41,9 @@ class NotificationService {
         title: title,
         body: body,
         notificationLayout: NotificationLayout.Default,
+        icon: 'resource://drawable/ic_notification'
+
+
       ),
     );
   }
