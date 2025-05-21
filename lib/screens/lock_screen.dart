@@ -55,7 +55,7 @@ class _LockScreenState extends State<LockScreen> {
       }
     } catch (e) {
 
-      print('Authentic error: $e');
+      print('Authentic errr: $e');
     } finally {
       setState(() {
         _isAuthenticating = false;
