@@ -29,7 +29,7 @@ class _LockScreenState extends State<LockScreen> {
       final bool canAuthenticateWithBiometrics = await _localAuth.canCheckBiometrics;
       final bool canAuthenticate = canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
       if (!canAuthenticate) {
-        // If biometrics are not available, just proceed to dashboard
+        // If biometrics are not available,
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
