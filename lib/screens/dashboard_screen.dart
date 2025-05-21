@@ -428,29 +428,49 @@ Future<void> updateMedicationStatus({
 Future<Map<DateTime, int>> _generateHeatMapDataset() async {
   Map<DateTime, int> dataset = {};
 
-  // Use history data to generate heat map
+  // Group history entries by date
+  Map<String, List<EnhancedMedicationHistory>> historyByDate = {};
+  
   for (var history in _medicationHistory) {
     if (_selectedPrescription != null && 
         history.prescriptionId == _selectedPrescription!.uid) {
-      final parts = history.date.split('/');
-      final date = DateTime(
-        int.parse(parts[2]), // year
-        int.parse(parts[1]), // month
-        int.parse(parts[0]), // day
-      );
-      
-      int totalMeds = history.medicationTimes.length;
-      int takenMeds = history.isTaken.where((taken) => taken).length;
-      
-      if (takenMeds == 0) {
-        dataset[date] = 1; // All missed (red)
-      } else if (takenMeds < totalMeds) {
-        dataset[date] = 2; // Partially taken (yellow)
-      } else {
-        dataset[date] = 3; // All taken (green)
+      if (!historyByDate.containsKey(history.date)) {
+        historyByDate[history.date] = [];
       }
+      historyByDate[history.date]!.add(history);
     }
   }
+
+  // Process each date's medications
+  historyByDate.forEach((dateStr, histories) {
+    final parts = dateStr.split('/');
+    final date = DateTime(
+      int.parse(parts[2]), // year
+      int.parse(parts[1]), // month
+      int.parse(parts[0]), // day
+    );
+
+    int totalMedications = 0;
+    int takenMedications = 0;
+
+    // Count total medications and taken medications for the day
+    for (var history in histories) {
+      totalMedications += history.medicationTimes.length;
+      takenMedications += history.isTaken.where((taken) => taken).length;
+    }
+
+    // Determine color based on overall medication adherence for the day
+    if (totalMedications == 0) {
+      dataset[date] = 0; // No medications scheduled
+    } else if (takenMedications == 0) {
+      dataset[date] = 1; // All missed (red)
+    } else if (takenMedications < totalMedications) {
+      dataset[date] = 2; // Partially taken (yellow)
+    } else {
+      dataset[date] = 3; // All taken (green)
+    }
+  });
+
   return dataset;
 }
 
