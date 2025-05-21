@@ -119,6 +119,10 @@ class AppLocalizations {
       'aboutDescription': 'MedTrack is your personal medication tracking assistant, helping you stay on top of your medication schedule and maintain better health.',
       'close': 'CLOSE',
       'adherence': 'Adherence',
+      'appLocked': 'App Locked',
+      'authenticateToAccess': 'Please authenticate to access the app',
+      'tryAgain': 'Try Again',
+      'biometricsNotAvailable': 'Biometric authentication is not available on this device',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -227,7 +231,11 @@ class AppLocalizations {
       'deleteAllDataWarning': 'এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ঔষধের ইতিহাস এবং সেটিংস স্থায়ীভাবে মুছে যাবে।',
       'aboutDescription': 'মেডট্র্যাক আপনার ব্যক্তিগত ঔষধ ট্র্যাকিং সহকারী, যা আপনাকে আপনার ঔষধের সময়সূচী মেনে চলতে এবং আরও ভাল স্বাস্থ্য বজায় রাখতে সাহায্য করে।',
       'close': 'বন্ধ করুন',
-      'adherence': 'Adherence',
+      'appLocked': 'অ্যাপ লক করা হয়েছে',
+      'authenticateToAccess': 'অ্যাপ অ্যাক্সেস করতে প্রমাণীকরণ করুন',
+      'tryAgain': 'আবার চেষ্টা করুন',
+      'biometricsNotAvailable': 'এই ডিভাইসে বায়োমেট্রিক প্রমাণীকরণ উপলব্ধ নয়',
+      'adherence': 'অনুগত্য',
     },
   };
 
@@ -337,10 +345,12 @@ class AppLocalizations {
   String get deleteAllDataWarning => _localizedValues[locale.languageCode]!['deleteAllDataWarning']!;
   String get aboutDescription => _localizedValues[locale.languageCode]!['aboutDescription']!;
   String get close => _localizedValues[locale.languageCode]!['close']!;
-  String get duration => 'Duration';
-  String get durationInDays => 'Duration in days';
-  String get enterPositiveNumber => 'Please enter a positive number';
-  String get adherence => 'Adherence';
+  String get adherence => _localizedValues[locale.languageCode]!['adherence']!;
+  String get appLocked => _localizedValues[locale.languageCode]!['appLocked']!;
+  String get authenticateToAccess => _localizedValues[locale.languageCode]!['authenticateToAccess']!;
+  String get tryAgain => _localizedValues[locale.languageCode]!['tryAgain']!;
+  String get biometricsNotAvailable => _localizedValues[locale.languageCode]!['biometricsNotAvailable']!;
+
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!

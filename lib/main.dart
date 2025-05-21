@@ -10,6 +10,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:med_track/providers/language_provider.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:med_track/screens/lock_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -60,9 +61,24 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: HomeScreen(),
+          home: FutureBuilder<bool>(
+            future: _checkBiometricLock(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              
+              final bool isBiometricLockEnabled = snapshot.data ?? false;
+              return isBiometricLockEnabled ? const LockScreen() : const HomeScreen();
+            },
+          ),
         );
       },
     );
+  }
+
+  Future<bool> _checkBiometricLock() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('biometric_lock') ?? false;
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:med_track/utils/app_localizations.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:local_auth/local_auth.dart';
 
 
 class PrivacyScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class PrivacyScreen extends StatefulWidget {
 }
 
 class _PrivacyScreenState extends State<PrivacyScreen> {
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  bool _isBiometricsAvailable = false;
   bool _dataCollection = true;
   bool _showMedNames = true;
   bool _biometricLock = false;
@@ -20,6 +23,16 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
   void initState() {
     super.initState();
     _loadPrivacySettings();
+    _checkBiometricsAvailability();
+  }
+
+  Future<void> _checkBiometricsAvailability() async {
+    final bool canAuthenticateWithBiometrics = await _localAuth.canCheckBiometrics;
+    final bool canAuthenticate = canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
+    
+    setState(() {
+      _isBiometricsAvailable = canAuthenticate;
+    });
   }
 
   Future<void> _loadPrivacySettings() async {
@@ -99,17 +112,22 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
               title: Text(localizations.biometricLock),
-              subtitle: Text(localizations.biometricLockDescription),
+              subtitle: Text(_isBiometricsAvailable 
+                ? localizations.biometricLockDescription 
+                : localizations.biometricsNotAvailable),
               secondary: Icon(
                 Icons.fingerprint,
+                color: _isBiometricsAvailable ? null : Colors.grey,
               ),
               value: _biometricLock,
-              onChanged: (bool value) {
-                setState(() {
-                  _biometricLock = value;
-                  _savePrivacySettings();
-                });
-              },
+              onChanged: _isBiometricsAvailable 
+                ? (bool value) {
+                    setState(() {
+                      _biometricLock = value;
+                      _savePrivacySettings();
+                    });
+                  }
+                : null,
             ),
           ),
 

@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_localization
   flutter_timezone
   flutter_tts
+  local_auth_windows
   permission_handler_windows
   record_windows
   share_plus
