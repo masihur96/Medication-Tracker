@@ -54,7 +54,7 @@ class _LockScreenState extends State<LockScreen> {
         );
       }
     } catch (e) {
-      // Handle errors
+
       print('Authentication error: $e');
     } finally {
       setState(() {
