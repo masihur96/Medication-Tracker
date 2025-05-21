@@ -67,8 +67,11 @@ class MyApp extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               }
+
+
               
               final bool isBiometricLockEnabled = snapshot.data ?? false;
+
               return isBiometricLockEnabled ? const LockScreen() : const HomeScreen();
             },
           ),

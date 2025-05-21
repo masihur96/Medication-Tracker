@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:med_track/utils/app_localizations.dart';
 
+import 'home_screen.dart';
+
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
 
@@ -23,14 +25,16 @@ class _LockScreenState extends State<LockScreen> {
     setState(() {
       _isAuthenticating = true;
     });
-
     try {
       final bool canAuthenticateWithBiometrics = await _localAuth.canCheckBiometrics;
       final bool canAuthenticate = canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
-
       if (!canAuthenticate) {
         // If biometrics are not available, just proceed to dashboard
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+              (Route<dynamic> route) => false,
+        );
         return;
       }
 
@@ -43,7 +47,11 @@ class _LockScreenState extends State<LockScreen> {
       );
 
       if (didAuthenticate) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+              (Route<dynamic> route) => false,
+        );
       }
     } catch (e) {
       // Handle errors
