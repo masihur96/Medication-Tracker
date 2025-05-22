@@ -1,7 +1,5 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
@@ -10,9 +8,7 @@ import 'package:med_track/services/voice_service.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
 
@@ -134,9 +130,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 setState(() => _notificationsEnabled = value);
                 await _saveSettings();
                 if (!value) {
-                  await FlutterLocalNotificationsPlugin().cancelAll();
+
+                  await _notificationService.cancelAllNotification();
                 } else {
-                  await scheduleMedicationNotifications();
+                  await _notificationService.setScheduleNotification();
                 }
               },
             ),
@@ -146,6 +143,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               value: _soundEnabled,
               onChanged: _notificationsEnabled ? (bool value) async {
                 setState(() => _soundEnabled = value);
+
+                if(!value){
+
+                  await _notificationService.muteNotifications();
+                }else{
+                  await _notificationService.unmuteNotifications();
+                }
                 await _saveSettings();
               } : null,
             ),
@@ -155,6 +159,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               value: _vibrationEnabled,
               onChanged: _notificationsEnabled ? (bool value) async {
                 setState(() => _vibrationEnabled = value);
+                if(!value){
+
+                  await _notificationService.setVibration("medication_channel", false);
+                }else{
+                  await _notificationService.setVibration("medication_channel", true);
+                }
                 await _saveSettings();
               } : null,
             ),
@@ -324,14 +334,11 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       await prefs.setString('prescriptions', updatedString);
 
       // Reschedule notifications
-      await scheduleMedicationNotifications();
+      await _notificationService.setScheduleNotification();
     }
   }
 
-  Future<void> scheduleMedicationNotifications() async {
-    // This will use the existing scheduling logic from settings_screen.dart
-    // You'll need to implement this based on your notification scheduling needs
-  }
+
 
   Future<void> _recordMedicationSound(String medicationId) async {
     // Implement the logic to record audio and save it

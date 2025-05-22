@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/home_screen.dart';
@@ -12,8 +11,7 @@ import 'package:med_track/providers/language_provider.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/screens/lock_screen.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

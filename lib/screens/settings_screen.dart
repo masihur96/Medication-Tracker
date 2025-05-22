@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:med_track/main.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
 import 'package:med_track/services/notification_service.dart';
@@ -380,86 +378,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       print('Notification permission status: $status');
     }
   }
-  Future<void> cancelAllNotifications() async {
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
 
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
 
-  Future<void> scheduleDailyAlarms([List<Medication>? medications]) async {
-    if (!_notificationsEnabled) {
-      // Cancel all notifications if notifications are disabled
-      await flutterLocalNotificationsPlugin.cancelAll();
-      return;
-    }
-
-    // Request notification permissions for iOS
-    final settings = await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-
-    // For Android 13 and above, request notification permission
-    if (Platform.isAndroid) {
-      final androidImplementation = flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      
-      final granted = await androidImplementation?.requestNotificationsPermission();
-      if (granted != true) {
-        return; // Exit if permission not granted
-      }
-    }
-
-    // Cancel existing notifications before scheduling new ones
-    await flutterLocalNotificationsPlugin.cancelAll();
-
-    if (medications == null || medications.isEmpty) {
-      return;
-    }
-
-    int notificationId = 0;
-    for (var medication in medications) {
-      for (int i = 0; i < medication.reminderTimes.length; i++) {
-        final time = medication.reminderTimes[i];
-        
-        final now = DateTime.now();
-        final scheduledTime = DateTime(
-          now.year, 
-          now.month, 
-          now.day, 
-          time.hour, 
-          time.minute
-        );
-
-        // If the time is already passed today, schedule for tomorrow
-        final adjustedTime = scheduledTime.isBefore(now)
-            ? scheduledTime.add(const Duration(days: 1))
-            : scheduledTime;
-
-        await flutterLocalNotificationsPlugin.zonedSchedule(
-          notificationId++, // Unique ID per notification
-          'Time for ${medication.name}',
-          'Please take ${medication.timesPerDay} of ${medication.name}\n${medication.notes ?? ''}',
-          tz.TZDateTime.from(adjustedTime, tz.local),
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'medication_channel_id',
-              'Medication Reminders',
-              channelDescription: 'Daily medication reminders',
-              importance: Importance.max,
-              priority: Priority.high,
-            ),
-          ),
-          matchDateTimeComponents: DateTimeComponents.time,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        );
-      }
-    }
-  }
 
   void showCustomAboutDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context);

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
+
+import '../services/local_repository.dart';
 
 
 class PrivacyScreen extends StatefulWidget {
@@ -25,7 +28,12 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     _loadPrivacySettings();
     _checkBiometricsAvailability();
   }
-
+  Future<void> shareExportedFile() async {
+     final  file = await LocalRepository().exportDataToFile();
+    if (file != null && await file.exists()) {
+      Share.shareXFiles([XFile(file.path)], text: 'Here is my prescription backup');
+    }
+  }
   Future<void> _checkBiometricsAvailability() async {
     final bool canAuthenticateWithBiometrics = await _localAuth.canCheckBiometrics;
     final bool canAuthenticate = canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
@@ -154,6 +162,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
               subtitle: Text(localizations.exportDataDescription),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
+                shareExportedFile(); // Call the method to share the exported file
+
                 // TODO: Implement data export functionality
               },
             ),
@@ -182,7 +192,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                         child: Text(localizations.cancel),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async{
+                         await LocalRepository.deleteAllData(); // Assuming you have a method to delete all data
                           // TODO: Implement data deletion
                           Navigator.pop(context);
                         },

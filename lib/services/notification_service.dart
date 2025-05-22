@@ -16,7 +16,6 @@ class NotificationService {
 
     await AwesomeNotifications().initialize(
       'resource://drawable/ic_notification',
-       // Use default icon
       [
         NotificationChannel(
           channelKey: 'medication_channel',
@@ -24,7 +23,8 @@ class NotificationService {
           channelDescription: 'Notifications for medication reminders',
           importance: NotificationImportance.High,
           playSound: true,
-          soundSource: null, // Set per notification
+          enableVibration: true,
+          enableLights: true,
         ),
       ],
       debug: true,
@@ -36,14 +36,12 @@ class NotificationService {
   static Future<void> showNotification(String title, String body) async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: 0,
+        id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
         channelKey: 'medication_channel',
         title: title,
         body: body,
         notificationLayout: NotificationLayout.Default,
-        icon: 'resource://drawable/ic_notification'
-
-
+        icon: 'resource://drawable/ic_notification',
       ),
     );
   }
@@ -54,6 +52,7 @@ class NotificationService {
         String? title,
         String? body,
         String? audioFilePath,
+        bool enableVibration = true,
       }) async {
     var scheduleDate = tz.TZDateTime(
       tz.local,
@@ -77,11 +76,53 @@ class NotificationService {
         body: body ?? 'Time to take your medication',
         notificationLayout: NotificationLayout.Default,
         customSound: soundPath,
+        wakeUpScreen: true,
+        category: NotificationCategory.Reminder,
+        autoDismissible: true,
       ),
-      schedule: NotificationCalendar.fromDate(
-        date: scheduleDate.toLocal(),
+      schedule: NotificationCalendar.fromDate(date: scheduleDate),
+    );
+  }
+
+  // 🔊 Dynamically change sound
+  static Future<void> updateChannelSound(String channelKey, String? soundSource) async {
+    await AwesomeNotifications().setChannel(
+      NotificationChannel(
+        channelKey: channelKey,
+        channelName: 'Medication Reminders',
+        channelDescription: 'Notifications for medication reminders',
+        importance: NotificationImportance.High,
+        playSound: soundSource != null,
+        soundSource: soundSource,
+        enableVibration: true,
       ),
     );
+  }
+
+  // 🔕 Enable/Disable vibration dynamically
+   Future<void> setVibration(String channelKey, bool enabled) async {
+    await AwesomeNotifications().setChannel(
+      NotificationChannel(
+        channelKey: channelKey,
+        channelName: 'Medication Reminders',
+        channelDescription: 'Notifications for medication reminders',
+        importance: NotificationImportance.High,
+        enableVibration: enabled,
+        playSound: true,
+      ),
+    );
+  }
+
+  // 🔇 Mute all notifications
+   Future<void> muteNotifications() async {
+    await setVibration('medication_channel', false);
+    await updateChannelSound('medication_channel', null);
+  }
+
+  // 🔔 Restore sound and vibration
+   Future<void> unmuteNotifications({String? customSound}) async {
+    await setVibration('medication_channel', true);
+    await updateChannelSound('medication_channel', customSound);
   }
 
   Future<void> setScheduleNotification() async {
@@ -90,46 +131,40 @@ class NotificationService {
       final String? listString = prefs.getString('prescriptions');
       if (listString != null) {
         final List decoded = jsonDecode(listString);
-        print("Prescription: $decoded");
-        final List<Prescription> loaded =
-        decoded.map((e) => Prescription.fromJson(e)).toList();
+        final List<Prescription> loaded = decoded.map((e) => Prescription.fromJson(e)).toList();
 
         for (final prescription in loaded) {
-          if (prescription.medications.isNotEmpty) {
-            for (final med in prescription.medications) {
-              List<DateTime> scheduleList = [];
-              for (String dateStr in med.remainderDates) {
-                List<String> dateParts = dateStr.split('/');
-                int day = int.parse(dateParts[0]);
-                int month = int.parse(dateParts[1]);
-                int year = int.parse(dateParts[2]);
+          for (final med in prescription.medications) {
+            List<DateTime> scheduleList = [];
+            for (String dateStr in med.remainderDates) {
+              List<String> dateParts = dateStr.split('/');
+              int day = int.parse(dateParts[0]);
+              int month = int.parse(dateParts[1]);
+              int year = int.parse(dateParts[2]);
 
-                for (TimeOfDay time in med.reminderTimes) {
-                  DateTime scheduledDateTime = DateTime(
-                    year,
-                    month,
-                    day,
-                    time.hour,
-                    time.minute,
-                  );
-                  scheduleList.add(scheduledDateTime);
-                }
+              for (TimeOfDay time in med.reminderTimes) {
+                DateTime scheduledDateTime = DateTime(
+                  year,
+                  month,
+                  day,
+                  time.hour,
+                  time.minute,
+                );
+                scheduleList.add(scheduledDateTime);
               }
+            }
 
-              print("scheduleList: $scheduleList");
+            for (DateTime scheduledDateTime in scheduleList) {
+              if (scheduledDateTime.isAfter(DateTime.now())) {
+                int notificationId = scheduledDateTime.millisecondsSinceEpoch ~/ 1000;
 
-              for (DateTime scheduledDateTime in scheduleList) {
-                if (scheduledDateTime.isAfter(DateTime.now())) {
-                  int notificationId = scheduledDateTime.millisecondsSinceEpoch ~/ 1000;
-
-                  await NotificationService.schedule(
-                    scheduledDateTime,
-                    notificationId,
-                    title: '${med.name} Reminder',
-                    body: 'Time to take your medication: ${med.name}\nDosage: ${med.notes}',
-                    audioFilePath: med.audioFilePath,
-                  );
-                }
+                await NotificationService.schedule(
+                  scheduledDateTime,
+                  notificationId,
+                  title: '${med.name} Reminder',
+                  body: 'Time to take your medication: ${med.name}\nDosage: ${med.notes}',
+                  audioFilePath: med.audioFilePath,
+                );
               }
             }
           }

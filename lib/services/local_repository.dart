@@ -1,9 +1,11 @@
 
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalRepository {
@@ -154,7 +156,42 @@ class LocalRepository {
     final String updatedList = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
     await prefs.setString('prescriptions', updatedList);
   }
+  Future<String?> exportData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? listString = prefs.getString('prescriptions');
+      if (listString != null) {
+        return listString; // Already a JSON string
+      }
+      return null; // No data to export
+    } catch (e) {
+      print("Error exporting data: $e");
+      return null;
+    }
+  }
 
 
+
+  Future<File?> exportDataToFile() async {
+    try {
+      final String? jsonData = await exportData();
+      if (jsonData == null) return null;
+
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/prescriptions_export.json');
+
+      await file.writeAsString(jsonData);
+      return file;
+    } catch (e) {
+      print("Error exporting to file: $e");
+      return null;
+    }
+  }
+
+
+ static Future<void> deleteAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
 
 }
