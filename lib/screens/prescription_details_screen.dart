@@ -149,11 +149,47 @@ class _PrescriptionDetailsScreenState extends State<PrescriptionDetailsScreen> {
                             },
                           ),
                         ),
-                      DataCell(Text(med.name)),
+                      DataCell(
+                        Row(
+                          children: [
+                            if (med.stock <= 3) // Assuming 5 or less is considered low stock
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: Colors.orange,
+                                  size: 20,
+                                ),
+                              ),
+                            Text(
+                              med.name,
+                              style: TextStyle(
+                                color: med.stock <= 3 ? Colors.red : null,
+                                fontWeight: med.stock <= 3 ? FontWeight.bold : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       // DataCell(Text(med.dosage)),
                       DataCell(Text(med.frequency)),
                       DataCell(Text(med.timesPerDay.toString())),
-                      DataCell(Text(med.stock.toString())),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: med.stock <= 5 ? Colors.red.withOpacity(0.1) : null,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            med.stock.toString(),
+                            style: TextStyle(
+                              color: med.stock <= 5 ? Colors.red : null,
+                              fontWeight: med.stock <= 5 ? FontWeight.bold : null,
+                            ),
+                          ),
+                        ),
+                      ),
                       DataCell(Text(med.notes ?? '')),
                       DataCell(
                         Wrap(
