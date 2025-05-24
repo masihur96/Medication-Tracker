@@ -179,4 +179,14 @@ class NotificationService {
   Future<void> cancelAllNotification() async {
     await AwesomeNotifications().cancelAll();
   }
+
+  // 🔔 Notify user if stock is low
+  static Future<void> notifyLowStock(String itemName, int currentStock, int threshold) async {
+    if (currentStock < threshold) {
+      await showNotification(
+        'Low Stock Alert',
+        'The stock for $itemName is low. Current stock: $currentStock',
+      );
+    }
+  }
 }
