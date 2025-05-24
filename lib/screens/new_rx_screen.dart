@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/add_medication_screen.dart';
+import 'package:med_track/screens/home_screen.dart';
 import 'package:med_track/services/local_repository.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/utils/bounching_dialog.dart';
@@ -61,7 +62,15 @@ class _NewRxScreenState extends State<NewRxScreen> {
     return Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.white,
+        leading: IconButton(onPressed: (){
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+                (Route<dynamic> route) => false, // removes all routes
+          );
+        }, icon: Icon(Icons.arrow_back)),
         title: GestureDetector(
+
           onTap: (){
 
             loadPrescriptions();
