@@ -189,4 +189,29 @@ class NotificationService {
       );
     }
   }
+
+  static Future<void> checkLowStock() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? listString = prefs.getString('prescriptions');
+      if (listString != null) {
+        final List decoded = jsonDecode(listString);
+        final List<Prescription> loaded = decoded.map((e) => Prescription.fromJson(e)).toList();
+
+        for (final prescription in loaded) {
+          for (final med in prescription.medications) {
+            if (med.stock <= 0) {
+              await showNotification(
+                'Low Stock Alert',
+                '${med.name} is running low. Current stock: ${med.stock}',
+              );
+            }
+          }
+        }
+      }
+    } catch (e, stackTrace) {
+      print('Error checking low stock: $e');
+      print('Stack trace: $stackTrace');
+    }
+  }
 }
