@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/providers/theme_provider.dart';
@@ -24,6 +25,33 @@ void main() async {
   await medicationProvider.initialize();
   final themeProvider = ThemeProvider();
   final languageProvider = LanguageProvider();
+
+  AwesomeNotifications().actionStream.listen((ReceivedAction action) {
+    switch (action.buttonKeyPressed) {
+      case 'CONFIRM':
+      // Handle confirm logic
+        print('User confirmed taking the medication');
+        break;
+      case 'SNOOZE':
+      // Reschedule notification after 10 mins (example)
+        final now = DateTime.now().add(Duration(minutes: 10));
+        AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: now.millisecondsSinceEpoch.remainder(100000),
+            channelKey: 'medication_channel',
+            title: 'Snoozed Reminder',
+            body: 'Reminder to take your medication',
+          ),
+          schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(now, tz.local)),
+        );
+        break;
+      case 'SKIP':
+      // Handle skip logic
+        print('User skipped medication');
+        break;
+    }
+  });
+
 
   runApp(
     MultiProvider(

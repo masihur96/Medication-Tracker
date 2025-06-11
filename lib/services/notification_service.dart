@@ -81,8 +81,29 @@ class NotificationService {
         autoDismissible: true,
       ),
       schedule: NotificationCalendar.fromDate(date: scheduleDate),
+      actionButtons: [
+        NotificationActionButton(
+          key: 'CONFIRM',
+          label: 'Confirm',
+          actionType: ActionType.Default,
+          color: Colors.green,
+        ),
+        NotificationActionButton(
+          key: 'SNOOZE',
+          label: 'Snooze',
+          actionType: ActionType.KeepOnTop,
+          color: Colors.orange,
+        ),
+        NotificationActionButton(
+          key: 'SKIP',
+          label: 'Skip',
+          actionType: ActionType.Default,
+          color: Colors.red,
+        ),
+      ],
     );
   }
+
 
   // 🔊 Dynamically change sound
   static Future<void> updateChannelSound(String channelKey, String? soundSource) async {
