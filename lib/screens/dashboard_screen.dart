@@ -328,7 +328,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _navigateToAIDoctorChat(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const AIDoctorChatScreen()),
+      MaterialPageRoute(builder: (_) => const MedicationChatScreen()),
     );
   }
 

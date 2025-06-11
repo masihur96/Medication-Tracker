@@ -63,6 +63,7 @@ dependencies:
   awesome_notifications:
   local_auth: ^2.3.0
   draggable_fab: ^0.1.4
+  dio: ^5.8.0+1
 
 dev_dependencies:
   flutter_test:
