@@ -6,7 +6,7 @@ import 'package:med_track/screens/home_screen.dart';
 import 'package:med_track/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:med_track/providers/language_provider.dart';
 import 'package:med_track/utils/app_localizations.dart';
@@ -18,39 +18,86 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await NotificationService.init();
-
-
+  
   // Initialize providers
   final medicationProvider = MedicationProvider();
   await medicationProvider.initialize();
   final themeProvider = ThemeProvider();
   final languageProvider = LanguageProvider();
 
-  AwesomeNotifications().actionStream.listen((ReceivedAction action) {
-    switch (action.buttonKeyPressed) {
-      case 'CONFIRM':
-      // Handle confirm logic
-        print('User confirmed taking the medication');
-        break;
-      case 'SNOOZE':
-      // Reschedule notification after 10 mins (example)
-        final now = DateTime.now().add(Duration(minutes: 10));
-        AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: now.millisecondsSinceEpoch.remainder(100000),
-            channelKey: 'medication_channel',
-            title: 'Snoozed Reminder',
-            body: 'Reminder to take your medication',
-          ),
-          schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(now, tz.local)),
-        );
-        break;
-      case 'SKIP':
-      // Handle skip logic
-        print('User skipped medication');
-        break;
-    }
-  });
+  AwesomeNotifications().setListeners(
+    onActionReceivedMethod: (ReceivedAction receivedAction) async {
+      final payload = receivedAction.payload ?? {};
+      print('Button payload: payload: $payload');
+      final medicationId = payload['medication_id'];
+      final originalId = payload['original_id'];
+
+      switch (receivedAction.buttonKeyPressed) {
+
+        case 'CONFIRM':
+          print('Medication $medicationId confirmed');
+          // TODO: Save confirmation to database/local storage
+          break;
+
+        case 'SNOOZE':
+          print('Medication $medicationId snoozed');
+
+          // Reschedule after 10 minutes
+          final newTime = DateTime.now().add(const Duration(minutes: 3));
+          final newId = newTime.millisecondsSinceEpoch.remainder(100000);
+
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: newId,
+              channelKey: 'medication_channel',
+              title: 'Snoozed: Medication Reminder',
+              body: 'This is a snoozed reminder to take your medication',
+              notificationLayout: NotificationLayout.Default,
+              payload: {
+                'medication_id': medicationId ?? '',
+                'original_id': originalId ?? '',
+              },
+            ),
+            schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(newTime, tz.local)),
+            actionButtons: [
+              NotificationActionButton(
+                key: 'CONFIRM',
+                label: 'Confirm',
+                actionType: ActionType.Default,
+                color: Colors.green,
+              ),
+              NotificationActionButton(
+                key: 'SNOOZE',
+                label: 'Snooze',
+                actionType: ActionType.Default,
+                color: Colors.orange,
+              ),
+              NotificationActionButton(
+                key: 'SKIP',
+                label: 'Skip',
+                actionType: ActionType.Default,
+                color: Colors.red,
+              ),
+            ],
+          );
+          break;
+
+        case 'SKIP':
+          print('Medication $medicationId skipped');
+          // TODO: Save skip status to local database or analytics
+          break;
+
+        default:
+        // This was a regular tap (not on a button)
+          if (medicationId != null && medicationId.isNotEmpty) {
+            print('Notification tapped for medication: $medicationId');
+            // TODO: Navigate to medication detail screen
+          }
+          break;
+      }
+    },
+  );
+
 
 
   runApp(

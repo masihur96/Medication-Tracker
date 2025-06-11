@@ -53,6 +53,7 @@ class NotificationService {
         String? body,
         String? audioFilePath,
         bool enableVibration = true,
+        String? medicationId, // To help identify the medication
       }) async {
     var scheduleDate = tz.TZDateTime(
       tz.local,
@@ -68,40 +69,7 @@ class NotificationService {
       soundPath = Platform.isAndroid ? 'file://$audioFilePath' : audioFilePath;
     }
 
-    await AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: id,
-        channelKey: 'medication_channel',
-        title: title ?? 'Medication Reminder',
-        body: body ?? 'Time to take your medication',
-        notificationLayout: NotificationLayout.Default,
-        customSound: soundPath,
-        wakeUpScreen: true,
-        category: NotificationCategory.Reminder,
-        autoDismissible: true,
-      ),
-      schedule: NotificationCalendar.fromDate(date: scheduleDate),
-      actionButtons: [
-        NotificationActionButton(
-          key: 'CONFIRM',
-          label: 'Confirm',
-          actionType: ActionType.Default,
-          color: Colors.green,
-        ),
-        NotificationActionButton(
-          key: 'SNOOZE',
-          label: 'Snooze',
-          actionType: ActionType.KeepOnTop,
-          color: Colors.orange,
-        ),
-        NotificationActionButton(
-          key: 'SKIP',
-          label: 'Skip',
-          actionType: ActionType.Default,
-          color: Colors.red,
-        ),
-      ],
-    );
+
   }
 
 
@@ -233,6 +201,17 @@ class NotificationService {
     } catch (e, stackTrace) {
       print('Error checking low stock: $e');
       print('Stack trace: $stackTrace');
+    }
+  }
+
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+    if (receivedAction.payload != null) {
+      final medicationId = receivedAction.payload!['medication_id'];
+      if (medicationId != null) {
+        // Navigate to medication details screen
+        // You'll need to implement this navigation logic
+        print('Notification tapped for medication: $medicationId');
+      }
     }
   }
 }
