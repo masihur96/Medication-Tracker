@@ -69,7 +69,44 @@ class NotificationService {
       soundPath = Platform.isAndroid ? 'file://$audioFilePath' : audioFilePath;
     }
 
-
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: id,
+        channelKey: 'medication_channel',
+        title: title ?? 'Medication Reminder',
+        body: body ?? 'Time to take your medication',
+        notificationLayout: NotificationLayout.Default,
+        customSound: soundPath,
+        wakeUpScreen: true,
+        category: NotificationCategory.Reminder,
+        autoDismissible: true,
+        payload: {
+          'medication_id': medicationId ?? '',
+          'original_id': id.toString(),
+        },
+      ),
+      schedule: NotificationCalendar.fromDate(date: scheduleDate),
+      actionButtons: [
+        NotificationActionButton(
+          key: 'CONFIRM',
+          label: 'Confirm',
+          actionType: ActionType.Default,
+          color: Colors.green,
+        ),
+        NotificationActionButton(
+          key: 'SNOOZE',
+          label: 'Snooze',
+          actionType: ActionType.KeepOnTop,
+          color: Colors.orange,
+        ),
+        NotificationActionButton(
+          key: 'SKIP',
+          label: 'Skip',
+          actionType: ActionType.KeepOnTop,
+          color: Colors.red,
+        ),
+      ],
+    );
   }
 
 

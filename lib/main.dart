@@ -69,13 +69,13 @@ void main() async {
               NotificationActionButton(
                 key: 'SNOOZE',
                 label: 'Snooze',
-                actionType: ActionType.Default,
+                actionType: ActionType.KeepOnTop,
                 color: Colors.orange,
               ),
               NotificationActionButton(
                 key: 'SKIP',
                 label: 'Skip',
-                actionType: ActionType.Default,
+                actionType: ActionType.KeepOnTop,
                 color: Colors.red,
               ),
             ],
