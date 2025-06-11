@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:draggable_fab/draggable_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:med_track/utils/bounching_dialog.dart';
+import 'package:med_track/utils/custom_size.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
+import 'ai_doctor_chat_screen.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -251,6 +255,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+      floatingActionButton:DraggableFab(
+        child: FloatingActionButton(
+          onPressed: () {
+            _showAIDoctorDialog(context);
+          }
+          ,
+          child: Icon(Icons.local_hospital, color: Colors.black, size: 30),
+        ),
+      )
+    );
+  }
+
+  void _showAIDoctorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => BounchingDialog(
+        height: screenSize(context, 1.0),
+
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(children: [
+
+
+            const Text(
+              "AI Doctor Assistant",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+              Image.asset('assets/doctor.png', height: 100, width: 100,fit: BoxFit.fill,),
+                    Text(
+            "Hello! I'm your AI Doctor. How can I assist you today?\n\n"
+                "- Or just general health tips?\n\n"
+                "Tap below to chat with me.",
+                    ),
+
+
+            SizedBox(height: 20),
+
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.deepPurple,
+                  ),
+                  child: const Text("Cancel"),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _navigateToAIDoctorChat(context);
+                  },
+                  icon: const Icon(Icons.chat,color: Colors.white,),
+                  label: const Text("Start Chat"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+
+              ],
+            ),
+
+                  ],),
+          ))
+    );
+  }
+  void _navigateToAIDoctorChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AIDoctorChatScreen()),
     );
   }
 
