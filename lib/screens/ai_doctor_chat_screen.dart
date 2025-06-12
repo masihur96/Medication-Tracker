@@ -34,9 +34,11 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
 
   Future<void> _initializeSpeech() async {
     await _speechToText.initialize();
-    await _flutterTts.setLanguage("bn-BD"); // Set Bengali language
+    await _flutterTts.setLanguage("bn-BD");
+    // Set Bengali language
     await _flutterTts.setSpeechRate(0.5); // Adjust speech rate
   }
+
 
   Future<void> _startListening() async {
     try {
