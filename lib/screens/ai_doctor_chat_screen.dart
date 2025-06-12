@@ -41,8 +41,8 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
   Future<void> _startListening() async {
     try {
       bool available = await _speechToText.initialize(
-        onStatus:  (status) {
-          debugPrint("Current status: $status"); // Debug
+        onStatus: (status) {
+          debugPrint("Current status: $status");
           _onSpeechStatus(status);
         },
         onError: (error) {
@@ -60,14 +60,10 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
               _controller.text = result.recognizedWords;
             });
           },
-          listenFor: const Duration(seconds: 30), // Max duration
-          pauseFor: const Duration(seconds: 3), // Auto-stop on silence
+          listenFor: const Duration(seconds: 30),
+          pauseFor: const Duration(seconds: 3),
           localeId: 'bn_BD',
         );
-
-        print(_controller.text);
-
-        // setState(() => _isListening = false);
       } else {
         debugPrint('Speech recognition not available');
       }
@@ -83,11 +79,8 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
         status.toLowerCase().contains('notlistening')) {
       if (_isListening) {
         _stopListening();
-
-        // Call your method here when listening is finished
-        _onListeningFinished();
-
-        // Delay briefly to ensure result has fully propagated
+        
+        // Automatically send the message when speech recognition is done
         Future.delayed(const Duration(milliseconds: 300), () {
           if (_controller.text.trim().isNotEmpty) {
             _onSendPressed();
@@ -96,17 +89,6 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
       }
     }
   }
-
-// Add this new method
-  void _onListeningFinished() {
-    debugPrint("Listening finished");
-    // Add your logic here for what to do when listening is finished
-    // For example:
-    // - Process the recognized text
-    // - Update UI
-    // - Trigger another action
-  }
-
 
   Future<void> _stopListening() async {
     if (_isListening) {
