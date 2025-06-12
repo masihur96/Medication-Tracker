@@ -68,7 +68,7 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
       appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
 
-          title: const Text('Ask AI Doctor')),
+          title: const Text('MedTrack Assistance')),
       body: Column(
         children: [
           Expanded(

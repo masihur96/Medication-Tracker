@@ -258,7 +258,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       floatingActionButton:DraggableFab(
         child: FloatingActionButton(
           onPressed: () {
-            _showAIDoctorDialog(context);
+            _showAIDoctorDialog(context,localizations);
           }
           ,
           child: Icon(Icons.local_hospital, color: Colors.black, size: 30),
@@ -267,7 +267,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showAIDoctorDialog(BuildContext context) {
+  void _showAIDoctorDialog(BuildContext context,AppLocalizations localizations) {
     showDialog(
       context: context,
       builder: (context) => BounchingDialog(
@@ -278,15 +278,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(children: [
 
 
-            const Text(
-              "AI Doctor Assistant",
+             Text(
+              localizations.aiDoctorTitle,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
               Image.asset('assets/doctor.png', height: 100, width: 100,fit: BoxFit.fill,),
                     Text(
-            "Hello! I'm your AI Doctor. How can I assist you today?\n\n"
-                "- Or just general health tips?\n\n"
-                "Tap below to chat with me.",
+            "${localizations.aiDoctorGreeting}\n\n"
+                "${localizations.aiDoctorOption}\n\n"
+                "${localizations.aiDoctorPrompt}",
                     ),
 
 
@@ -302,7 +302,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.deepPurple,
                   ),
-                  child: const Text("Cancel"),
+                  child:  Text(localizations.cancel),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
@@ -311,7 +311,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     _navigateToAIDoctorChat(context);
                   },
                   icon: const Icon(Icons.chat,color: Colors.white,),
-                  label: const Text("Start Chat"),
+                  label:  Text(localizations.startChat),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
                     foregroundColor: Colors.white,
