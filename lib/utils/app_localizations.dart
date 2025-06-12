@@ -128,6 +128,7 @@ class AppLocalizations {
       'aiDoctorOption': '- Or just general health tips?',
       'aiDoctorPrompt': 'Tap below to chat with me.',
       'startChat': 'Start Chat',
+      'medTrackAssistance': 'AI Dr. Assistance',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -247,6 +248,7 @@ class AppLocalizations {
       'aiDoctorPrompt': 'আমার সঙ্গে চ্যাট করতে নিচে ট্যাপ করুন।',
 
       'startChat': 'চ্যাট শুরু করুন',
+      'medTrackAssistance': 'এআই ডাক্তার সহায়তা',
     },
   };
 
@@ -367,6 +369,7 @@ class AppLocalizations {
   String get aiDoctorPrompt => _localizedValues[locale.languageCode]!['aiDoctorPrompt']!;
 
   String get startChat => _localizedValues[locale.languageCode]!['startChat']!;
+  String get medTrackAssistance => _localizedValues[locale.languageCode]!['medTrackAssistance']!;
 
 
   String medicationDueIn(String time) {

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:draggable_fab/draggable_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/utils/app_localizations.dart';
@@ -150,10 +150,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
          actions: [
-           IconButton(
-             icon: const Icon(Icons.notifications_outlined,color: Colors.white),
-             onPressed: () {
+
+           GestureDetector(
+             onTap: () {
+               _showAIDoctorDialog(context,localizations);
+               // Navigate to profile screen
+
              },
+             child: Lottie.asset('assets/animation1.json',
+               width: 80,
+
+               fit: BoxFit.fill,
+               repeat: true,
+             ),
            ),
          ],
     ),
@@ -255,15 +264,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      floatingActionButton:DraggableFab(
-        child: FloatingActionButton(
-          onPressed: () {
-            _showAIDoctorDialog(context,localizations);
-          }
-          ,
-          child: Icon(Icons.local_hospital, color: Colors.black, size: 30),
-        ),
-      )
+
     );
   }
 

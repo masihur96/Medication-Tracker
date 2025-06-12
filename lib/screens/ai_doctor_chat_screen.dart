@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:med_track/models/chat_model.dart';
 import 'package:med_track/services/chat_repository.dart';
 
+import '../utils/app_localizations.dart';
+
 
 class MedicationChatScreen extends StatefulWidget {
   const MedicationChatScreen({super.key});
@@ -63,12 +65,13 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
 
       appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
 
-          title: const Text('MedTrack Assistance')),
+          title:  Text(localizations.medTrackAssistance)),
       body: Column(
         children: [
           Expanded(
