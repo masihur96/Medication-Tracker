@@ -42,6 +42,7 @@ class NotificationService {
         title: title,
         body: body,
         notificationLayout: NotificationLayout.Default,
+        customSound: 'resource://raw/med_reminder',
         icon: 'resource://drawable/ic_notification',
       ),
     );
@@ -65,10 +66,7 @@ class NotificationService {
       scheduledTime.minute,
     );
 
-    String? soundPath;
-    if (audioFilePath != null && await File(audioFilePath).exists()) {
-      soundPath = Platform.isAndroid ? 'file://$audioFilePath' : audioFilePath;
-    }
+
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
@@ -77,7 +75,9 @@ class NotificationService {
         title: title ?? 'Medication Reminder',
         body: body ?? 'Time to take your medication',
         notificationLayout: NotificationLayout.Default,
-        customSound: soundPath,
+
+        customSound: 'resource://raw/med_reminder',
+
         wakeUpScreen: true,
         category: NotificationCategory.Reminder,
         autoDismissible: true,
@@ -137,6 +137,7 @@ class NotificationService {
         importance: NotificationImportance.High,
         enableVibration: enabled,
         playSound: true,
+
         soundSource: 'resource://raw/med_reminder',
         enableLights: true,
       ),

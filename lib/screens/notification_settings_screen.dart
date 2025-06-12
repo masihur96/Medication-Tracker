@@ -340,11 +340,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
 
 
-  Future<void> _recordMedicationSound(String medicationId) async {
-    // Implement the logic to record audio and save it
-    // For example, using a package like 'audio_recorder' or 'flutter_sound'
-    // After recording, save the file path in _medicationSounds[medicationId]
-  }
 
   String _formatTime(TimeOfDay time) {
     final now = DateTime.now();
