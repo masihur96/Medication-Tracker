@@ -159,6 +159,8 @@ class NotificationService {
         final List decoded = jsonDecode(listString);
         final List<Prescription> loaded = decoded.map((e) => Prescription.fromJson(e)).toList();
 
+        print("loadedloadedloadedloadedloaded${loaded.first.medications.first.audioFilePath}");
+
         for (final prescription in loaded) {
           for (final med in prescription.medications) {
             List<DateTime> scheduleList = [];

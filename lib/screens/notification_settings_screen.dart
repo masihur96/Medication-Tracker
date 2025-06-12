@@ -434,7 +434,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         final recorderService = RecorderService();
 
         try {
-          final filePath = await recorderService.startRecording("my_recording");
+          final filePath = await recorderService.startRecording(medication.id);
           developer.log("Recording to: $filePath");
 
           final isRecording = await recorderService.isRecording();
@@ -450,7 +450,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           if (recordedFile != null) {
             await playAudio(recordedFile, context);
 
-            recordAndAssignAudio(medication);
+            recordAndAssignAudio(medication,recordedFile);
           }
 
           await recorderService.dispose();
@@ -468,58 +468,49 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
 
 
-  Future<void> recordAndAssignAudio(Medication medicationName) async {
-    final recorder = RecorderService();
+  Future<void> recordAndAssignAudio(Medication medication,String filePath) async {
     try {
       // Start recording
-      final filePath = await recorder.startRecording('med_${medicationName.name}');
-      // Simulate recording for 5 seconds (replace with user interaction)
-      await Future.delayed(Duration(seconds: 5));
-      // Stop recording
-      final savedFilePath = await recorder.stopRecording();
 
-      if (savedFilePath != null) {
-        // Load existing prescriptions
-        final prefs = await SharedPreferences.getInstance();
-        final String? listString = prefs.getString('prescriptions');
-        if (listString != null) {
-          final List decoded = jsonDecode(listString);
-          final List<Prescription> prescriptions =
-          decoded.map((e) => Prescription.fromJson(e)).toList();
 
-          // Update the specific medication
-          for (var prescription in prescriptions) {
-            for (var med in prescription.medications) {
-              if (med.name == medicationName.name) {
-                // Create a new Medication instance with updated audioFilePath
-                final updatedMed = Medication(
-                  name: med.name,
-                  notes: med.notes,
-                  remainderDates: med.remainderDates,
-                  reminderTimes: med.reminderTimes,
-                  audioFilePath: savedFilePath,
-                  id: med.id,
-                  timesPerDay: med.timesPerDay,
-                  stock: med.stock,
-                  isActive: med.isActive,
-                  isTaken: med.isTaken,
-                  frequency: med.frequency,
+      // Load existing prescriptions
+      final prefs = await SharedPreferences.getInstance();
+      final String? listString = prefs.getString('prescriptions');
+      if (listString != null) {
+        final List decoded = jsonDecode(listString);
+        final List<Prescription> prescriptions =
+        decoded.map((e) => Prescription.fromJson(e)).toList();
 
-                );
-                // Replace the old medication in the list
-                prescription.medications[prescription.medications.indexOf(med)] =
-                    updatedMed;
-
-              }
+        // Update the specific medication
+        for (var prescription in prescriptions) {
+          for (var med in prescription.medications) {
+            if (med.id == medication.id) {
+              // Create a new Medication instance with updated audioFilePath
+              final updatedMed = Medication(
+                name: med.name,
+                notes: med.notes,
+                remainderDates: med.remainderDates,
+                reminderTimes: med.reminderTimes,
+                audioFilePath: filePath,
+                id: med.id,
+                timesPerDay: med.timesPerDay,
+                stock: med.stock,
+                isActive: med.isActive,
+                isTaken: med.isTaken,
+                frequency: med.frequency,
+              );
+              // Replace the old medication in the list
+              prescription.medications[prescription.medications.indexOf(med)] =
+                  updatedMed;
             }
           }
-
-          // Save updated prescriptions
-          await prefs.setString(
-              'prescriptions', jsonEncode(prescriptions.map((p) => p.toJson()).toList()));
         }
+
+        // Save updated prescriptions
+        await prefs.setString(
+            'prescriptions', jsonEncode(prescriptions.map((p) => p.toJson()).toList()));
       }
-      await _notificationService.cancelAllNotification();
+          await _notificationService.cancelAllNotification();
       await _notificationService.setScheduleNotification();
     } catch (e) {
       print('Error recording audio: $e');
