@@ -39,21 +39,74 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
   }
 
   Future<void> _startListening() async {
-    if (!_isListening) {
-      bool available = await _speechToText.initialize();
+    try {
+      bool available = await _speechToText.initialize(
+        onStatus:  (status) {
+          debugPrint("Current status: $status"); // Debug
+          _onSpeechStatus(status);
+        },
+        onError: (error) {
+          debugPrint('Speech recognition error: $error');
+          _stopListening();
+        },
+      );
+
       if (available) {
         setState(() => _isListening = true);
-        _speechToText.listen(
+
+        await _speechToText.listen(
           onResult: (result) {
             setState(() {
               _controller.text = result.recognizedWords;
             });
           },
-          localeId: "bn_BD", // Set Bengali language
+          listenFor: const Duration(seconds: 30), // Max duration
+          pauseFor: const Duration(seconds: 3), // Auto-stop on silence
+          localeId: 'bn_BD',
         );
+
+        print(_controller.text);
+
+        // setState(() => _isListening = false);
+      } else {
+        debugPrint('Speech recognition not available');
+      }
+    } catch (e) {
+      debugPrint('Error initializing speech recognition: $e');
+    }
+  }
+
+  void _onSpeechStatus(String status) {
+    debugPrint("Speech status: $status");
+
+    if (status.toLowerCase().contains('done') ||
+        status.toLowerCase().contains('notlistening')) {
+      if (_isListening) {
+        _stopListening();
+
+        // Call your method here when listening is finished
+        _onListeningFinished();
+
+        // Delay briefly to ensure result has fully propagated
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (_controller.text.trim().isNotEmpty) {
+            _onSendPressed();
+          }
+        });
       }
     }
   }
+
+// Add this new method
+  void _onListeningFinished() {
+    debugPrint("Listening finished");
+    // Add your logic here for what to do when listening is finished
+    // For example:
+    // - Process the recognized text
+    // - Update UI
+    // - Trigger another action
+  }
+
 
   Future<void> _stopListening() async {
     if (_isListening) {
@@ -103,15 +156,41 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
     });
   }
 
+  // Add retry functionality
+  Future<void> _retryLastMessage() async {
+    if (messages.isNotEmpty) {
+      // Get the last user message
+      String lastUserMessage = messages
+          .where((msg) => msg.startsWith("👤"))
+          .last
+          .replaceFirst("👤 আপনি: ", "");
+      
+      // Clear the last bot response if it exists
+      if (messages.last.startsWith("🤖")) {
+        messages.removeLast();
+      }
+      
+      // Retry the last message
+      createChat(lastUserMessage);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
-
       appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-
-          title:  Text(localizations.medTrackAssistance)),
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text(localizations.medTrackAssistance),
+        actions: [
+          // Add retry button in app bar
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _isLoading ? null : _retryLastMessage,
+            tooltip: 'Retry last message',
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -154,12 +233,16 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
               _isListening ? Icons.mic : Icons.mic_none,
               color: _isListening ? Colors.red : Colors.grey,
             ),
-            onPressed: () {
+            onPressed: () async {
               if (_isListening) {
-                _stopListening();
+               await _stopListening();
               } else {
-                _startListening();
+               await _startListening();
               }
+
+              setState(() {
+                _isListening = !_isListening;
+              });
             },
           ),
           Expanded(
