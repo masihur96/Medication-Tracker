@@ -423,7 +423,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            Positioned(
+            medication.audioFilePath!.isEmpty?SizedBox(): Positioned(
               right: -10,
                 top: -10,
                 child: IconButton(
