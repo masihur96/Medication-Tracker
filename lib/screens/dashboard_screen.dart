@@ -6,11 +6,13 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/utils/bounching_dialog.dart';
 import 'package:med_track/utils/custom_size.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
+import '../services/local_repository.dart';
 import 'ai_doctor_chat_screen.dart';
 
 
@@ -27,6 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Prescription> _prescriptions = [];
   Prescription? _selectedPrescription;
   List<EnhancedMedicationHistory> _medicationHistory = [];
+  final LocalRepository _localRepository = LocalRepository();
   bool _isLoading = true;
 
   
@@ -60,37 +63,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
       List<Medication> todayMedications = [];
       final prefs = await SharedPreferences.getInstance();
       final String? listString = prefs.getString('prescriptions');
-      if (listString != null) {
-        final List decoded = jsonDecode(listString);
-        final List<Prescription> loaded =
-            decoded.map((e) => Prescription.fromJson(e)).toList();
+      
+      if (listString == null) {
+        // Show placeholder when no prescriptions exist
         setState(() {
-          _prescriptions = loaded;
-          if (loaded.isNotEmpty) {
-            _selectedPrescription = loaded[0];
-          }
+          _prescriptions = [];
+          _selectedPrescription = null;
+          _todayMedications = [];
         });
+        return;
+      }
 
-        final String today = _formatDate(DateTime.now());
+      final List decoded = jsonDecode(listString);
+      final List<Prescription> loaded =
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+      setState(() {
+        _prescriptions = loaded;
+        if (loaded.isNotEmpty) {
+          _selectedPrescription = loaded[0];
+        }
+      });
 
-        // Collect today's medications and schedule notifications
-        for (final prescription in loaded) {
-          if(prescription.medications.isNotEmpty){
-            for (final med in prescription.medications) {
-              // Create a list to store all scheduled DateTimes
+      final String today = _formatDate(DateTime.now());
 
-              if (med.remainderDates.contains(today)) {
-                todayMedications.add(med);
-              }
+      // Collect today's medications and schedule notifications
+      for (final prescription in loaded) {
+        if(prescription.medications.isNotEmpty){
+          for (final med in prescription.medications) {
+            // Create a list to store all scheduled DateTimes
+
+            if (med.remainderDates.contains(today)) {
+              todayMedications.add(med);
             }
           }
         }
-
-        setState(() {
-          _todayMedications = todayMedications;
-        });
-
       }
+
+      setState(() {
+        _todayMedications = todayMedications;
+      });
+
     } catch (e, stackTrace) {
       log('Error loading prescriptions: $e');
       log('Stack trace: $stackTrace');
@@ -169,7 +181,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
+        : _prescriptions.isEmpty
+          ? _buildEmptyPrescriptionPlaceholder()
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,5 +643,58 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
 
 }
 
+Widget _buildEmptyPrescriptionPlaceholder() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset(
+          'assets/animation2.json',
+          width: 300,
+          height: 300,
+          fit: BoxFit.fill,
+        ),
+
+        Text(
+          'No Prescriptions Yet',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Add your first prescription to start tracking your medications',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton.icon(
+          onPressed: () async{
+            String uuid =  DateTime.now().microsecondsSinceEpoch.toString();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>  NewRxScreen(uuid: uuid,),
+              ),
+            );
+            await   _localRepository.loadPrescriptions();
+          },
+          icon: const Icon(Icons.add_circle_outline),
+          label: const Text('Add Prescription'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
 }
