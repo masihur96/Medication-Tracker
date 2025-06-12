@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:lottie/lottie.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
@@ -356,72 +357,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Text(
-             medication.name,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                 medication.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
 
-            Text('${localizations.notes}: ${medication.notes}',
-              style: const TextStyle(
-                fontSize: 14,
-              ),),
-            const SizedBox(height: 3),
-            // Display status for each reminder time
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: medication.reminderTimes.length,
-              itemBuilder: (context, index) {
-                final time = _formatTimeOfDay(medication.reminderTimes[index]);
-                return Padding(
-                  padding: const EdgeInsets.only(top: 3.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${localizations.time}: $time'),
-                      GestureDetector(
-                        onTap: () async {
-                          setState(() {
-                            medication.isTaken[index] = !medication.isTaken[index];
-                          });
+                Text('${localizations.notes}: ${medication.notes}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),),
+                const SizedBox(height: 3),
+                // Display status for each reminder time
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: medication.reminderTimes.length,
+                  itemBuilder: (context, index) {
+                    final time = _formatTimeOfDay(medication.reminderTimes[index]);
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 3.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('${localizations.time}: $time'),
+                          GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                medication.isTaken[index] = !medication.isTaken[index];
+                              });
 
 
-                          await updateMedicationStatus(
-                            medicationId: medication.id,
-                            timeIndex: index,
-                            isTaken: medication.isTaken[index]
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: medication.isTaken[index] ? Colors.green : Colors.orange,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            medication.isTaken[index] ? localizations.save : 'Pending',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                              await updateMedicationStatus(
+                                medicationId: medication.id,
+                                timeIndex: index,
+                                isTaken: medication.isTaken[index]
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: medication.isTaken[index] ? Colors.green : Colors.orange,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                medication.isTaken[index] ? localizations.save : 'Pending',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ],
             ),
+            Positioned(
+              right: -10,
+                top: -10,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                    onPressed: (){
+                    print(medication.audioFilePath);
+
+                      playAudio(medication.audioFilePath!, context);
+                    }, icon: Icon(Icons.hearing)))
           ],
         ),
       ),
     );
+  }
+
+  Future<void> playAudio(String filePath, BuildContext context) async {
+    final player = AudioPlayer();
+    try {
+      await player.setFilePath(filePath);
+      await player.play();
+    } catch (e) {
+      log("Error playing audio: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to play audio: $e")),
+      );
+    } finally {
+      await player.dispose();
+    }
   }
 Future<void> updateMedicationStatus({
   required String medicationId,

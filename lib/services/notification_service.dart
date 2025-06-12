@@ -24,6 +24,7 @@ class NotificationService {
           importance: NotificationImportance.High,
           playSound: true,
           enableVibration: true,
+          soundSource: 'resource://raw/med_reminder',
           enableLights: true,
         ),
       ],
@@ -118,8 +119,9 @@ class NotificationService {
         channelName: 'Medication Reminders',
         channelDescription: 'Notifications for medication reminders',
         importance: NotificationImportance.High,
-        playSound: soundSource != null,
-        soundSource: soundSource,
+        playSound: true,
+        enableLights: true,
+        soundSource: 'resource://raw/med_reminder',
         enableVibration: true,
       ),
     );
@@ -135,6 +137,8 @@ class NotificationService {
         importance: NotificationImportance.High,
         enableVibration: enabled,
         playSound: true,
+        soundSource: 'resource://raw/med_reminder',
+        enableLights: true,
       ),
     );
   }
