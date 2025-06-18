@@ -57,5 +57,10 @@
     <key>NSFaceIDUsageDescription</key>
     <string>We need to use Face ID to authenticate you</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs access to microphone for voice chat</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app needs access to speech recognition for voice chat</string>
+
 </dict>
 </plist>

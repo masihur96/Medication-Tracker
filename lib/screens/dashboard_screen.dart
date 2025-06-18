@@ -3,11 +3,18 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:lottie/lottie.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
+import 'package:med_track/screens/new_rx_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
+import 'package:med_track/utils/bounching_dialog.dart';
+import 'package:med_track/utils/custom_size.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/enhanced_medication_history.dart';
+import '../services/local_repository.dart';
+import 'ai_doctor_chat_screen.dart';
 
 
 class DashboardScreen extends StatefulWidget {
@@ -23,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Prescription> _prescriptions = [];
   Prescription? _selectedPrescription;
   List<EnhancedMedicationHistory> _medicationHistory = [];
+  final LocalRepository _localRepository = LocalRepository();
   bool _isLoading = true;
 
   
@@ -56,37 +64,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
       List<Medication> todayMedications = [];
       final prefs = await SharedPreferences.getInstance();
       final String? listString = prefs.getString('prescriptions');
-      if (listString != null) {
-        final List decoded = jsonDecode(listString);
-        final List<Prescription> loaded =
-            decoded.map((e) => Prescription.fromJson(e)).toList();
+      
+      if (listString == null) {
+        // Show placeholder when no prescriptions exist
         setState(() {
-          _prescriptions = loaded;
-          if (loaded.isNotEmpty) {
-            _selectedPrescription = loaded[0];
-          }
+          _prescriptions = [];
+          _selectedPrescription = null;
+          _todayMedications = [];
         });
+        return;
+      }
 
-        final String today = _formatDate(DateTime.now());
+      final List decoded = jsonDecode(listString);
+      final List<Prescription> loaded =
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+      setState(() {
+        _prescriptions = loaded;
+        if (loaded.isNotEmpty) {
+          _selectedPrescription = loaded[0];
+        }
+      });
 
-        // Collect today's medications and schedule notifications
-        for (final prescription in loaded) {
-          if(prescription.medications.isNotEmpty){
-            for (final med in prescription.medications) {
-              // Create a list to store all scheduled DateTimes
+      final String today = _formatDate(DateTime.now());
 
-              if (med.remainderDates.contains(today)) {
-                todayMedications.add(med);
-              }
+      // Collect today's medications and schedule notifications
+      for (final prescription in loaded) {
+        if(prescription.medications.isNotEmpty){
+          for (final med in prescription.medications) {
+            // Create a list to store all scheduled DateTimes
+
+            if (med.remainderDates.contains(today)) {
+              todayMedications.add(med);
             }
           }
         }
-
-        setState(() {
-          _todayMedications = todayMedications;
-        });
-
       }
+
+      setState(() {
+        _todayMedications = todayMedications;
+      });
+
     } catch (e, stackTrace) {
       log('Error loading prescriptions: $e');
       log('Stack trace: $stackTrace');
@@ -146,17 +163,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
          actions: [
-           IconButton(
-             icon: const Icon(Icons.notifications_outlined,color: Colors.white),
-             onPressed: () {
+
+           GestureDetector(
+             onTap: () {
+               _showAIDoctorDialog(context,localizations);
+               // Navigate to profile screen
+
              },
+             child: Lottie.asset('assets/animation1.json',
+               width: 80,
+
+               fit: BoxFit.fill,
+               repeat: true,
+             ),
            ),
          ],
     ),
 
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
+        : _prescriptions.isEmpty
+          ? _buildEmptyPrescriptionPlaceholder()
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,6 +279,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+
+    );
+  }
+
+  void _showAIDoctorDialog(BuildContext context,AppLocalizations localizations) {
+    showDialog(
+      context: context,
+      builder: (context) => BounchingDialog(
+        height: screenSize(context, 1.0),
+
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(children: [
+
+
+             Text(
+              localizations.aiDoctorTitle,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+              Image.asset('assets/doctor.png', height: 100, width: 100,fit: BoxFit.fill,),
+                    Text(
+            "${localizations.aiDoctorGreeting}\n\n"
+                "${localizations.aiDoctorOption}\n\n"
+                "${localizations.aiDoctorPrompt}",
+                    ),
+
+
+            SizedBox(height: 20),
+
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.deepPurple,
+                  ),
+                  child:  Text(localizations.cancel),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _navigateToAIDoctorChat(context);
+                  },
+                  icon: const Icon(Icons.chat,color: Colors.white,),
+                  label:  Text(localizations.startChat),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+
+              ],
+            ),
+
+                  ],),
+          ))
+    );
+  }
+  void _navigateToAIDoctorChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MedicationChatScreen()),
     );
   }
 
@@ -263,72 +357,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Text(
-             medication.name,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                 medication.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
 
-            Text('${localizations.notes}: ${medication.notes}',
-              style: const TextStyle(
-                fontSize: 14,
-              ),),
-            const SizedBox(height: 3),
-            // Display status for each reminder time
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: medication.reminderTimes.length,
-              itemBuilder: (context, index) {
-                final time = _formatTimeOfDay(medication.reminderTimes[index]);
-                return Padding(
-                  padding: const EdgeInsets.only(top: 3.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${localizations.time}: $time'),
-                      GestureDetector(
-                        onTap: () async {
-                          setState(() {
-                            medication.isTaken[index] = !medication.isTaken[index];
-                          });
+                Text('${localizations.notes}: ${medication.notes}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),),
+                const SizedBox(height: 3),
+                // Display status for each reminder time
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: medication.reminderTimes.length,
+                  itemBuilder: (context, index) {
+                    final time = _formatTimeOfDay(medication.reminderTimes[index]);
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 3.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('${localizations.time}: $time'),
+                          GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                medication.isTaken[index] = !medication.isTaken[index];
+                              });
 
 
-                          await updateMedicationStatus(
-                            medicationId: medication.id,
-                            timeIndex: index,
-                            isTaken: medication.isTaken[index]
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: medication.isTaken[index] ? Colors.green : Colors.orange,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            medication.isTaken[index] ? localizations.save : 'Pending',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                              await updateMedicationStatus(
+                                medicationId: medication.id,
+                                timeIndex: index,
+                                isTaken: medication.isTaken[index]
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: medication.isTaken[index] ? Colors.green : Colors.orange,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                medication.isTaken[index] ? localizations.save : 'Pending',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ],
             ),
+            medication.audioFilePath!.isEmpty?SizedBox(): Positioned(
+              right: -10,
+                top: -10,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                    onPressed: (){
+                    print(medication.audioFilePath);
+
+                      playAudio(medication.audioFilePath!, context);
+                    }, icon: Icon(Icons.hearing)))
           ],
         ),
       ),
     );
+  }
+
+  Future<void> playAudio(String filePath, BuildContext context) async {
+    final player = AudioPlayer();
+    try {
+      await player.setFilePath(filePath);
+      await player.play();
+    } catch (e) {
+      log("Error playing audio: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to play audio: $e")),
+      );
+    } finally {
+      await player.dispose();
+    }
   }
 Future<void> updateMedicationStatus({
   required String medicationId,
@@ -550,5 +673,58 @@ void _showMedicationDetails(DateTime date, BuildContext context) {
 
 }
 
+Widget _buildEmptyPrescriptionPlaceholder() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset(
+          'assets/animation2.json',
+          width: 300,
+          height: 300,
+          fit: BoxFit.fill,
+        ),
+
+        Text(
+          'No Prescriptions Yet',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Add your first prescription to start tracking your medications',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton.icon(
+          onPressed: () async{
+            String uuid =  DateTime.now().microsecondsSinceEpoch.toString();
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>  NewRxScreen(uuid: uuid,),
+              ),
+            );
+            await   _localRepository.loadPrescriptions();
+          },
+          icon: const Icon(Icons.add_circle_outline),
+          label: const Text('Add Prescription'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
 }

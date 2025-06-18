@@ -123,6 +123,12 @@ class AppLocalizations {
       'authenticateToAccess': 'Please authenticate to access the app',
       'tryAgain': 'Try Again',
       'biometricsNotAvailable': 'Biometric authentication is not available on this device',
+      'aiDoctorTitle': 'AI Doctor Assistant',
+      'aiDoctorGreeting': "Hello! I'm your AI Doctor. How can I assist you today?",
+      'aiDoctorOption': '- Or just general health tips?',
+      'aiDoctorPrompt': 'Tap below to chat with me.',
+      'startChat': 'Start Chat',
+      'medTrackAssistance': 'AI Dr. Assistance',
     },
     'bn': {
       'settings': 'সেটিংস',
@@ -236,6 +242,13 @@ class AppLocalizations {
       'tryAgain': 'আবার চেষ্টা করুন',
       'biometricsNotAvailable': 'এই ডিভাইসে বায়োমেট্রিক প্রমাণীকরণ উপলব্ধ নয়',
       'adherence': 'অনুগত্য',
+      'aiDoctorTitle': 'এআই ডক্টর সহকারী',
+      'aiDoctorGreeting': 'হ্যালো! আমি আপনার এআই ডাক্তার। আমি আজ আপনাকে কীভাবে সহায়তা করতে পারি?',
+      'aiDoctorOption': '- অথবা সাধারণ স্বাস্থ্য পরামর্শ?',
+      'aiDoctorPrompt': 'আমার সঙ্গে চ্যাট করতে নিচে ট্যাপ করুন।',
+
+      'startChat': 'চ্যাট শুরু করুন',
+      'medTrackAssistance': 'এআই ডাক্তার সহায়তা',
     },
   };
 
@@ -350,6 +363,13 @@ class AppLocalizations {
   String get authenticateToAccess => _localizedValues[locale.languageCode]!['authenticateToAccess']!;
   String get tryAgain => _localizedValues[locale.languageCode]!['tryAgain']!;
   String get biometricsNotAvailable => _localizedValues[locale.languageCode]!['biometricsNotAvailable']!;
+  String get aiDoctorTitle => _localizedValues[locale.languageCode]!['aiDoctorTitle']!;
+  String get aiDoctorGreeting => _localizedValues[locale.languageCode]!['aiDoctorGreeting']!;
+  String get aiDoctorOption => _localizedValues[locale.languageCode]!['aiDoctorOption']!;
+  String get aiDoctorPrompt => _localizedValues[locale.languageCode]!['aiDoctorPrompt']!;
+
+  String get startChat => _localizedValues[locale.languageCode]!['startChat']!;
+  String get medTrackAssistance => _localizedValues[locale.languageCode]!['medTrackAssistance']!;
 
 
   String medicationDueIn(String time) {

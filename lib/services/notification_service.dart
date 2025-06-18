@@ -24,6 +24,7 @@ class NotificationService {
           importance: NotificationImportance.High,
           playSound: true,
           enableVibration: true,
+          soundSource: 'resource://raw/med_reminder',
           enableLights: true,
         ),
       ],
@@ -41,6 +42,7 @@ class NotificationService {
         title: title,
         body: body,
         notificationLayout: NotificationLayout.Default,
+        customSound: 'resource://raw/med_reminder',
         icon: 'resource://drawable/ic_notification',
       ),
     );
@@ -53,6 +55,7 @@ class NotificationService {
         String? body,
         String? audioFilePath,
         bool enableVibration = true,
+        String? medicationId, // To help identify the medication
       }) async {
     var scheduleDate = tz.TZDateTime(
       tz.local,
@@ -63,10 +66,7 @@ class NotificationService {
       scheduledTime.minute,
     );
 
-    String? soundPath;
-    if (audioFilePath != null && await File(audioFilePath).exists()) {
-      soundPath = Platform.isAndroid ? 'file://$audioFilePath' : audioFilePath;
-    }
+
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
@@ -75,14 +75,41 @@ class NotificationService {
         title: title ?? 'Medication Reminder',
         body: body ?? 'Time to take your medication',
         notificationLayout: NotificationLayout.Default,
-        customSound: soundPath,
+
+        customSound: 'resource://raw/med_reminder',
+
         wakeUpScreen: true,
         category: NotificationCategory.Reminder,
         autoDismissible: true,
+        payload: {
+          'medication_id': medicationId ?? '',
+          'original_id': id.toString(),
+        },
       ),
       schedule: NotificationCalendar.fromDate(date: scheduleDate),
+      actionButtons: [
+        NotificationActionButton(
+          key: 'CONFIRM',
+          label: 'Confirm',
+          actionType: ActionType.Default,
+          color: Colors.green,
+        ),
+        NotificationActionButton(
+          key: 'SNOOZE',
+          label: 'Snooze',
+          actionType: ActionType.KeepOnTop,
+          color: Colors.orange,
+        ),
+        NotificationActionButton(
+          key: 'SKIP',
+          label: 'Skip',
+          actionType: ActionType.KeepOnTop,
+          color: Colors.red,
+        ),
+      ],
     );
   }
+
 
   // 🔊 Dynamically change sound
   static Future<void> updateChannelSound(String channelKey, String? soundSource) async {
@@ -92,8 +119,9 @@ class NotificationService {
         channelName: 'Medication Reminders',
         channelDescription: 'Notifications for medication reminders',
         importance: NotificationImportance.High,
-        playSound: soundSource != null,
-        soundSource: soundSource,
+        playSound: true,
+        enableLights: true,
+        soundSource: 'resource://raw/med_reminder',
         enableVibration: true,
       ),
     );
@@ -109,6 +137,9 @@ class NotificationService {
         importance: NotificationImportance.High,
         enableVibration: enabled,
         playSound: true,
+
+        soundSource: 'resource://raw/med_reminder',
+        enableLights: true,
       ),
     );
   }
@@ -132,6 +163,8 @@ class NotificationService {
       if (listString != null) {
         final List decoded = jsonDecode(listString);
         final List<Prescription> loaded = decoded.map((e) => Prescription.fromJson(e)).toList();
+
+        print("loadedloadedloadedloadedloaded${loaded.first.medications.first.audioFilePath}");
 
         for (final prescription in loaded) {
           for (final med in prescription.medications) {
@@ -212,6 +245,17 @@ class NotificationService {
     } catch (e, stackTrace) {
       print('Error checking low stock: $e');
       print('Stack trace: $stackTrace');
+    }
+  }
+
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+    if (receivedAction.payload != null) {
+      final medicationId = receivedAction.payload!['medication_id'];
+      if (medicationId != null) {
+        // Navigate to medication details screen
+        // You'll need to implement this navigation logic
+        print('Notification tapped for medication: $medicationId');
+      }
     }
   }
 }
