@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:med_track/models/medication.dart';
@@ -321,8 +321,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             ElevatedButton(
               onPressed: () async{
                 if (_formKey.currentState!.validate()) {
-
-
+                  
 
                   final prescription = Prescription(
 
@@ -352,6 +351,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               await    savePrescription(prescription);
               await _notificationService.cancelAllNotification();
               await _notificationService.setScheduleNotification();
+              await uploadPrescriptionToSupabase(prescription);
                   Navigator.pop(context);
 
                 }
@@ -372,6 +372,71 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       ),
     );
   }
+
+
+  Future<void> uploadPrescriptionToSupabase(Prescription prescription) async {
+    const supabaseUrl = 'https://ykbpugszryxnhzotaoue.supabase.co';
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlrYnB1Z3N6cnl4bmh6b3Rhb3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NzAxNzQsImV4cCI6MjA2NzU0NjE3NH0.1Oolf9bu9vLf0KrdQ2drMHSBp2H5lFggezfIcdkzSO0';
+    const prescriptionTableName = 'prescriptions';
+    const medicationTableName = 'medications';
+
+    final dio = Dio(BaseOptions(
+      baseUrl: '$supabaseUrl/rest/v1/',
+      headers: {
+        'apikey': apiKey,
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+      },
+    ));
+
+    // 1. Check if prescription exists
+    final checkResponse = await dio.get(
+      prescriptionTableName,
+      queryParameters: {
+        'prescription_uid': 'eq.${prescription.uid}',
+        'select': 'prescription_uid',
+        'limit': 1,
+      },
+    );
+
+    final exists = (checkResponse.data as List).isNotEmpty;
+
+    print(checkResponse.toString());
+
+    // 2. Insert prescription only if it doesn't exist
+    if (!exists) {
+      await dio.post(prescriptionTableName, data: {
+        'prescription_uid': prescription.uid,
+        'doctor': prescription.doctor,
+        'date': prescription.date,
+        'patient': prescription.patient,
+        'age': prescription.age,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    }
+
+
+
+    final Medication lastMedication = prescription.medications.last;
+    // 3. Insert medications (always)
+
+      await dio.post(medicationTableName, data: {
+        'prescription_uid': prescription.uid,
+        'medication_name': lastMedication.name,
+        'stock': lastMedication.stock,
+        'times_per_day': lastMedication.timesPerDay,
+        'is_active': lastMedication.isActive,
+        'is_taken': lastMedication.isTaken,
+        'id': lastMedication.id,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+        'date': prescription.date,
+        'notes': lastMedication.notes,
+        // add other fields from med that you want to upload
+      });
+  }
+
 
   Future<void> savePrescription(Prescription prescription) async {
     final prefs = await SharedPreferences.getInstance();
