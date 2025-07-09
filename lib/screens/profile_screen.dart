@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:med_track/models/user_profile.dart';
+import 'package:med_track/services/supabase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -28,20 +32,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfileData();
+
   }
 
+
+
   Future<void> _loadProfileData() async {
+
+
+    UserProfile userProfile = await loadUserProfile() ?? UserProfile(
+      profileImage: null,
+      name: '',
+      age: '',
+      phone: '',
+      email: '',
+      emergencyContact: '',
+      allergies: '',
+      bloodGroup: '',
+    );
+      setState(() {
+        _nameController.text =userProfile.name;
+        _ageController.text = userProfile.age;
+        _phoneController.text =userProfile.phone;
+        _emailController.text = userProfile.email;
+        _emergencyContactController.text = userProfile.emergencyContact;
+        _allergiesController.text = userProfile.allergies;
+        _bloodGroupController.text = userProfile.bloodGroup;
+        _profileImagePath = userProfile.profileImage;
+      });
+
+
+  }
+  Future<UserProfile?> loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _nameController.text = prefs.getString('name') ?? '';
-      _ageController.text = prefs.getString('age') ?? '';
-      _phoneController.text = prefs.getString('phone') ?? '';
-      _emailController.text = prefs.getString('email') ?? '';
-      _emergencyContactController.text = prefs.getString('emergencyContact') ?? '';
-      _allergiesController.text = prefs.getString('allergies') ?? '';
-      _bloodGroupController.text = prefs.getString('bloodGroup') ?? '';
-      _profileImagePath = prefs.getString('profileImage');
-    });
+    final userJson = prefs.getString('userProfile');
+
+    if (userJson != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJson);
+      return UserProfile.fromMap(userMap);
+    }
+
+    return null;
   }
 
   Future<void> _pickImage() async {
@@ -264,25 +295,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
   Future<void> _saveChanges() async {
     final prefs = await SharedPreferences.getInstance();
-    if (_profileImagePath != null) {
-      await prefs.setString('profileImage', _profileImagePath!);
-    }
-    await prefs.setString('name', _nameController.text);
-    await prefs.setString('age', _ageController.text);
-    await prefs.setString('phone', _phoneController.text);
-    await prefs.setString('email', _emailController.text);
-    await prefs.setString('emergencyContact', _emergencyContactController.text);
-    await prefs.setString('allergies', _allergiesController.text);
-    await prefs.setString('bloodGroup', _bloodGroupController.text);
 
+    final user = UserProfile(
+      profileImage: _profileImagePath,
+      name: _nameController.text,
+      age: _ageController.text,
+      phone: _phoneController.text,
+      email: _emailController.text,
+      emergencyContact: _emergencyContactController.text,
+      allergies: _allergiesController.text,
+      bloodGroup: _bloodGroupController.text,
+    );
+
+    final userJson = jsonEncode(user.toMap());
+    await prefs.setString('userProfile', userJson);
+    SupabaseService().uploadUserProfile(user);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Changes saved successfully')),
       );
     }
   }
+
+
+
 
   @override
   void dispose() {
