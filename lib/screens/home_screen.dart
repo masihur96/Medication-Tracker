@@ -17,12 +17,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeData();
-  }
-
   int _selectedIndex = 0;
 
   // List of screens
@@ -32,11 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
     MedicationScheduleScreen(),
     SettingsScreen(),
   ];
-
-  Future<void> _initializeData() async {
-    final provider = Provider.of<MedicationProvider>(context, listen: false);
-    await provider.initialize();
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

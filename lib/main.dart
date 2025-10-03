@@ -16,117 +16,167 @@ import 'package:med_track/screens/lock_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await NotificationService.init();
   
-  // Initialize providers
-  final medicationProvider = MedicationProvider();
-  await medicationProvider.initialize();
-  final themeProvider = ThemeProvider();
-  final languageProvider = LanguageProvider();
+  try {
+    print('🚀 Starting app initialization...');
+    
+    // Initialize NotificationService with error handling
+    try {
+      await NotificationService.init();
+      print('✅ NotificationService initialized');
+    } catch (e) {
+      print('⚠️ NotificationService initialization failed: $e');
+    }
+    
+    // Initialize providers with error handling
+    final medicationProvider = MedicationProvider();
+    try {
+      await medicationProvider.initialize();
+      print('✅ MedicationProvider initialized');
+    } catch (e) {
+      print('⚠️ MedicationProvider initialization failed: $e');
+    }
+    
+    final themeProvider = ThemeProvider();
+    final languageProvider = LanguageProvider();
+    print('✅ All providers created');
 
-  AwesomeNotifications().setListeners(
-    onActionReceivedMethod: (ReceivedAction receivedAction) async {
-      final payload = receivedAction.payload ?? {};
-      final medicationId = payload['medication_id'];
-      final originalId = payload['original_id'];
-      final missedCount = int.tryParse(payload['missed_count'] ?? '0') ?? 0;
-      final nextDoseTime = payload['next_dose_time'];
+    // Set up notification listeners with error handling
+    try {
+      AwesomeNotifications().setListeners(
+        onActionReceivedMethod: (ReceivedAction receivedAction) async {
+          try {
+            final payload = receivedAction.payload ?? {};
+            final medicationId = payload['medication_id'];
+            final originalId = payload['original_id'];
+            final missedCount = int.tryParse(payload['missed_count'] ?? '0') ?? 0;
+            final nextDoseTime = payload['next_dose_time'];
 
-      switch (receivedAction.buttonKeyPressed) {
-        case 'CONFIRM':
-          print('Medication $medicationId confirmed');
-          // Reset missed count when confirmed
-          await _updateMedicationStatus(medicationId, true);
-          break;
+            switch (receivedAction.buttonKeyPressed) {
+              case 'CONFIRM':
+                print('Medication $medicationId confirmed');
+                await _updateMedicationStatus(medicationId, true);
+                break;
 
-        case 'SNOOZE':
-          print('Medication $medicationId snoozed');
-          
-          // Calculate smart snooze duration based on missed count
-          final snoozeDuration = _calculateSmartSnoozeDuration(missedCount);
-          final newTime = DateTime.now().add(snoozeDuration);
-          final newId = newTime.millisecondsSinceEpoch.remainder(100000);
+              case 'SNOOZE':
+                print('Medication $medicationId snoozed');
+                
+                final snoozeDuration = _calculateSmartSnoozeDuration(missedCount);
+                final newTime = DateTime.now().add(snoozeDuration);
+                final newId = newTime.millisecondsSinceEpoch.remainder(100000);
+                final newMissedCount = missedCount + 1;
 
-          // Increment missed count
-          final newMissedCount = missedCount + 1;
+                await AwesomeNotifications().createNotification(
+                  content: NotificationContent(
+                    id: newId,
+                    channelKey: 'medication_channel',
+                    title: 'Snoozed: Medication Reminder',
+                    body: 'This is a snoozed reminder to take your medication (Missed: $newMissedCount times)',
+                    notificationLayout: NotificationLayout.Default,
+                    payload: {
+                      'medication_id': medicationId ?? '',
+                      'original_id': originalId ?? '',
+                      'missed_count': newMissedCount.toString(),
+                      'next_dose_time': nextDoseTime,
+                    },
+                  ),
+                  schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(newTime, tz.local)),
+                  actionButtons: [
+                    NotificationActionButton(
+                      key: 'CONFIRM',
+                      label: 'Confirm',
+                      actionType: ActionType.Default,
+                      color: Colors.green,
+                    ),
+                    NotificationActionButton(
+                      key: 'SNOOZE',
+                      label: 'Snooze',
+                      actionType: ActionType.KeepOnTop,
+                      color: Colors.orange,
+                    ),
+                    NotificationActionButton(
+                      key: 'SKIP',
+                      label: 'Skip',
+                      actionType: ActionType.KeepOnTop,
+                      color: Colors.red,
+                    ),
+                  ],
+                );
 
-          await AwesomeNotifications().createNotification(
-            content: NotificationContent(
-              id: newId,
-              channelKey: 'medication_channel',
-              title: 'Snoozed: Medication Reminder',
-              body: 'This is a snoozed reminder to take your medication (Missed: $newMissedCount times)',
-              notificationLayout: NotificationLayout.Default,
-              payload: {
-                'medication_id': medicationId ?? '',
-                'original_id': originalId ?? '',
-                'missed_count': newMissedCount.toString(),
-                'next_dose_time': nextDoseTime,
-              },
-            ),
-            schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(newTime, tz.local)),
-            actionButtons: [
-              NotificationActionButton(
-                key: 'CONFIRM',
-                label: 'Confirm',
-                actionType: ActionType.Default,
-                color: Colors.green,
-              ),
-              NotificationActionButton(
-                key: 'SNOOZE',
-                label: 'Snooze',
-                actionType: ActionType.KeepOnTop,
-                color: Colors.orange,
-              ),
-              NotificationActionButton(
-                key: 'SKIP',
-                label: 'Skip',
-                actionType: ActionType.KeepOnTop,
-                color: Colors.red,
-              ),
-            ],
-          );
+                await _updateMedicationStatus(medicationId, false, newMissedCount);
+                break;
 
-          // Update medication status in database
-          await _updateMedicationStatus(medicationId, false, newMissedCount);
-          break;
+              case 'SKIP':
+                print('Medication $medicationId skipped');
+                await _updateMedicationStatus(medicationId, false, missedCount + 1);
+                
+                if (nextDoseTime != null) {
+                  final nextDose = DateTime.parse(nextDoseTime);
+                  if (nextDose.isAfter(DateTime.now())) {
+                    await _scheduleNextDose(medicationId, nextDose);
+                  }
+                }
+                break;
 
-        case 'SKIP':
-          print('Medication $medicationId skipped');
-          await _updateMedicationStatus(medicationId, false, missedCount + 1);
-          
-          // Schedule next dose if available
-          if (nextDoseTime != null) {
-            final nextDose = DateTime.parse(nextDoseTime);
-            if (nextDose.isAfter(DateTime.now())) {
-              await _scheduleNextDose(medicationId, nextDose);
+              default:
+                if (medicationId != null && medicationId.isNotEmpty) {
+                  print('Notification tapped for medication: $medicationId');
+                }
+                break;
             }
+          } catch (e) {
+            print('❌ Error in notification action handler: $e');
           }
-          break;
+        },
+      );
+      print('✅ Notification listeners set up');
+    } catch (e) {
+      print('⚠️ Notification listeners setup failed: $e');
+    }
 
-        default:
-          if (medicationId != null && medicationId.isNotEmpty) {
-            print('Notification tapped for medication: $medicationId');
-            // TODO: Navigate to medication detail screen
-          }
-          break;
-      }
-    },
-  );
-
-
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: medicationProvider),
-        ChangeNotifierProvider.value(value: themeProvider),
-        ChangeNotifierProvider(create: (_) => languageProvider),
-      ],
-      child: MyApp(),
-    ),
-  );
+    print('🎯 Starting app...');
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: medicationProvider),
+          ChangeNotifierProvider.value(value: themeProvider),
+          ChangeNotifierProvider(create: (_) => languageProvider),
+        ],
+        child: MyApp(),
+      ),
+    );
+  } catch (e, stackTrace) {
+    print('💥 CRITICAL ERROR in main(): $e');
+    print('Stack trace: $stackTrace');
+    
+    // Fallback: Run a minimal app
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error, size: 48, color: Colors.red),
+                SizedBox(height: 16),
+                Text('App initialization failed'),
+                SizedBox(height: 8),
+                Text('Error: $e', style: TextStyle(fontSize: 12)),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Try to restart the app
+                    main();
+                  },
+                  child: Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 
@@ -135,44 +185,144 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('🎨 Building MyApp widget...');
+    
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
-        return MaterialApp(
-          title: 'MedTrack',
-          theme: themeProvider.getTheme(),
-          locale: languageProvider.currentLocale,
-          supportedLocales: const [
-            Locale('en'), // English
-            Locale('bn'), // Bengali
-          ],
-          localizationsDelegates: const [
-            AppLocalizationsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: FutureBuilder<bool>(
-            future: _checkBiometricLock(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              }
+        print('🎨 Consumer2 builder called');
+        
+        try {
+          return MaterialApp(
+            title: 'MedTrack',
+            theme: _getSafeTheme(themeProvider),
+            locale: _getSafeLocale(languageProvider),
+            supportedLocales: const [
+              Locale('en'), // English
+              Locale('bn'), // Bengali
+            ],
+            localizationsDelegates: const [
+              AppLocalizationsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: _buildHome(),
+          );
+        } catch (e) {
+          print('❌ Error building MaterialApp: $e');
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, color: Colors.red),
+                    Text('App Error: $e'),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      ),
+                      child: Text('Go to Home'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
 
+  ThemeData _getSafeTheme(ThemeProvider? themeProvider) {
+    try {
+      return themeProvider?.getTheme() ?? ThemeData.light();
+    } catch (e) {
+      print('⚠️ Error getting theme, using default: $e');
+      return ThemeData.light();
+    }
+  }
 
-              
-              final bool isBiometricLockEnabled = snapshot.data ?? false;
+  Locale _getSafeLocale(LanguageProvider? languageProvider) {
+    try {
+      return languageProvider?.currentLocale ?? const Locale('en');
+    } catch (e) {
+      print('⚠️ Error getting locale, using English: $e');
+      return const Locale('en');
+    }
+  }
 
-              return isBiometricLockEnabled ? const LockScreen() : const HomeScreen();
-            },
-          ),
-        );
+  Widget _buildHome() {
+    print('🏠 Building home widget...');
+    
+    return FutureBuilder<bool>(
+      future: _checkBiometricLock(),
+      builder: (context, snapshot) {
+        print('🏠 FutureBuilder state: ${snapshot.connectionState}');
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading...'),
+                ],
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          print('❌ Error checking biometric lock: ${snapshot.error}');
+          return const HomeScreen(); // Fallback to home screen
+        }
+        
+        final bool isBiometricLockEnabled = snapshot.data ?? false;
+        print('🔒 Biometric lock enabled: $isBiometricLockEnabled');
+
+        try {
+          return isBiometricLockEnabled ? const LockScreen() : const HomeScreen();
+        } catch (e) {
+          print('❌ Error creating home/lock screen: $e');
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.home, size: 48),
+                  const Text('Welcome to MedTrack'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    ),
+                    child: const Text('Continue'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
       },
     );
   }
 
   Future<bool> _checkBiometricLock() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('biometric_lock') ?? false;
+    try {
+      print('🔒 Checking biometric lock setting...');
+      final prefs = await SharedPreferences.getInstance();
+      final result = prefs.getBool('biometric_lock') ?? false;
+      print('🔒 Biometric lock result: $result');
+      return result;
+    } catch (e) {
+      print('❌ Error checking biometric lock: $e');
+      return false; // Default to no lock if error
+    }
   }
 }
 
