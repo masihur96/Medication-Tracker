@@ -19,7 +19,7 @@
 
 
     <application
-        android:label="med_track"
+        android:label="MediRx"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
