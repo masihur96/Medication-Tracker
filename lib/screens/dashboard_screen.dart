@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:med_track/models/medication.dart';
 import 'package:med_track/models/prescription.dart';
 import 'package:med_track/screens/new_rx_screen.dart';
+import 'package:med_track/screens/scan_prescription_screen.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/utils/bounching_dialog.dart';
 import 'package:med_track/utils/custom_size.dart';
@@ -163,6 +164,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
          actions: [
+           GestureDetector(
+             onTap: () {
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (context) =>  PrescriptionHome()),
+               );
+               //     .then((_) async{
+               //   await _localRepository.loadPrescriptions();
+               //   await initializeData();
+               // });
+
+             },
+             child: Lottie.asset('assets/scan_document.json',
+               // width: ,
+
+               fit: BoxFit.fill,
+               repeat: true,
+             ),
+           ),
 
            GestureDetector(
              onTap: () {
