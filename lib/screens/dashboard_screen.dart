@@ -168,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
              onTap: () {
                Navigator.push(
                  context,
-                 MaterialPageRoute(builder: (context) =>  PrescriptionHome()),
+                 MaterialPageRoute(builder: (context) =>  FullScreenCameraScanner()),
                );
                //     .then((_) async{
                //   await _localRepository.loadPrescriptions();
