@@ -1,45 +1,56 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:camera/camera.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-class PrescriptionHome extends StatefulWidget {
-  const PrescriptionHome({super.key});
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+
+class FullScreenCameraScanner extends StatefulWidget {
+  const FullScreenCameraScanner({super.key});
 
   @override
-  State<PrescriptionHome> createState() => _PrescriptionHomeState();
+  State<FullScreenCameraScanner> createState() => _FullScreenCameraScannerState();
 }
 
-class _PrescriptionHomeState extends State<PrescriptionHome> {
-  final picker = ImagePicker();
+class _FullScreenCameraScannerState extends State<FullScreenCameraScanner> {
+  CameraController? _controller;
+  bool _isCameraReady = false;
+  bool _isLoading = false;
   final dio = Dio();
-  File? _imageFile;
-  bool _loading = false;
-  String? extractedText;
-  List<String> medicineLines = [];
 
   final String apiKey = "YOUR_GOOGLE_VISION_API_KEY";
-  final String visionUrl =
-      "https://vision.googleapis.com/v1/images:annotate";
+  final String visionUrl = "https://vision.googleapis.com/v1/images:annotate";
 
-  Future<void> pickImage() async {
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _imageFile = File(picked.path));
-    }
+  @override
+  void initState() {
+    super.initState();
+    initCamera();
   }
 
-  Future<void> scanImage() async {
-    if (_imageFile == null) return;
-    setState(() {
-      _loading = true;
-      extractedText = null;
-      medicineLines.clear();
-    });
+  Future<void> initCamera() async {
+    final cameras = await availableCameras();
+    final backCamera = cameras.firstWhere(
+          (c) => c.lensDirection == CameraLensDirection.back,
+    );
+
+    _controller = CameraController(backCamera, ResolutionPreset.medium);
+    await _controller!.initialize();
+    setState(() => _isCameraReady = true);
+  }
+
+  Future<void> captureAndScan(BuildContext context) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
 
     try {
-      final bytes = await _imageFile!.readAsBytes();
+      setState(() => _isLoading = true);
+
+      // Take picture
+      final XFile picture = await _controller!.takePicture();
+      final File imageFile = File(picture.path);
+
+      // Convert to base64
+      final bytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(bytes);
 
       final requestBody = {
@@ -62,165 +73,138 @@ class _PrescriptionHomeState extends State<PrescriptionHome> {
       final text = annotations?["text"] ?? "";
 
       final lines = text.split("\n").map((e) => e.trim()).toList();
-      final meds = lines.where((l) =>
-      l.toLowerCase().contains("mg") ||
-          l.toLowerCase().contains("ml") ||
-          RegExp(r"\\d-\\d-\\d").hasMatch(l) ||
-          l.toLowerCase().contains("tablet") ||
-          l.toLowerCase().contains("cap")).toList();
+      final meds = lines.where((l) {
+        final lower = l.toLowerCase();
+        return lower.contains("mg") ||
+            lower.contains("ml") ||
+            lower.contains("tablet") ||
+            lower.contains("cap") ||
+            lower.contains("syrup");
+      }).toList();
 
-      setState(() {
-        extractedText = text;
-        medicineLines = meds;
-      });
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ScanResultPage(
+              imagePath: imageFile.path,
+              fullText: text,
+              medicines: meds,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       debugPrint("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Scan failed. Try again.")),
+      );
     } finally {
-      setState(() => _loading = false);
+      setState(() => _isLoading = false);
     }
+  }
+
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("AI Prescription Scanner")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            if (_imageFile != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(_imageFile!, height: 220, fit: BoxFit.cover),
-              ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.photo),
-                    label: const Text("Pick Image"),
-                    onPressed: pickImage,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.document_scanner_outlined),
-                    label: const Text("Scan"),
-                    onPressed: scanImage,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_loading)
-              CircularProgressIndicator(color: Colors.teal)
-              // const SpinKitCircle(color: Colors.teal, size: 40)
-            else if (medicineLines.isNotEmpty)
-              Expanded(
-                child: ListView(
-                  children: [
-                    Text(
-                      "Extracted Medicines",
+    if (!_isCameraReady) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-                    ),
-                    const SizedBox(height: 8),
-                    ...medicineLines.map(
-                          (line) => Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        child: ListTile(
-                          leading: const Icon(Icons.medical_services_outlined,
-                              color: Colors.teal),
-                          title: Text(line),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (extractedText != null)
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(extractedText ?? ""),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          CameraPreview(_controller!),
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.teal),
+              ),
+            ),
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap:(){
+    _isLoading ? null : captureAndScan(context);
+    },
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    color: _isLoading ? Colors.grey : Colors.white,
                   ),
                 ),
-          ],
-        ),
-      ),
-      floatingActionButton: medicineLines.isNotEmpty
-          ? FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  EPrescriptionPage(medicines: medicineLines),
+              ),
             ),
-          );
-        },
-        label: const Text("Generate e-Prescription"),
-        icon: const Icon(Icons.receipt_long_outlined),
-      )
-          : null,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class EPrescriptionPage extends StatelessWidget {
+class ScanResultPage extends StatelessWidget {
+  final String imagePath;
+  final String fullText;
   final List<String> medicines;
-  const EPrescriptionPage({super.key, required this.medicines});
+
+  const ScanResultPage({
+    super.key,
+    required this.imagePath,
+    required this.fullText,
+    required this.medicines,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("e-Prescription Preview")),
+      appBar: AppBar(title: const Text("Scan Result"), backgroundColor: Colors.teal),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 3,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Dr. John Doe",
-                    // style: GoogleFonts.poppins(
-                    //     fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                const Text("MBBS, MD (Medicine)"),
-                const Divider(),
-                const Text("Patient Name: ______________________"),
-                const SizedBox(height: 12),
-                Text("Prescription:",
-                    // style: GoogleFonts.poppins(
-                    //     fontSize: 18, fontWeight: FontWeight.w600)
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: medicines.length,
-                    itemBuilder: (ctx, i) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Text("• ${medicines[i]}",
-                            style: const TextStyle(fontSize: 16)),
-                      );
-                    },
-                  ),
-                ),
-                const Divider(),
-                const Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text("Signature: ____________"),
-                ),
-              ],
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.file(File(imagePath), height: 220, fit: BoxFit.cover),
             ),
-          ),
+            const SizedBox(height: 16),
+            if (medicines.isNotEmpty)
+              Expanded(
+                child: ListView(
+                  children: [
+                    const Text(
+                      "Detected Medicines:",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    ...medicines.map((m) => ListTile(
+                      leading: const Icon(Icons.medical_services_outlined,
+                          color: Colors.teal),
+                      title: Text(m),
+                    )),
+                  ],
+                ),
+              )
+            else
+              Expanded(
+                child: SingleChildScrollView(child: Text(fullText)),
+              ),
+          ],
         ),
       ),
     );
