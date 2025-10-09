@@ -1,33 +1,38 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:med_track/providers/language_provider.dart';
 import 'package:med_track/providers/medication_provider.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/home_screen.dart';
+import 'package:med_track/screens/lock_screen.dart';
 import 'package:med_track/services/notification_service.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:med_track/providers/language_provider.dart';
-import 'package:med_track/utils/app_localizations.dart';
-import 'package:med_track/screens/lock_screen.dart';
 
-
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+// ...
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   try {
     print('🚀 Starting app initialization...');
-    
-    // Initialize NotificationService with error handling
     try {
       await NotificationService.init();
       print('✅ NotificationService initialized');
     } catch (e) {
       print('⚠️ NotificationService initialization failed: $e');
     }
-    
+
     // Initialize providers with error handling
     final medicationProvider = MedicationProvider();
     try {
@@ -36,7 +41,7 @@ void main() async {
     } catch (e) {
       print('⚠️ MedicationProvider initialization failed: $e');
     }
-    
+
     final themeProvider = ThemeProvider();
     final languageProvider = LanguageProvider();
     print('✅ All providers created');
@@ -49,7 +54,8 @@ void main() async {
             final payload = receivedAction.payload ?? {};
             final medicationId = payload['medication_id'];
             final originalId = payload['original_id'];
-            final missedCount = int.tryParse(payload['missed_count'] ?? '0') ?? 0;
+            final missedCount =
+                int.tryParse(payload['missed_count'] ?? '0') ?? 0;
             final nextDoseTime = payload['next_dose_time'];
 
             switch (receivedAction.buttonKeyPressed) {
@@ -60,8 +66,9 @@ void main() async {
 
               case 'SNOOZE':
                 print('Medication $medicationId snoozed');
-                
-                final snoozeDuration = _calculateSmartSnoozeDuration(missedCount);
+
+                final snoozeDuration =
+                    _calculateSmartSnoozeDuration(missedCount);
                 final newTime = DateTime.now().add(snoozeDuration);
                 final newId = newTime.millisecondsSinceEpoch.remainder(100000);
                 final newMissedCount = missedCount + 1;
@@ -71,7 +78,8 @@ void main() async {
                     id: newId,
                     channelKey: 'medication_channel',
                     title: 'Snoozed: Medication Reminder',
-                    body: 'This is a snoozed reminder to take your medication (Missed: $newMissedCount times)',
+                    body:
+                        'This is a snoozed reminder to take your medication (Missed: $newMissedCount times)',
                     notificationLayout: NotificationLayout.Default,
                     payload: {
                       'medication_id': medicationId ?? '',
@@ -80,7 +88,8 @@ void main() async {
                       'next_dose_time': nextDoseTime,
                     },
                   ),
-                  schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(newTime, tz.local)),
+                  schedule: NotificationCalendar.fromDate(
+                      date: tz.TZDateTime.from(newTime, tz.local)),
                   actionButtons: [
                     NotificationActionButton(
                       key: 'CONFIRM',
@@ -103,13 +112,15 @@ void main() async {
                   ],
                 );
 
-                await _updateMedicationStatus(medicationId, false, newMissedCount);
+                await _updateMedicationStatus(
+                    medicationId, false, newMissedCount);
                 break;
 
               case 'SKIP':
                 print('Medication $medicationId skipped');
-                await _updateMedicationStatus(medicationId, false, missedCount + 1);
-                
+                await _updateMedicationStatus(
+                    medicationId, false, missedCount + 1);
+
                 if (nextDoseTime != null) {
                   final nextDose = DateTime.parse(nextDoseTime);
                   if (nextDose.isAfter(DateTime.now())) {
@@ -148,7 +159,7 @@ void main() async {
   } catch (e, stackTrace) {
     print('💥 CRITICAL ERROR in main(): $e');
     print('Stack trace: $stackTrace');
-    
+
     // Fallback: Run a minimal app
     runApp(
       MaterialApp(
@@ -179,18 +190,17 @@ void main() async {
   }
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     print('🎨 Building MyApp widget...');
-    
+
     return Consumer2<ThemeProvider, LanguageProvider>(
       builder: (context, themeProvider, languageProvider, child) {
         print('🎨 Consumer2 builder called');
-        
+
         try {
           return MaterialApp(
             title: 'MedTrack',
@@ -255,12 +265,12 @@ class MyApp extends StatelessWidget {
 
   Widget _buildHome() {
     print('🏠 Building home widget...');
-    
+
     return FutureBuilder<bool>(
       future: _checkBiometricLock(),
       builder: (context, snapshot) {
         print('🏠 FutureBuilder state: ${snapshot.connectionState}');
-        
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(
@@ -280,12 +290,14 @@ class MyApp extends StatelessWidget {
           print('❌ Error checking biometric lock: ${snapshot.error}');
           return const HomeScreen(); // Fallback to home screen
         }
-        
+
         final bool isBiometricLockEnabled = snapshot.data ?? false;
         print('🔒 Biometric lock enabled: $isBiometricLockEnabled');
 
         try {
-          return isBiometricLockEnabled ? const LockScreen() : const HomeScreen();
+          return isBiometricLockEnabled
+              ? const LockScreen()
+              : const HomeScreen();
         } catch (e) {
           print('❌ Error creating home/lock screen: $e');
           return Scaffold(
@@ -341,9 +353,10 @@ Duration _calculateSmartSnoozeDuration(int missedCount) {
 }
 
 // Helper function to update medication status
-Future<void> _updateMedicationStatus(String? medicationId, bool isConfirmed, [int missedCount = 0]) async {
+Future<void> _updateMedicationStatus(String? medicationId, bool isConfirmed,
+    [int missedCount = 0]) async {
   if (medicationId == null) return;
-  
+
   // TODO: Implement this method to update your medication status in the database
   // This should update the missed count and confirmation status
   // Example implementation:
@@ -355,7 +368,8 @@ Future<void> _updateMedicationStatus(String? medicationId, bool isConfirmed, [in
 }
 
 // Helper function to schedule next dose
-Future<void> _scheduleNextDose(String? medicationId, DateTime nextDoseTime) async {
+Future<void> _scheduleNextDose(
+    String? medicationId, DateTime nextDoseTime) async {
   if (medicationId == null) return;
 
   final newId = nextDoseTime.millisecondsSinceEpoch.remainder(100000);
@@ -372,7 +386,8 @@ Future<void> _scheduleNextDose(String? medicationId, DateTime nextDoseTime) asyn
         'missed_count': '0',
       },
     ),
-    schedule: NotificationCalendar.fromDate(date: tz.TZDateTime.from(nextDoseTime, tz.local)),
+    schedule: NotificationCalendar.fromDate(
+        date: tz.TZDateTime.from(nextDoseTime, tz.local)),
     actionButtons: [
       NotificationActionButton(
         key: 'CONFIRM',
