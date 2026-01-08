@@ -203,7 +203,7 @@ class MyApp extends StatelessWidget {
 
         try {
           return MaterialApp(
-            title: 'MedTrack',
+            title: '',
             theme: _getSafeTheme(themeProvider),
             locale: _getSafeLocale(languageProvider),
             supportedLocales: const [
@@ -306,7 +306,7 @@ class MyApp extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.home, size: 48),
-                  const Text('Welcome to MedTrack'),
+                  const Text('Welcome to '),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => Navigator.push(

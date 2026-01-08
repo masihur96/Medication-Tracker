@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:intl/intl.dart';
@@ -13,10 +14,10 @@ import 'package:med_track/utils/app_localizations.dart';
 import 'package:med_track/utils/bounching_dialog.dart';
 import 'package:med_track/utils/custom_size.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/enhanced_medication_history.dart';
 import '../services/local_repository.dart';
 import 'ai_doctor_chat_screen.dart';
-
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -34,21 +35,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final LocalRepository _localRepository = LocalRepository();
   bool _isLoading = true;
 
-  
   @override
   void initState() {
     super.initState();
     initTask();
     // Initialize data
-
   }
 
-  initTask()async{
-   await initializeData();
-
+  initTask() async {
+    await initializeData();
   }
-
-
 
   Future<void> initializeData() async {
     setState(() => _isLoading = true);
@@ -65,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       List<Medication> todayMedications = [];
       final prefs = await SharedPreferences.getInstance();
       final String? listString = prefs.getString('prescriptions');
-      
+
       if (listString == null) {
         // Show placeholder when no prescriptions exist
         setState(() {
@@ -90,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       // Collect today's medications and schedule notifications
       for (final prescription in loaded) {
-        if(prescription.medications.isNotEmpty){
+        if (prescription.medications.isNotEmpty) {
           for (final med in prescription.medications) {
             // Create a list to store all scheduled DateTimes
 
@@ -104,7 +100,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         _todayMedications = todayMedications;
       });
-
     } catch (e, stackTrace) {
       log('Error loading prescriptions: $e');
       log('Stack trace: $stackTrace');
@@ -117,9 +112,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (historyString != null) {
       final List decoded = jsonDecode(historyString);
       setState(() {
-        _medicationHistory = decoded
-            .map((e) => EnhancedMedicationHistory.fromJson(e))
-            .toList();
+        _medicationHistory =
+            decoded.map((e) => EnhancedMedicationHistory.fromJson(e)).toList();
       });
     }
   }
@@ -139,7 +133,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
   }
@@ -150,217 +143,209 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return DateFormat('hh:mm a').format(dt);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
-       appBar: AppBar(
-      elevation: 0,
-      backgroundColor: Theme.of(context).primaryColor,
-      title: Text(
-        'MedTrack',
-        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-      ),
-         actions: [
-           GestureDetector(
-             onTap: () {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(builder: (context) =>  FullScreenCameraScanner()),
-               );
-               //     .then((_) async{
-               //   await _localRepository.loadPrescriptions();
-               //   await initializeData();
-               // });
-
-             },
-             child: Lottie.asset('assets/scan_document.json',
-               // width: ,
-
-               fit: BoxFit.fill,
-               repeat: true,
-             ),
-           ),
-
-           GestureDetector(
-             onTap: () {
-               _showAIDoctorDialog(context,localizations);
-               // Navigate to profile screen
-
-             },
-             child: Lottie.asset('assets/animation1.json',
-               width: 80,
-
-               fit: BoxFit.fill,
-               repeat: true,
-             ),
-           ),
-         ],
-    ),
-
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : _prescriptions.isEmpty
-          ? _buildEmptyPrescriptionPlaceholder()
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Today's Medications Section
-            Text(
-              localizations.todaysMedications,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _todayMedications.length,
-              itemBuilder: (context, index) {
-                final medication = _todayMedications[index];
-                return GestureDetector(
-                  onTap: (){
-                    print(medication.audioFilePath);
-
-                  },
-                  child: _buildMedicationCard(
-                    medication: medication,
-                  ),
-                );
-              },
-            ),
-
-
-            const SizedBox(height: 16),
-
-            // Medication Dosage Chart
-            Row(
-              children: [
-                Text(
-                  localizations.dosageMonitor,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                SizedBox(width: 10,),
-                Expanded(
-
-
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<Prescription>(
-                      isExpanded: true,
-                      value: _selectedPrescription,
-                      hint: Text(localizations.rx),
-                      items: _prescriptions.map((prescription) {
-                        return DropdownMenuItem<Prescription>(
-                          value: prescription,
-                          child: Text(prescription.doctor),
-                        );
-                      }).toList(),
-                      onChanged: (Prescription? newValue) {
-                        setState(() {
-                          _selectedPrescription = newValue;
-                        });
-                        loadHeatMapData(); // Reload heat map when prescription changes
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            HeatMapCalendar(
-              defaultColor: Colors.grey[200],
-              flexible: true,
-              colorMode: ColorMode.color,
-              datasets: _heatMapDataset,
-              colorsets: const {
-
-                1: Colors.red,  // Red for missed
-                2: Colors.yellow, // Yellow for partially taken
-                3: Colors.green, // Green for all taken
-              },
-              onClick: (value) {
-                _showMedicationDetails(value, context);
-              },
-              textColor: Color(0xFF1A1A1A)
-            ),
-            const SizedBox(height: 16),
-
-          ],
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text(
+          'Medi Rx',
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FullScreenCameraScanner()),
+              );
+              //     .then((_) async{
+              //   await _localRepository.loadPrescriptions();
+              //   await initializeData();
+              // });
+            },
+            child: Lottie.asset(
+              'assets/scan_document.json',
+              // width: ,
+
+              fit: BoxFit.fill,
+              repeat: true,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              _showAIDoctorDialog(context, localizations);
+              // Navigate to profile screen
+            },
+            child: Lottie.asset(
+              'assets/animation1.json',
+              width: 80,
+              fit: BoxFit.fill,
+              repeat: true,
+            ),
+          ),
+        ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _prescriptions.isEmpty
+              ? _buildEmptyPrescriptionPlaceholder()
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Today's Medications Section
+                      Text(
+                        localizations.todaysMedications,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _todayMedications.length,
+                        itemBuilder: (context, index) {
+                          final medication = _todayMedications[index];
+                          return GestureDetector(
+                            onTap: () {
+                              print(medication.audioFilePath);
+                            },
+                            child: _buildMedicationCard(
+                              medication: medication,
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Medication Dosage Chart
+                      Row(
+                        children: [
+                          Text(
+                            localizations.dosageMonitor,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<Prescription>(
+                                isExpanded: true,
+                                value: _selectedPrescription,
+                                hint: Text(localizations.rx),
+                                items: _prescriptions.map((prescription) {
+                                  return DropdownMenuItem<Prescription>(
+                                    value: prescription,
+                                    child: Text(prescription.doctor),
+                                  );
+                                }).toList(),
+                                onChanged: (Prescription? newValue) {
+                                  setState(() {
+                                    _selectedPrescription = newValue;
+                                  });
+                                  loadHeatMapData(); // Reload heat map when prescription changes
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      HeatMapCalendar(
+                          defaultColor: Colors.grey[200],
+                          flexible: true,
+                          colorMode: ColorMode.color,
+                          datasets: _heatMapDataset,
+                          colorsets: const {
+                            1: Colors.red, // Red for missed
+                            2: Colors.yellow, // Yellow for partially taken
+                            3: Colors.green, // Green for all taken
+                          },
+                          onClick: (value) {
+                            _showMedicationDetails(value, context);
+                          },
+                          textColor: Color(0xFF1A1A1A)),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
     );
   }
 
-  void _showAIDoctorDialog(BuildContext context,AppLocalizations localizations) {
+  void _showAIDoctorDialog(
+      BuildContext context, AppLocalizations localizations) {
     showDialog(
-      context: context,
-      builder: (context) => BounchingDialog(
-        height: screenSize(context, 1.0),
-
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(children: [
-
-
-             Text(
-              localizations.aiDoctorTitle,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-              Image.asset('assets/doctor.png', height: 100, width: 100,fit: BoxFit.fill,),
-                    Text(
-            "${localizations.aiDoctorGreeting}\n\n"
-                "${localizations.aiDoctorOption}\n\n"
-                "${localizations.aiDoctorPrompt}",
-                    ),
-
-
-            SizedBox(height: 20),
-
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.deepPurple,
+        context: context,
+        builder: (context) => BounchingDialog(
+            height: screenSize(context, 1.0),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  Text(
+                    localizations.aiDoctorTitle,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  child:  Text(localizations.cancel),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _navigateToAIDoctorChat(context);
-                  },
-                  icon: const Icon(Icons.chat,color: Colors.white,),
-                  label:  Text(localizations.startChat),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
+                  Image.asset(
+                    'assets/doctor.png',
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.fill,
                   ),
-                ),
-
-              ],
-            ),
-
-                  ],),
-          ))
-    );
+                  Text(
+                    "${localizations.aiDoctorGreeting}\n\n"
+                    "${localizations.aiDoctorOption}\n\n"
+                    "${localizations.aiDoctorPrompt}",
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.deepPurple,
+                        ),
+                        child: Text(localizations.cancel),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _navigateToAIDoctorChat(context);
+                        },
+                        icon: const Icon(
+                          Icons.chat,
+                          color: Colors.white,
+                        ),
+                        label: Text(localizations.startChat),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )));
   }
+
   void _navigateToAIDoctorChat(BuildContext context) {
     Navigator.push(
       context,
@@ -369,11 +354,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMedicationCard({
-
     required Medication medication,
   }) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -383,17 +367,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                 medication.name,
+                  medication.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
 
-                Text('${localizations.notes}: ${medication.notes}',
+                Text(
+                  '${localizations.notes}: ${medication.notes}',
                   style: const TextStyle(
                     fontSize: 14,
-                  ),),
+                  ),
+                ),
                 const SizedBox(height: 3),
                 // Display status for each reminder time
                 ListView.builder(
@@ -401,7 +387,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: medication.reminderTimes.length,
                   itemBuilder: (context, index) {
-                    final time = _formatTimeOfDay(medication.reminderTimes[index]);
+                    final time =
+                        _formatTimeOfDay(medication.reminderTimes[index]);
                     return Padding(
                       padding: const EdgeInsets.only(top: 3.0),
                       child: Row(
@@ -411,24 +398,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           GestureDetector(
                             onTap: () async {
                               setState(() {
-                                medication.isTaken[index] = !medication.isTaken[index];
+                                medication.isTaken[index] =
+                                    !medication.isTaken[index];
                               });
 
-
                               await updateMedicationStatus(
-                                medicationId: medication.id,
-                                timeIndex: index,
-                                isTaken: medication.isTaken[index]
-                              );
+                                  medicationId: medication.id,
+                                  timeIndex: index,
+                                  isTaken: medication.isTaken[index]);
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: medication.isTaken[index] ? Colors.green : Colors.orange,
+                                color: medication.isTaken[index]
+                                    ? Colors.green
+                                    : Colors.orange,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                medication.isTaken[index] ? localizations.save : 'Pending',
+                                medication.isTaken[index]
+                                    ? localizations.save
+                                    : 'Pending',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -443,16 +434,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            medication.audioFilePath!.isEmpty?SizedBox(): Positioned(
-              right: -10,
-                top: -10,
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                    onPressed: (){
-                    print(medication.audioFilePath);
+            medication.audioFilePath!.isEmpty
+                ? SizedBox()
+                : Positioned(
+                    right: -10,
+                    top: -10,
+                    child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          print(medication.audioFilePath);
 
-                      playAudio(medication.audioFilePath!, context);
-                    }, icon: Icon(Icons.hearing)))
+                          playAudio(medication.audioFilePath!, context);
+                        },
+                        icon: Icon(Icons.hearing)))
           ],
         ),
       ),
@@ -473,278 +467,289 @@ class _DashboardScreenState extends State<DashboardScreen> {
       await player.dispose();
     }
   }
-Future<void> updateMedicationStatus({
-  required String medicationId,
-  required int timeIndex,
-  required bool isTaken,
-}) async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? prescriptionsString = prefs.getString('prescriptions');
-  
-  if (prescriptionsString != null) {
-    final List decoded = jsonDecode(prescriptionsString);
-    final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
-    
-    // Update the status in today's medications list for UI
-    for (var item in _todayMedications) {
-      if (item.id == medicationId) {
-        if (timeIndex < item.isTaken.length) {
-          // Check if the status is changing from not taken to taken
-          bool wasPreviouslyTaken = item.isTaken[timeIndex];
-          item.isTaken[timeIndex] = isTaken;
-          
-          // Update stock only when medication is marked as taken
-          if (!wasPreviouslyTaken && isTaken) {
-            item.stock = item.stock - 1;
-          }
-          // If medication is unmarked as taken, increment the stock back
-          else if (wasPreviouslyTaken && !isTaken) {
-            item.stock = item.stock + 1;
-          }
-          
-          // Update or create history entry
-          final String today = _formatDate(DateTime.now());
-          final prescription = prescriptions.firstWhere(
-            (p) => p.medications.any((m) => m.id == medicationId)
-          );
-          
-          // Create or update history entry
-          EnhancedMedicationHistory historyEntry = EnhancedMedicationHistory(
-            prescriptionId: prescription.uid,
 
-            date: today,
-            medicationName: item.name,
-            dosage: item.timesPerDay.toString(),
-            notes: item.notes!,
-            medicationTimes: item.reminderTimes.map((t) => _formatTimeOfDay(t)).toList(),
-            isTaken: item.isTaken,
-            doctorName: prescription.doctor,
-            patientName: prescription.patient,
-            patientAge: prescription.age!,
-          );
-          
-          // Update history list
-          _medicationHistory.removeWhere((h) => 
-            h.prescriptionId == prescription.uid && 
-            h.date == today && 
-            h.medicationName == item.name
-          );
-          _medicationHistory.add(historyEntry);
-          
-          // Save updated history
-          await saveMedicationHistory();
-        }
-        break;
-      }
-    }
-    
-    // Update the status and stock in the full prescriptions list
-    for (var prescription in prescriptions) {
-      for (var medication in prescription.medications) {
-        if (medication.id == medicationId) {
-          if (timeIndex < medication.isTaken.length) {
-            bool wasPreviouslyTaken = medication.isTaken[timeIndex];
-            medication.isTaken[timeIndex] = isTaken;
-            
-            // Update stock in the main prescriptions list
+  Future<void> updateMedicationStatus({
+    required String medicationId,
+    required int timeIndex,
+    required bool isTaken,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? prescriptionsString = prefs.getString('prescriptions');
+
+    if (prescriptionsString != null) {
+      final List decoded = jsonDecode(prescriptionsString);
+      final List<Prescription> prescriptions =
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+
+      // Update the status in today's medications list for UI
+      for (var item in _todayMedications) {
+        if (item.id == medicationId) {
+          if (timeIndex < item.isTaken.length) {
+            // Check if the status is changing from not taken to taken
+            bool wasPreviouslyTaken = item.isTaken[timeIndex];
+            item.isTaken[timeIndex] = isTaken;
+
+            // Update stock only when medication is marked as taken
             if (!wasPreviouslyTaken && isTaken) {
-              medication.stock = medication.stock - 1;
+              item.stock = item.stock - 1;
             }
             // If medication is unmarked as taken, increment the stock back
             else if (wasPreviouslyTaken && !isTaken) {
-              medication.stock = medication.stock + 1;
+              item.stock = item.stock + 1;
             }
+
+            // Update or create history entry
+            final String today = _formatDate(DateTime.now());
+            final prescription = prescriptions.firstWhere(
+                (p) => p.medications.any((m) => m.id == medicationId));
+
+            // Create or update history entry
+            EnhancedMedicationHistory historyEntry = EnhancedMedicationHistory(
+              prescriptionId: prescription.uid,
+              date: today,
+              medicationName: item.name,
+              dosage: item.timesPerDay.toString(),
+              notes: item.notes!,
+              medicationTimes:
+                  item.reminderTimes.map((t) => _formatTimeOfDay(t)).toList(),
+              isTaken: item.isTaken,
+              doctorName: prescription.doctor,
+              patientName: prescription.patient,
+              patientAge: prescription.age!,
+            );
+
+            // Update history list
+            _medicationHistory.removeWhere((h) =>
+                h.prescriptionId == prescription.uid &&
+                h.date == today &&
+                h.medicationName == item.name);
+            _medicationHistory.add(historyEntry);
+
+            // Save updated history
+            await saveMedicationHistory();
           }
           break;
         }
       }
-    }
-    
-    // Save the updated full prescriptions list
-    final updatedString = jsonEncode(prescriptions.map((e) => e.toJson()).toList());
-    await prefs.setString('prescriptions', updatedString);
-    // Add this line to update the heat map
-    await loadHeatMapData();
-  }
-}
 
-Future<Map<DateTime, int>> _generateHeatMapDataset() async {
-  Map<DateTime, int> dataset = {};
+      // Update the status and stock in the full prescriptions list
+      for (var prescription in prescriptions) {
+        for (var medication in prescription.medications) {
+          if (medication.id == medicationId) {
+            if (timeIndex < medication.isTaken.length) {
+              bool wasPreviouslyTaken = medication.isTaken[timeIndex];
+              medication.isTaken[timeIndex] = isTaken;
 
-  // Group history entries by date
-  Map<String, List<EnhancedMedicationHistory>> historyByDate = {};
-  
-  for (var history in _medicationHistory) {
-    if (_selectedPrescription != null && 
-        history.prescriptionId == _selectedPrescription!.uid) {
-      if (!historyByDate.containsKey(history.date)) {
-        historyByDate[history.date] = [];
+              // Update stock in the main prescriptions list
+              if (!wasPreviouslyTaken && isTaken) {
+                medication.stock = medication.stock - 1;
+              }
+              // If medication is unmarked as taken, increment the stock back
+              else if (wasPreviouslyTaken && !isTaken) {
+                medication.stock = medication.stock + 1;
+              }
+            }
+            break;
+          }
+        }
       }
-      historyByDate[history.date]!.add(history);
+
+      // Save the updated full prescriptions list
+      final updatedString =
+          jsonEncode(prescriptions.map((e) => e.toJson()).toList());
+      await prefs.setString('prescriptions', updatedString);
+      // Add this line to update the heat map
+      await loadHeatMapData();
     }
   }
 
-  // Process each date's medications
-  historyByDate.forEach((dateStr, histories) {
-    final parts = dateStr.split('/');
-    final date = DateTime(
-      int.parse(parts[2]), // year
-      int.parse(parts[1]), // month
-      int.parse(parts[0]), // day
-    );
+  Future<Map<DateTime, int>> _generateHeatMapDataset() async {
+    Map<DateTime, int> dataset = {};
 
-    int totalMedications = 0;
-    int takenMedications = 0;
+    // Group history entries by date
+    Map<String, List<EnhancedMedicationHistory>> historyByDate = {};
 
-    // Count total medications and taken medications for the day
-    for (var history in histories) {
-      totalMedications += history.medicationTimes.length;
-      takenMedications += history.isTaken.where((taken) => taken).length;
+    for (var history in _medicationHistory) {
+      if (_selectedPrescription != null &&
+          history.prescriptionId == _selectedPrescription!.uid) {
+        if (!historyByDate.containsKey(history.date)) {
+          historyByDate[history.date] = [];
+        }
+        historyByDate[history.date]!.add(history);
+      }
     }
 
-    // Determine color based on overall medication adherence for the day
-    if (totalMedications == 0) {
-      dataset[date] = 0; // No medications scheduled
-    } else if (takenMedications == 0) {
-      dataset[date] = 1; // All missed (red)
-    } else if (takenMedications < totalMedications) {
-      dataset[date] = 2; // Partially taken (yellow)
-    } else {
-      dataset[date] = 3; // All taken (green)
-    }
-  });
+    // Process each date's medications
+    historyByDate.forEach((dateStr, histories) {
+      final parts = dateStr.split('/');
+      final date = DateTime(
+        int.parse(parts[2]), // year
+        int.parse(parts[1]), // month
+        int.parse(parts[0]), // day
+      );
 
-  return dataset;
-}
+      int totalMedications = 0;
+      int takenMedications = 0;
 
-void _showMedicationDetails(DateTime date, BuildContext context) {
-  // Format date to match your storage format
-  String formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  
-  // Filter medication history for the selected date and prescription
-  List<EnhancedMedicationHistory> historyForDate = _medicationHistory.where((history) => 
-    history.date == formattedDate && 
-    history.prescriptionId == _selectedPrescription?.uid
-  ).toList();
+      // Count total medications and taken medications for the day
+      for (var history in histories) {
+        totalMedications += history.medicationTimes.length;
+        takenMedications += history.isTaken.where((taken) => taken).length;
+      }
 
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Medications for ${DateFormat('MMM d, yyyy').format(date)}'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: historyForDate.isEmpty
-                ? [Text('No medication records for this date')]
-                : historyForDate.map((history) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left side (medication details)
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          history.medicationName.toUpperCase(),
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        Text('Dosage: ${history.dosage}'),
-                        Text('Note: ${history.notes}'),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  // Right side (medication times and status)
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: history.medicationTimes.asMap().entries.map((entry) =>
-                          Text(
-                            '  ${entry.value}\n${history.isTaken[entry.key] ? "Taken" : "Missed"}',
-                            style: TextStyle(
-                              color: history.isTaken[entry.key] ? Colors.green : Colors.red,
+      // Determine color based on overall medication adherence for the day
+      if (totalMedications == 0) {
+        dataset[date] = 0; // No medications scheduled
+      } else if (takenMedications == 0) {
+        dataset[date] = 1; // All missed (red)
+      } else if (takenMedications < totalMedications) {
+        dataset[date] = 2; // Partially taken (yellow)
+      } else {
+        dataset[date] = 3; // All taken (green)
+      }
+    });
 
-                            ),textAlign: TextAlign.center,
-                          )
-                      ).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            )).toList(),
+    return dataset;
+  }
+
+  void _showMedicationDetails(DateTime date, BuildContext context) {
+    // Format date to match your storage format
+    String formattedDate =
+        '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+    // Filter medication history for the selected date and prescription
+    List<EnhancedMedicationHistory> historyForDate = _medicationHistory
+        .where((history) =>
+            history.date == formattedDate &&
+            history.prescriptionId == _selectedPrescription?.uid)
+        .toList();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title:
+            Text('Medications for ${DateFormat('MMM d, yyyy').format(date)}'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: historyForDate.isEmpty
+                  ? [Text('No medication records for this date')]
+                  : historyForDate
+                      .map((history) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Left side (medication details)
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        history.medicationName.toUpperCase(),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                      Text('Dosage: ${history.dosage}'),
+                                      Text('Note: ${history.notes}'),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                // Right side (medication times and status)
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: history.medicationTimes
+                                        .asMap()
+                                        .entries
+                                        .map((entry) => Text(
+                                              '  ${entry.value}\n${history.isTaken[entry.key] ? "Taken" : "Missed"}',
+                                              style: TextStyle(
+                                                color:
+                                                    history.isTaken[entry.key]
+                                                        ? Colors.green
+                                                        : Colors.red,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ))
+                                        .toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Close'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Close'),
-        ),
-      ],
-    ),
-  );
+    );
+  }
 
-
-}
-
-Widget _buildEmptyPrescriptionPlaceholder() {
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(
-          'assets/animation2.json',
-          width: 300,
-          height: 300,
-          fit: BoxFit.fill,
-        ),
-
-        Text(
-          'No Prescriptions Yet',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+  Widget _buildEmptyPrescriptionPlaceholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            'assets/animation2.json',
+            width: 300,
+            height: 300,
+            fit: BoxFit.fill,
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Add your first prescription to start tracking your medications',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[600],
+          Text(
+            'No Prescriptions Yet',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
           ),
-        ),
-        const SizedBox(height: 32),
-        ElevatedButton.icon(
-          onPressed: () async{
-            String uuid =  DateTime.now().microsecondsSinceEpoch.toString();
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>  NewRxScreen(uuid: uuid,),
-              ),
-            );
-            await   _localRepository.loadPrescriptions();
-          },
-          icon: const Icon(Icons.add_circle_outline),
-          label: const Text('Add Prescription'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
+          const SizedBox(height: 16),
+          Text(
+            'Add your first prescription to start tracking your medications',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () async {
+              String uuid = DateTime.now().microsecondsSinceEpoch.toString();
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewRxScreen(
+                    uuid: uuid,
+                  ),
+                ),
+              );
+              await _localRepository.loadPrescriptions();
+            },
+            icon: const Icon(Icons.add_circle_outline),
+            label: const Text('Add Prescription'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

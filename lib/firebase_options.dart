@@ -63,6 +63,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '877181396433',
     projectId: 'medirx-5b23a',
     storageBucket: 'medirx-5b23a.firebasestorage.app',
-    iosBundleId: 'com.example.medTrack',
+    iosBundleId: 'com.example.',
   );
 }

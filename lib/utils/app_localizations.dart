@@ -27,7 +27,7 @@ class AppLocalizations {
       'tellFriend': 'Tell a Friend',
       'shareApp': 'Share this app with friends',
       'about': 'About',
-      'learnMore': 'Learn more about MedTrack',
+      'learnMore': 'Learn more about ',
       'language': 'Language',
       'selectLanguage': 'Select your preferred language',
       'version': 'Version',
@@ -45,7 +45,8 @@ class AppLocalizations {
       'todaysMedications': "Today's Medications",
       'noMedications': 'No medications scheduled',
       'confirmDelete': 'Confirm Delete',
-      'deleteConfirmMessage': 'Are you sure you want to delete this medication?',
+      'deleteConfirmMessage':
+          'Are you sure you want to delete this medication?',
       'yes': 'Yes',
       'no': 'No',
       'dashboard': 'Dashboard',
@@ -104,9 +105,11 @@ class AppLocalizations {
       'turnOnOffReminders': 'Turn on/off all medication reminders',
       'dataPrivacy': 'Data Privacy',
       'dataCollection': 'Data Collection',
-      'dataCollectionDescription': 'Allow anonymous usage data collection to improve the app',
+      'dataCollectionDescription':
+          'Allow anonymous usage data collection to improve the app',
       'showMedicationNames': 'Show Medication Names',
-      'showMedicationNamesDescription': 'Show medication names in notifications and widgets',
+      'showMedicationNamesDescription':
+          'Show medication names in notifications and widgets',
       'biometricLock': 'Biometric Lock',
       'biometricLockDescription': 'Require authentication to open the app',
       'dataManagement': 'Data Management',
@@ -115,16 +118,20 @@ class AppLocalizations {
       'deleteAllData': 'Delete All Data',
       'deleteAllDataDescription': 'Permanently remove all your data',
       'deleteAllDataConfirm': 'Delete All Data?',
-      'deleteAllDataWarning': 'This action cannot be undone. All your medication history and settings will be permanently deleted.',
-      'aboutDescription': 'MedTrack is your personal medication tracking assistant, helping you stay on top of your medication schedule and maintain better health.',
+      'deleteAllDataWarning':
+          'This action cannot be undone. All your medication history and settings will be permanently deleted.',
+      'aboutDescription':
+          ' is your personal medication tracking assistant, helping you stay on top of your medication schedule and maintain better health.',
       'close': 'CLOSE',
       'adherence': 'Adherence',
       'appLocked': 'App Locked',
       'authenticateToAccess': 'Please authenticate to access the app',
       'tryAgain': 'Try Again',
-      'biometricsNotAvailable': 'Biometric authentication is not available on this device',
+      'biometricsNotAvailable':
+          'Biometric authentication is not available on this device',
       'aiDoctorTitle': 'AI Doctor Assistant',
-      'aiDoctorGreeting': "Hello! I'm your AI Doctor. How can I assist you today?",
+      'aiDoctorGreeting':
+          "Hello! I'm your AI Doctor. How can I assist you today?",
       'aiDoctorOption': '- Or just general health tips?',
       'aiDoctorPrompt': 'Tap below to chat with me.',
       'startChat': 'Start Chat',
@@ -223,7 +230,8 @@ class AppLocalizations {
       'turnOnOffReminders': 'সমস্ত ঔষধের রিমাইন্ডার চালু/বন্ধ করুন',
       'dataPrivacy': 'ডেটা গোপনীয়তা',
       'dataCollection': 'ডেটা সংগ্রহ',
-      'dataCollectionDescription': 'অ্যাপ উন্নত করতে বেনামী ব্যবহার ডেটা সংগ্রহের অনুমতি দিন',
+      'dataCollectionDescription':
+          'অ্যাপ উন্নত করতে বেনামী ব্যবহার ডেটা সংগ্রহের অনুমতি দিন',
       'showMedicationNames': 'ঔষধের নাম দেখান',
       'showMedicationNamesDescription': 'নোটিফিকেশন এবং উইজেটে ঔষধের নাম দেখান',
       'biometricLock': 'বায়োমেট্রিক লক',
@@ -234,8 +242,10 @@ class AppLocalizations {
       'deleteAllData': 'সমস্ত ডেটা মুছবেন',
       'deleteAllDataDescription': 'আপনার সমস্ত ডেটা স্থায়ীভাবে মুছে ফেলুন',
       'deleteAllDataConfirm': 'সমস্ত ডেটা মুছবেন?',
-      'deleteAllDataWarning': 'এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ঔষধের ইতিহাস এবং সেটিংস স্থায়ীভাবে মুছে যাবে।',
-      'aboutDescription': 'মেডট্র্যাক আপনার ব্যক্তিগত ঔষধ ট্র্যাকিং সহকারী, যা আপনাকে আপনার ঔষধের সময়সূচী মেনে চলতে এবং আরও ভাল স্বাস্থ্য বজায় রাখতে সাহায্য করে।',
+      'deleteAllDataWarning':
+          'এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ঔষধের ইতিহাস এবং সেটিংস স্থায়ীভাবে মুছে যাবে।',
+      'aboutDescription':
+          'মেডট্র্যাক আপনার ব্যক্তিগত ঔষধ ট্র্যাকিং সহকারী, যা আপনাকে আপনার ঔষধের সময়সূচী মেনে চলতে এবং আরও ভাল স্বাস্থ্য বজায় রাখতে সাহায্য করে।',
       'close': 'বন্ধ করুন',
       'appLocked': 'অ্যাপ লক করা হয়েছে',
       'authenticateToAccess': 'অ্যাপ অ্যাক্সেস করতে প্রমাণীকরণ করুন',
@@ -243,10 +253,10 @@ class AppLocalizations {
       'biometricsNotAvailable': 'এই ডিভাইসে বায়োমেট্রিক প্রমাণীকরণ উপলব্ধ নয়',
       'adherence': 'অনুগত্য',
       'aiDoctorTitle': 'এআই ডক্টর সহকারী',
-      'aiDoctorGreeting': 'হ্যালো! আমি আপনার এআই ডাক্তার। আমি আজ আপনাকে কীভাবে সহায়তা করতে পারি?',
+      'aiDoctorGreeting':
+          'হ্যালো! আমি আপনার এআই ডাক্তার। আমি আজ আপনাকে কীভাবে সহায়তা করতে পারি?',
       'aiDoctorOption': '- অথবা সাধারণ স্বাস্থ্য পরামর্শ?',
       'aiDoctorPrompt': 'আমার সঙ্গে চ্যাট করতে নিচে ট্যাপ করুন।',
-
       'startChat': 'চ্যাট শুরু করুন',
       'medTrackAssistance': 'এআই ডাক্তার সহায়তা',
     },
@@ -254,26 +264,38 @@ class AppLocalizations {
 
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
   String get profile => _localizedValues[locale.languageCode]!['profile']!;
-  String get manageProfile => _localizedValues[locale.languageCode]!['manageProfile']!;
-  String get appSettings => _localizedValues[locale.languageCode]!['appSettings']!;
-  String get medicationHistory => _localizedValues[locale.languageCode]!['medicationHistory']!;
-  String get viewHistory => _localizedValues[locale.languageCode]!['viewHistory']!;
-  String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
-  String get enableDisableNotifications => _localizedValues[locale.languageCode]!['enableDisableNotifications']!;
+  String get manageProfile =>
+      _localizedValues[locale.languageCode]!['manageProfile']!;
+  String get appSettings =>
+      _localizedValues[locale.languageCode]!['appSettings']!;
+  String get medicationHistory =>
+      _localizedValues[locale.languageCode]!['medicationHistory']!;
+  String get viewHistory =>
+      _localizedValues[locale.languageCode]!['viewHistory']!;
+  String get notifications =>
+      _localizedValues[locale.languageCode]!['notifications']!;
+  String get enableDisableNotifications =>
+      _localizedValues[locale.languageCode]!['enableDisableNotifications']!;
   String get darkTheme => _localizedValues[locale.languageCode]!['darkTheme']!;
-  String get switchTheme => _localizedValues[locale.languageCode]!['switchTheme']!;
-  String get moreOptions => _localizedValues[locale.languageCode]!['moreOptions']!;
+  String get switchTheme =>
+      _localizedValues[locale.languageCode]!['switchTheme']!;
+  String get moreOptions =>
+      _localizedValues[locale.languageCode]!['moreOptions']!;
   String get privacy => _localizedValues[locale.languageCode]!['privacy']!;
-  String get managePrivacy => _localizedValues[locale.languageCode]!['managePrivacy']!;
-  String get tellFriend => _localizedValues[locale.languageCode]!['tellFriend']!;
+  String get managePrivacy =>
+      _localizedValues[locale.languageCode]!['managePrivacy']!;
+  String get tellFriend =>
+      _localizedValues[locale.languageCode]!['tellFriend']!;
   String get shareApp => _localizedValues[locale.languageCode]!['shareApp']!;
   String get about => _localizedValues[locale.languageCode]!['about']!;
   String get learnMore => _localizedValues[locale.languageCode]!['learnMore']!;
   String get language => _localizedValues[locale.languageCode]!['language']!;
-  String get selectLanguage => _localizedValues[locale.languageCode]!['selectLanguage']!;
+  String get selectLanguage =>
+      _localizedValues[locale.languageCode]!['selectLanguage']!;
   String get version => _localizedValues[locale.languageCode]!['version']!;
   String get newRx => _localizedValues[locale.languageCode]!['newRx']!;
-  String get medicationName => _localizedValues[locale.languageCode]!['medicationName']!;
+  String get medicationName =>
+      _localizedValues[locale.languageCode]!['medicationName']!;
   String get dosage => _localizedValues[locale.languageCode]!['dosage']!;
   String get frequency => _localizedValues[locale.languageCode]!['frequency']!;
   String get schedule => _localizedValues[locale.languageCode]!['schedule']!;
@@ -282,95 +304,145 @@ class AppLocalizations {
   String get delete => _localizedValues[locale.languageCode]!['delete']!;
   String get edit => _localizedValues[locale.languageCode]!['edit']!;
   String get home => _localizedValues[locale.languageCode]!['home']!;
-  String get upcomingDoses => _localizedValues[locale.languageCode]!['upcomingDoses']!;
-  String get todaysMedications => _localizedValues[locale.languageCode]!['todaysMedications']!;
-  String get noMedications => _localizedValues[locale.languageCode]!['noMedications']!;
-  String get confirmDelete => _localizedValues[locale.languageCode]!['confirmDelete']!;
-  String get deleteConfirmMessage => _localizedValues[locale.languageCode]!['deleteConfirmMessage']!;
+  String get upcomingDoses =>
+      _localizedValues[locale.languageCode]!['upcomingDoses']!;
+  String get todaysMedications =>
+      _localizedValues[locale.languageCode]!['todaysMedications']!;
+  String get noMedications =>
+      _localizedValues[locale.languageCode]!['noMedications']!;
+  String get confirmDelete =>
+      _localizedValues[locale.languageCode]!['confirmDelete']!;
+  String get deleteConfirmMessage =>
+      _localizedValues[locale.languageCode]!['deleteConfirmMessage']!;
   String get yes => _localizedValues[locale.languageCode]!['yes']!;
   String get no => _localizedValues[locale.languageCode]!['no']!;
   String get dashboard => _localizedValues[locale.languageCode]!['dashboard']!;
   String get drug => _localizedValues[locale.languageCode]!['drug']!;
   String get rx => _localizedValues[locale.languageCode]!['rx']!;
-  String get dosageMonitor => _localizedValues[locale.languageCode]!['dosageMonitor']!;
-  String get medications => _localizedValues[locale.languageCode]!['medications']!;
+  String get dosageMonitor =>
+      _localizedValues[locale.languageCode]!['dosageMonitor']!;
+  String get medications =>
+      _localizedValues[locale.languageCode]!['medications']!;
   String get drugs => _localizedValues[locale.languageCode]!['drugs']!;
   String get stock => _localizedValues[locale.languageCode]!['stock']!;
   String get active => _localizedValues[locale.languageCode]!['active']!;
   String get inactive => _localizedValues[locale.languageCode]!['inactive']!;
-  String get noMedicationsYet => _localizedValues[locale.languageCode]!['noMedicationsYet']!;
+  String get noMedicationsYet =>
+      _localizedValues[locale.languageCode]!['noMedicationsYet']!;
   String get time => _localizedValues[locale.languageCode]!['time']!;
   String get notes => _localizedValues[locale.languageCode]!['notes']!;
   String get notSet => _localizedValues[locale.languageCode]!['notSet']!;
   String get notTaking => _localizedValues[locale.languageCode]!['notTaking']!;
-  String get discontinued => _localizedValues[locale.languageCode]!['discontinued']!;
-  String get currentStock => _localizedValues[locale.languageCode]!['currentStock']!;
+  String get discontinued =>
+      _localizedValues[locale.languageCode]!['discontinued']!;
+  String get currentStock =>
+      _localizedValues[locale.languageCode]!['currentStock']!;
   String get units => _localizedValues[locale.languageCode]!['units']!;
-  String get prescriptions => _localizedValues[locale.languageCode]!['prescriptions']!;
-  String get noPrescriptionsFound => _localizedValues[locale.languageCode]!['noPrescriptionsFound']!;
-  String get addPrescription => _localizedValues[locale.languageCode]!['addPrescription']!;
+  String get prescriptions =>
+      _localizedValues[locale.languageCode]!['prescriptions']!;
+  String get noPrescriptionsFound =>
+      _localizedValues[locale.languageCode]!['noPrescriptionsFound']!;
+  String get addPrescription =>
+      _localizedValues[locale.languageCode]!['addPrescription']!;
   String get chamber => _localizedValues[locale.languageCode]!['chamber']!;
   String get patient => _localizedValues[locale.languageCode]!['patient']!;
   String get doctor => _localizedValues[locale.languageCode]!['doctor']!;
-  String get prescriptionDetails => _localizedValues[locale.languageCode]!['prescriptionDetails']!;
+  String get prescriptionDetails =>
+      _localizedValues[locale.languageCode]!['prescriptionDetails']!;
   String get name => _localizedValues[locale.languageCode]!['name']!;
-  String get timesPerDay => _localizedValues[locale.languageCode]!['timesPerDay']!;
-  String get reminderTimes => _localizedValues[locale.languageCode]!['reminderTimes']!;
+  String get timesPerDay =>
+      _localizedValues[locale.languageCode]!['timesPerDay']!;
+  String get reminderTimes =>
+      _localizedValues[locale.languageCode]!['reminderTimes']!;
   String get for_ => _localizedValues[locale.languageCode]!['for']!;
   String get required => _localizedValues[locale.languageCode]!['required']!;
-  String get enterValidNumber => _localizedValues[locale.languageCode]!['enterValidNumber']!;
+  String get enterValidNumber =>
+      _localizedValues[locale.languageCode]!['enterValidNumber']!;
   String get daily => _localizedValues[locale.languageCode]!['daily']!;
   String get weekly => _localizedValues[locale.languageCode]!['weekly']!;
   String get monthly => _localizedValues[locale.languageCode]!['monthly']!;
   String get asNeeded => _localizedValues[locale.languageCode]!['asNeeded']!;
-  String get additionalInfo => _localizedValues[locale.languageCode]!['additionalInfo']!;
-  String get additionalInstructions => _localizedValues[locale.languageCode]!['additionalInstructions']!;
-  String get medicationStatus => _localizedValues[locale.languageCode]!['medicationStatus']!;
-  String get updatePrescription => _localizedValues[locale.languageCode]!['updatePrescription']!;
-  String get saveMedication => _localizedValues[locale.languageCode]!['saveMedication']!;
-  String get selectPrescription => _localizedValues[locale.languageCode]!['selectPrescription']!;
-  String get selectDateToViewMedications => _localizedValues[locale.languageCode]!['selectDateToViewMedications']!;
-  String get noMedicationsScheduled => _localizedValues[locale.languageCode]!['noMedicationsScheduled']!;
+  String get additionalInfo =>
+      _localizedValues[locale.languageCode]!['additionalInfo']!;
+  String get additionalInstructions =>
+      _localizedValues[locale.languageCode]!['additionalInstructions']!;
+  String get medicationStatus =>
+      _localizedValues[locale.languageCode]!['medicationStatus']!;
+  String get updatePrescription =>
+      _localizedValues[locale.languageCode]!['updatePrescription']!;
+  String get saveMedication =>
+      _localizedValues[locale.languageCode]!['saveMedication']!;
+  String get selectPrescription =>
+      _localizedValues[locale.languageCode]!['selectPrescription']!;
+  String get selectDateToViewMedications =>
+      _localizedValues[locale.languageCode]!['selectDateToViewMedications']!;
+  String get noMedicationsScheduled =>
+      _localizedValues[locale.languageCode]!['noMedicationsScheduled']!;
   String get taken => _localizedValues[locale.languageCode]!['taken']!;
-  String get notTakenYet => _localizedValues[locale.languageCode]!['notTakenYet']!;
+  String get notTakenYet =>
+      _localizedValues[locale.languageCode]!['notTakenYet']!;
   String get age => _localizedValues[locale.languageCode]!['age']!;
   String get date => _localizedValues[locale.languageCode]!['date']!;
   String get status => _localizedValues[locale.languageCode]!['status']!;
   String get takenAt => _localizedValues[locale.languageCode]!['takenAt']!;
-  String get medication => _localizedValues[locale.languageCode]!['medication']!;
+  String get medication =>
+      _localizedValues[locale.languageCode]!['medication']!;
   String get vibration => _localizedValues[locale.languageCode]!['vibration']!;
   String get sound => _localizedValues[locale.languageCode]!['sound']!;
-  String get enableNotifications => _localizedValues[locale.languageCode]!['enableNotifications']!;
-  String get turnOnOffReminders => _localizedValues[locale.languageCode]!['turnOnOffReminders']!;
-  String get dataPrivacy => _localizedValues[locale.languageCode]!['dataPrivacy']!;
-  String get dataCollection => _localizedValues[locale.languageCode]!['dataCollection']!;
-  String get dataCollectionDescription => _localizedValues[locale.languageCode]!['dataCollectionDescription']!;
-  String get showMedicationNames => _localizedValues[locale.languageCode]!['showMedicationNames']!;
-  String get showMedicationNamesDescription => _localizedValues[locale.languageCode]!['showMedicationNamesDescription']!;
-  String get biometricLock => _localizedValues[locale.languageCode]!['biometricLock']!;
-  String get biometricLockDescription => _localizedValues[locale.languageCode]!['biometricLockDescription']!;
-  String get dataManagement => _localizedValues[locale.languageCode]!['dataManagement']!;
-  String get exportData => _localizedValues[locale.languageCode]!['exportData']!;
-  String get exportDataDescription => _localizedValues[locale.languageCode]!['exportDataDescription']!;
-  String get deleteAllData => _localizedValues[locale.languageCode]!['deleteAllData']!;
-  String get deleteAllDataDescription => _localizedValues[locale.languageCode]!['deleteAllDataDescription']!;
-  String get deleteAllDataConfirm => _localizedValues[locale.languageCode]!['deleteAllDataConfirm']!;
-  String get deleteAllDataWarning => _localizedValues[locale.languageCode]!['deleteAllDataWarning']!;
-  String get aboutDescription => _localizedValues[locale.languageCode]!['aboutDescription']!;
+  String get enableNotifications =>
+      _localizedValues[locale.languageCode]!['enableNotifications']!;
+  String get turnOnOffReminders =>
+      _localizedValues[locale.languageCode]!['turnOnOffReminders']!;
+  String get dataPrivacy =>
+      _localizedValues[locale.languageCode]!['dataPrivacy']!;
+  String get dataCollection =>
+      _localizedValues[locale.languageCode]!['dataCollection']!;
+  String get dataCollectionDescription =>
+      _localizedValues[locale.languageCode]!['dataCollectionDescription']!;
+  String get showMedicationNames =>
+      _localizedValues[locale.languageCode]!['showMedicationNames']!;
+  String get showMedicationNamesDescription =>
+      _localizedValues[locale.languageCode]!['showMedicationNamesDescription']!;
+  String get biometricLock =>
+      _localizedValues[locale.languageCode]!['biometricLock']!;
+  String get biometricLockDescription =>
+      _localizedValues[locale.languageCode]!['biometricLockDescription']!;
+  String get dataManagement =>
+      _localizedValues[locale.languageCode]!['dataManagement']!;
+  String get exportData =>
+      _localizedValues[locale.languageCode]!['exportData']!;
+  String get exportDataDescription =>
+      _localizedValues[locale.languageCode]!['exportDataDescription']!;
+  String get deleteAllData =>
+      _localizedValues[locale.languageCode]!['deleteAllData']!;
+  String get deleteAllDataDescription =>
+      _localizedValues[locale.languageCode]!['deleteAllDataDescription']!;
+  String get deleteAllDataConfirm =>
+      _localizedValues[locale.languageCode]!['deleteAllDataConfirm']!;
+  String get deleteAllDataWarning =>
+      _localizedValues[locale.languageCode]!['deleteAllDataWarning']!;
+  String get aboutDescription =>
+      _localizedValues[locale.languageCode]!['aboutDescription']!;
   String get close => _localizedValues[locale.languageCode]!['close']!;
   String get adherence => _localizedValues[locale.languageCode]!['adherence']!;
   String get appLocked => _localizedValues[locale.languageCode]!['appLocked']!;
-  String get authenticateToAccess => _localizedValues[locale.languageCode]!['authenticateToAccess']!;
+  String get authenticateToAccess =>
+      _localizedValues[locale.languageCode]!['authenticateToAccess']!;
   String get tryAgain => _localizedValues[locale.languageCode]!['tryAgain']!;
-  String get biometricsNotAvailable => _localizedValues[locale.languageCode]!['biometricsNotAvailable']!;
-  String get aiDoctorTitle => _localizedValues[locale.languageCode]!['aiDoctorTitle']!;
-  String get aiDoctorGreeting => _localizedValues[locale.languageCode]!['aiDoctorGreeting']!;
-  String get aiDoctorOption => _localizedValues[locale.languageCode]!['aiDoctorOption']!;
-  String get aiDoctorPrompt => _localizedValues[locale.languageCode]!['aiDoctorPrompt']!;
+  String get biometricsNotAvailable =>
+      _localizedValues[locale.languageCode]!['biometricsNotAvailable']!;
+  String get aiDoctorTitle =>
+      _localizedValues[locale.languageCode]!['aiDoctorTitle']!;
+  String get aiDoctorGreeting =>
+      _localizedValues[locale.languageCode]!['aiDoctorGreeting']!;
+  String get aiDoctorOption =>
+      _localizedValues[locale.languageCode]!['aiDoctorOption']!;
+  String get aiDoctorPrompt =>
+      _localizedValues[locale.languageCode]!['aiDoctorPrompt']!;
 
   String get startChat => _localizedValues[locale.languageCode]!['startChat']!;
-  String get medTrackAssistance => _localizedValues[locale.languageCode]!['medTrackAssistance']!;
-
+  String get medTrackAssistance =>
+      _localizedValues[locale.languageCode]!['medTrackAssistance']!;
 
   String medicationDueIn(String time) {
     return _localizedValues[locale.languageCode]!['medicationDueIn']!
@@ -391,4 +463,4 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   @override
   bool shouldReload(AppLocalizationsDelegate old) => false;
-} 
+}

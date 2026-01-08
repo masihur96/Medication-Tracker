@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:med_track/utils/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:local_auth/local_auth.dart';
 
 import '../services/local_repository.dart';
-
 
 class PrivacyScreen extends StatefulWidget {
   const PrivacyScreen({super.key});
@@ -28,16 +26,23 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
     _loadPrivacySettings();
     _checkBiometricsAvailability();
   }
+
   Future<void> shareExportedFile() async {
-     final  file = await LocalRepository().exportDataToFile();
+    final file = await LocalRepository().exportDataToFile();
     if (file != null && await file.exists()) {
-      Share.shareXFiles([XFile(file.path)], text: 'Here is my prescription backup');
+      SharePlus.instance
+          .share(ShareParams(text: 'check out my website https://example.com'));
+      // Share.shareXFiles([XFile(file.path)],
+      //     text: 'Here is my prescription backup');
     }
   }
+
   Future<void> _checkBiometricsAvailability() async {
-    final bool canAuthenticateWithBiometrics = await _localAuth.canCheckBiometrics;
-    final bool canAuthenticate = canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
-    
+    final bool canAuthenticateWithBiometrics =
+        await _localAuth.canCheckBiometrics;
+    final bool canAuthenticate =
+        canAuthenticateWithBiometrics || await _localAuth.isDeviceSupported();
+
     setState(() {
       _isBiometricsAvailable = canAuthenticate;
     });
@@ -62,7 +67,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -70,7 +75,8 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         foregroundColor: Colors.white,
         title: Text(
           localizations.privacy,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: ListView(
@@ -114,28 +120,27 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
             ),
           ),
 
-
           // Biometric Lock
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SwitchListTile(
               title: Text(localizations.biometricLock),
-              subtitle: Text(_isBiometricsAvailable 
-                ? localizations.biometricLockDescription 
-                : localizations.biometricsNotAvailable),
+              subtitle: Text(_isBiometricsAvailable
+                  ? localizations.biometricLockDescription
+                  : localizations.biometricsNotAvailable),
               secondary: Icon(
                 Icons.fingerprint,
                 color: _isBiometricsAvailable ? null : Colors.grey,
               ),
               value: _biometricLock,
-              onChanged: _isBiometricsAvailable 
-                ? (bool value) {
-                    setState(() {
-                      _biometricLock = value;
-                      _savePrivacySettings();
-                    });
-                  }
-                : null,
+              onChanged: _isBiometricsAvailable
+                  ? (bool value) {
+                      setState(() {
+                        _biometricLock = value;
+                        _savePrivacySettings();
+                      });
+                    }
+                  : null,
             ),
           ),
 
@@ -192,8 +197,9 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
                         child: Text(localizations.cancel),
                       ),
                       TextButton(
-                        onPressed: () async{
-                         await LocalRepository.deleteAllData(); // Assuming you have a method to delete all data
+                        onPressed: () async {
+                          await LocalRepository
+                              .deleteAllData(); // Assuming you have a method to delete all data
                           // TODO: Implement data deletion
                           Navigator.pop(context);
                         },
@@ -214,4 +220,4 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       ),
     );
   }
-} 
+}

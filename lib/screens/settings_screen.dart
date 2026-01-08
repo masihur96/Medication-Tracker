@@ -1,22 +1,22 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:med_track/providers/language_provider.dart';
 import 'package:med_track/providers/theme_provider.dart';
 import 'package:med_track/screens/profile_screen.dart';
 import 'package:med_track/services/notification_service.dart';
+import 'package:med_track/utils/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/medication.dart';
 import '../models/prescription.dart';
 import 'history_screen.dart';
 import 'notification_settings_screen.dart';
 import 'privacy_screen.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io';
-import 'dart:convert';
-import 'package:med_track/providers/language_provider.dart';
-import 'package:med_track/utils/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -26,7 +26,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
   final NotificationService _notificationService = NotificationService();
 
   bool _notificationsEnabled = true;
@@ -47,7 +46,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _isDarkMode = prefs.getBool('dark_mode') ?? false;
       _currentLanguage = prefs.getString('language') ?? 'English';
       _profileImagePath = prefs.getString('profileImage');
-
     });
   }
 
@@ -61,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -99,7 +97,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               title: Text(
                 localizations.profile,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
                 localizations.manageProfile,
@@ -122,7 +121,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: Text(localizations.language),
               subtitle: Text(localizations.selectLanguage),
               trailing: DropdownButton<String>(
-                value: Provider.of<LanguageProvider>(context).currentLocale.languageCode,
+                value: Provider.of<LanguageProvider>(context)
+                    .currentLocale
+                    .languageCode,
                 items: const [
                   DropdownMenuItem(
                     value: 'en',
@@ -151,7 +152,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-
               ),
             ),
           ),
@@ -162,7 +162,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.history,
-
               ),
               title: Text(localizations.medicationHistory),
               subtitle: Text(localizations.viewHistory),
@@ -171,8 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => HistoryScreen(
-                    ),
+                    builder: (_) => HistoryScreen(),
                   ),
                 );
                 // Navigate to history screen
@@ -188,12 +186,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => NotificationSettingsScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => NotificationSettingsScreen()),
                 );
               },
               leading: Icon(
                 Icons.notifications,
-
               ),
               title: Text(localizations.notifications),
               subtitle: Text(localizations.enableDisableNotifications),
@@ -206,19 +204,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await _saveSettings();
 
                   if (_notificationsEnabled) {
+                    bool isEnable =
+                        await checkAndRequestNotificationPermission();
 
-                bool isEnable =await    checkAndRequestNotificationPermission();
-
-                if(isEnable){
-                  await _notificationService.setScheduleNotification();
-                }
-
-
-
-
+                    if (isEnable) {
+                      await _notificationService.setScheduleNotification();
+                    }
                   } else {
                     await _notificationService.cancelAllNotification();
-
                   }
                 },
               ),
@@ -233,21 +226,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(localizations.switchTheme),
               secondary: Icon(
                 Icons.dark_mode,
-
               ),
               value: _isDarkMode,
               onChanged: (bool value) async {
                 setState(() {
                   _isDarkMode = value;
                 });
-                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme();
                 await _saveSettings();
               },
             ),
           ),
 
           const SizedBox(height: 16),
-          
+
           // Additional Settings Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -256,7 +249,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-
               ),
             ),
           ),
@@ -267,7 +259,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.privacy_tip,
-
               ),
               title: Text(localizations.privacy),
               subtitle: Text(localizations.managePrivacy),
@@ -287,14 +278,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.share,
-
               ),
               title: Text(localizations.tellFriend),
               subtitle: Text(localizations.shareApp),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
-                const String appLink = "https://medtrack.app"; // Replace with your actual app link
-                const String message = "Check out MedTrack - Your personal medication tracking assistant! Download it here: ";
+                const String appLink =
+                    "https://.app"; // Replace with your actual app link
+                const String message =
+                    "Check out  - Your personal medication tracking assistant! Download it here: ";
                 await Share.share('$message$appLink');
               },
             ),
@@ -306,24 +298,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: ListTile(
               leading: Icon(
                 Icons.info,
-
               ),
               title: Text(localizations.about),
               subtitle: Text(localizations.learnMore),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-
                 showCustomAboutDialog(context);
                 // showAboutDialog(
                 //   context: context,
-                //   applicationName: 'MedTrack',
+                //   applicationName: '',
                 //   applicationVersion: '1.0.0',
                 //   applicationIcon: const FlutterLogo(),
                 //   useRootNavigator: false,
                 //
                 //   children: [
                 //     const Text(
-                //       'MedTrack is your personal medication tracking assistant, '
+                //       ' is your personal medication tracking assistant, '
                 //       'helping you stay on top of your medication schedule and '
                 //       'maintain better health.',
                 //     ),
@@ -359,7 +349,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       status = await Permission.notification.request();
 
       if (status.isGranted) {
-
         return true;
         // Permission granted
         print('Notification permission granted.');
@@ -379,20 +368,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-
-
   void showCustomAboutDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               const FlutterLogo(),
               const SizedBox(width: 12),
-              const Text('MedTrack'),
+              const Text(''),
             ],
           ),
           content: Column(
@@ -422,18 +410,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     final String? listString = prefs.getString('prescriptions');
     List<Medication> allMedications = [];
-    
+
     if (listString != null) {
       final List decoded = jsonDecode(listString);
-      final List<Prescription> prescriptions = decoded.map((e) => Prescription.fromJson(e)).toList();
-      
+      final List<Prescription> prescriptions =
+          decoded.map((e) => Prescription.fromJson(e)).toList();
+
       // Collect all active medications from all prescriptions
       for (var prescription in prescriptions) {
-        allMedications.addAll(prescription.medications.where((med) => med.isActive));
+        allMedications
+            .addAll(prescription.medications.where((med) => med.isActive));
       }
     }
-    
+
     return allMedications;
   }
-
-} 
+}

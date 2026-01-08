@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:med_track/models/chat_model.dart';
 import 'package:med_track/services/chat_repository.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 
 import '../utils/app_localizations.dart';
-
 
 class MedicationChatScreen extends StatefulWidget {
   const MedicationChatScreen({super.key});
@@ -38,7 +37,6 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
     // Set Bengali language
     await _flutterTts.setSpeechRate(0.5); // Adjust speech rate
   }
-
 
   Future<void> _startListening() async {
     try {
@@ -81,7 +79,7 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
         status.toLowerCase().contains('notlistening')) {
       if (_isListening) {
         _stopListening();
-        
+
         // Automatically send the message when speech recognition is done
         Future.delayed(const Duration(milliseconds: 300), () {
           if (_controller.text.trim().isNotEmpty) {
@@ -104,20 +102,21 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
   }
 
   createChat(String text) async {
-
     setState(() {
       _isLoading = true;
       messages.add("👤 আপনি: $text");
     });
 
-    String prompt = "You are a knowledgeable and helpful assistant doctor. Answer in Bengali. User: $text";
-
+    String prompt =
+        "You are a knowledgeable and helpful assistant doctor. Answer in Bengali. User: $text";
 
     _scrollToBottom();
-    ChatBootModel? chatBootModelData = await _chatRepository.createChat(text: prompt);
+    ChatBootModel? chatBootModelData =
+        await _chatRepository.createChat(text: prompt);
     if (chatBootModelData != null) {
       setState(() {
-        messages.add("🤖 ডাক্তার: ${chatBootModelData.choices.first.message?.content}");
+        messages.add(
+            "🤖 ডাক্তার: ${chatBootModelData.choices.first.message?.content}");
       });
       _scrollToBottom();
     }
@@ -126,7 +125,6 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
       _isLoading = false;
     });
   }
-
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -148,12 +146,12 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
           .where((msg) => msg.startsWith("👤"))
           .last
           .replaceFirst("👤 আপনি: ", "");
-      
+
       // Clear the last bot response if it exists
       if (messages.last.startsWith("🤖")) {
         messages.removeLast();
       }
-      
+
       // Retry the last message
       createChat(lastUserMessage);
     }
@@ -165,7 +163,7 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(localizations.medTrackAssistance),
+        title: Text(localizations.doctor),
         actions: [
           // Add retry button in app bar
           IconButton(
@@ -178,25 +176,24 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: messages.length > 1 ? messages.length - 1 : 0,
-              itemBuilder: (context, index) {
-                final textMessage = messages[index + 1]; // Skip the first item
-                final isUser = textMessage.startsWith("👤");
-                return _buildMessageBubble(
-                  text: textMessage,
-                  isUser: isUser,
-                );
-              },
-            )
-
-          ),
-          if (_isLoading) const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: CircularProgressIndicator(),
-          ),
+              child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            itemCount: messages.length > 1 ? messages.length - 1 : 0,
+            itemBuilder: (context, index) {
+              final textMessage = messages[index + 1]; // Skip the first item
+              final isUser = textMessage.startsWith("👤");
+              return _buildMessageBubble(
+                text: textMessage,
+                isUser: isUser,
+              );
+            },
+          )),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: CircularProgressIndicator(),
+            ),
           _buildMessageInput(),
         ],
       ),
@@ -207,7 +204,9 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, -2))],
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, -2))
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -219,9 +218,9 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
             ),
             onPressed: () async {
               if (_isListening) {
-               await _stopListening();
+                await _stopListening();
               } else {
-               await _startListening();
+                await _startListening();
               }
 
               setState(() {
@@ -241,7 +240,8 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               onSubmitted: (_) => _onSendPressed(),
             ),
@@ -274,7 +274,8 @@ class _MedicationChatScreenState extends State<MedicationChatScreen> {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(

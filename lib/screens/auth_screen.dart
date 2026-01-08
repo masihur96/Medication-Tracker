@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:med_track/screens/forgot_password_screen.dart';
 
-
-import 'dashboard_screen.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -24,7 +22,14 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
 
   final List<String> _bloodGroups = [
-    'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-'
   ];
 
   @override
@@ -50,22 +55,26 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'MedTrack',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        '',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         _isSignIn ? 'Welcome back!' : 'Create your account',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Form Fields
                   if (!_isSignIn) ...[
                     _buildTextField(
@@ -148,7 +157,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Sign In/Up Button
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleAuth,
@@ -164,13 +173,14 @@ class _AuthScreenState extends State<AuthScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
                         : Text(_isSignIn ? 'Sign In' : 'Sign Up'),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Toggle Sign In/Up
                   TextButton(
                     onPressed: () {
@@ -301,4 +311,4 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     }
   }
-} 
+}
